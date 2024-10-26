@@ -9,10 +9,12 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class StockPrice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
