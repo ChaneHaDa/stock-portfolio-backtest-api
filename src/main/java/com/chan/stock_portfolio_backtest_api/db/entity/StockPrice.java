@@ -1,5 +1,6 @@
 package com.chan.stock_portfolio_backtest_api.db.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,10 +25,11 @@ public class StockPrice {
     private Integer lowPrice;
     private Integer highPrice;
     private Integer tradeQuantity;
-    private Integer tradeAmount;
-    private Integer issuedCount;
+    private Long tradeAmount;
+    private Long issuedCount;
     private LocalDate baseDate;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "stock_id")
     private Stock stock;
