@@ -5,7 +5,6 @@ import com.chan.stock_portfolio_backtest_api.db.entity.Stock;
 import com.chan.stock_portfolio_backtest_api.db.service.StockService;
 import com.chan.stock_portfolio_backtest_api.exception.EntityNotFoundException;
 import java.util.List;
-import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,18 +22,21 @@ public class StockController {
     }
 
     @GetMapping
-    public ResponseEntity<Stock> getStockByQuery(@RequestParam("query") String query) {
-        Stock stock1 = stockService.findStockByQuery(query);
-        if(stock1 == null) {
-            throw new EntityNotFoundException(String.format("%s is not founded", query));
+    public ResponseEntity<List<Stock>> getStockByQuery(@RequestParam("names") List<String> names,
+                                                       @RequestParam("startDate") String startDate,
+                                                       @RequestParam("endDate") String endDate) {
+        List<Stock> stockList = stockService.findStocksByNamesAndDateRange(names, startDate, endDate);
+        if (stockList.isEmpty()) {
+            throw new EntityNotFoundException(String.format("stock is not founded"));
         }
-        return ResponseEntity.ok().body(stock1);
+        System.out.println(names);
+        return ResponseEntity.ok().body(stockList);
     }
 
     @GetMapping("/search/{query}")
-    public ResponseEntity<List<StockDTO>> searchStocks(@PathVariable("query") String query){
-        List<StockDTO> stockList = stockService.getStocksByQuery(query);
-        if(stockList.isEmpty()){
+    public ResponseEntity<List<StockDTO>> searchStocks(@PathVariable("query") String query) {
+        List<StockDTO> stockList = stockService.findStocksByQuery(query);
+        if (stockList.isEmpty()) {
             throw new EntityNotFoundException(String.format("Stock is not founded"));
         }
         return ResponseEntity.ok().body(stockList);
