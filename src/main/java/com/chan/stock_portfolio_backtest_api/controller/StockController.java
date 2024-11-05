@@ -1,5 +1,6 @@
 package com.chan.stock_portfolio_backtest_api.controller;
 
+import com.chan.stock_portfolio_backtest_api.constants.AppConstants;
 import com.chan.stock_portfolio_backtest_api.db.dto.StockDTO;
 import com.chan.stock_portfolio_backtest_api.db.entity.Stock;
 import com.chan.stock_portfolio_backtest_api.db.service.StockService;
@@ -22,14 +23,13 @@ public class StockController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Stock>> getStockByQuery(@RequestParam("names") List<String> names,
-                                                       @RequestParam("startDate") String startDate,
-                                                       @RequestParam("endDate") String endDate) {
+    public ResponseEntity<List<Stock>> getStocksByNamesAndDateRange(@RequestParam("names") List<String> names,
+                                                                    @RequestParam(value = "startDate", defaultValue = AppConstants.DEFAULT_START_DATE) String startDate,
+                                                                    @RequestParam(value = "endDate", defaultValue = AppConstants.DEFAULT_END_DATE) String endDate) {
         List<Stock> stockList = stockService.findStocksByNamesAndDateRange(names, startDate, endDate);
         if (stockList.isEmpty()) {
             throw new EntityNotFoundException(String.format("stock is not founded"));
         }
-        System.out.println(names);
         return ResponseEntity.ok().body(stockList);
     }
 
