@@ -1,7 +1,7 @@
 package com.chan.stock_portfolio_backtest_api.controller;
 
 import com.chan.stock_portfolio_backtest_api.constants.AppConstants;
-import com.chan.stock_portfolio_backtest_api.db.dto.StockDTO;
+import com.chan.stock_portfolio_backtest_api.db.dto.StockSearchDTO;
 import com.chan.stock_portfolio_backtest_api.db.entity.Stock;
 import com.chan.stock_portfolio_backtest_api.db.service.StockService;
 import com.chan.stock_portfolio_backtest_api.exception.EntityNotFoundException;
@@ -39,8 +39,8 @@ public class StockController {
     }
 
     @GetMapping("/search/{query}")
-    public ResponseEntity<List<StockDTO>> searchStocks(@PathVariable("query") String query) {
-        List<StockDTO> stockList = stockService.findStocksByQuery(query);
+    public ResponseEntity<List<StockSearchDTO>> searchStocks(@PathVariable("query") String query) {
+        List<StockSearchDTO> stockList = stockService.findStocksByQuery(query);
         if (stockList.isEmpty()) {
             throw new EntityNotFoundException(String.format("Stock is not founded"));
         }

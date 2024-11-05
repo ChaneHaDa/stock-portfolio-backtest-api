@@ -1,6 +1,6 @@
 package com.chan.stock_portfolio_backtest_api.db.service;
 
-import com.chan.stock_portfolio_backtest_api.db.dto.StockDTO;
+import com.chan.stock_portfolio_backtest_api.db.dto.StockSearchDTO;
 import com.chan.stock_portfolio_backtest_api.db.entity.Stock;
 import com.chan.stock_portfolio_backtest_api.db.repository.StockRepository;
 import java.time.LocalDate;
@@ -24,9 +24,9 @@ public class StockService {
         }
     }
 
-    public List<StockDTO> findStocksByQuery(String query) {
-        List<StockDTO> stockList = stockRepository.findByNameOrShortCodeContaining(query);
-        return stockList;
+    public List<StockSearchDTO> findStocksByQuery(String query) {
+        List<StockSearchDTO> stockSearchDTOS = stockRepository.findByNameOrShortCodeContaining(query);
+        return stockSearchDTOS;
     }
 
     public List<Stock> findStocksByNamesAndDateRange(List<String> names, String startDate, String endDate) {
