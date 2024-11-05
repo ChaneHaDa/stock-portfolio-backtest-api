@@ -25,7 +25,6 @@ public class StockPriceDTO {
     public static StockPriceDTO entityToDTO(StockPrice stockPrice) {
         return new StockPriceDTO(stockPrice.getId(), stockPrice.getClosePrice(), stockPrice.getOpenPrice(),
                 stockPrice.getLowPrice(), stockPrice.getHighPrice(), stockPrice.getTradeQuantity(),
-                stockPrice.getTradeAmount(),
-                stockPrice.getIssuedCount(), stockPrice.getBaseDate());
+                stockPrice.getTradeAmount(), stockPrice.getIssuedCount(), stockPrice.getBaseDate());
     }
 }

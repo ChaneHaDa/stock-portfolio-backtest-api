@@ -1,5 +1,6 @@
 package com.chan.stock_portfolio_backtest_api.db.service;
 
+import com.chan.stock_portfolio_backtest_api.db.dto.StockDTO;
 import com.chan.stock_portfolio_backtest_api.db.dto.StockSearchDTO;
 import com.chan.stock_portfolio_backtest_api.db.entity.Stock;
 import com.chan.stock_portfolio_backtest_api.db.repository.StockRepository;
@@ -29,11 +30,12 @@ public class StockService {
         return stockSearchDTOS;
     }
 
-    public List<Stock> findStocksByNamesAndDateRange(List<String> names, String startDate, String endDate) {
+    public List<StockDTO> findStocksByNamesAndDateRange(List<String> names, String startDate, String endDate) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate start = LocalDate.parse(startDate, formatter);
         LocalDate end = LocalDate.parse(endDate, formatter);
-        return stockRepository.findByNameInAndStockPriceDateRange(names, start, end);
+        return stockRepository.findByNameInAndStockPriceDateRange(names, start, end)
+                .stream().map(StockDTO::entityToDTO).toList();
     }
 
 }
