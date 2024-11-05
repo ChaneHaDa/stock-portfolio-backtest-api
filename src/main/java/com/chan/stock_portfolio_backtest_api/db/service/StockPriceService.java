@@ -1,6 +1,6 @@
 package com.chan.stock_portfolio_backtest_api.db.service;
 
-import com.chan.stock_portfolio_backtest_api.db.entity.StockPrice;
+import com.chan.stock_portfolio_backtest_api.db.dto.StockPriceDTO;
 import com.chan.stock_portfolio_backtest_api.db.repository.StockPriceRepository;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -15,14 +15,16 @@ public class StockPriceService {
         this.stockPriceRepository = stockPriceRepository;
     }
 
-    public List<StockPrice> findStockPricesByStockName(String stockName) {
-        return stockPriceRepository.findByStockName(stockName);
+    public List<StockPriceDTO> findStockPricesByStockName(String stockName) {
+        return stockPriceRepository.findByStockName(stockName)
+                .stream().map(StockPriceDTO::entityToDTO).toList();
     }
 
-    public List<StockPrice> findStockPricesByStockNameAndDateRange(String name, String startDate, String endDate) {
+    public List<StockPriceDTO> findStockPricesByStockNameAndDateRange(String name, String startDate, String endDate) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate start = LocalDate.parse(startDate, formatter);
         LocalDate end = LocalDate.parse(endDate, formatter);
-        return stockPriceRepository.findByStockNameAndDateRange(name, start, end);
+        return stockPriceRepository.findByStockNameAndDateRange(name, start, end)
+                .stream().map(StockPriceDTO::entityToDTO).toList();
     }
 }
