@@ -18,7 +18,7 @@ public class SwaggerConfig {
     private Info apiInfo() {
         return new Info()
                 .title("Portfolio Backtest API")
-                .description("Stock info, stock price")
+                .description("Create a portfolio and backtest it")
                 .version("1.0.0");
     }
 }

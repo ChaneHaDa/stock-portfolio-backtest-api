@@ -1,7 +1,8 @@
 package com.chan.stock_portfolio_backtest_api.db.service;
 
-import com.chan.stock_portfolio_backtest_api.db.entity.StockPrice;
+import com.chan.stock_portfolio_backtest_api.db.dto.StockPriceDTO;
 import com.chan.stock_portfolio_backtest_api.db.repository.StockPriceRepository;
+import com.chan.stock_portfolio_backtest_api.exception.EntityNotFoundException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -15,14 +16,33 @@ public class StockPriceService {
         this.stockPriceRepository = stockPriceRepository;
     }
 
-    public List<StockPrice> findStockPricesByStockName(String stockName) {
-        return stockPriceRepository.findByStockName(stockName);
+    public List<StockPriceDTO> findStockPricesByStockName(String stockName) {
+        List<StockPriceDTO> stockPriceDTOList = stockPriceRepository.findByStockName(stockName)
+                .stream()
+                .map(StockPriceDTO::entityToDTO)
+                .toList();
+
+        if (stockPriceDTOList.isEmpty()) {
+            throw new EntityNotFoundException(String.format("%s not found", stockName));
+        }
+
+        return stockPriceDTOList;
     }
 
-    public List<StockPrice> findStockPricesByStockNameAndDateRange(String name, String startDate, String endDate) {
+    public List<StockPriceDTO> findStockPricesByStockNameAndDateRange(String name, String startDate, String endDate) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate start = LocalDate.parse(startDate, formatter);
         LocalDate end = LocalDate.parse(endDate, formatter);
-        return stockPriceRepository.findByStockNameAndDateRange(name, start, end);
+
+        List<StockPriceDTO> stockPriceDTOList = stockPriceRepository.findByStockNameAndDateRange(name, start, end)
+                .stream()
+                .map(StockPriceDTO::entityToDTO)
+                .toList();
+
+        if (stockPriceDTOList.isEmpty()) {
+            throw new EntityNotFoundException(String.format("%s not found", name));
+        }
+
+        return stockPriceDTOList;
     }
 }
