@@ -1,6 +1,7 @@
 package com.chan.stock_portfolio_backtest_api.exception;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -25,6 +26,12 @@ public class CustomizedResponseEntityExceptionHandler {
                 request.getDescription(false));
 
         return new ResponseEntity<ErrorDetails>(errorDetails, HttpStatus.NOT_FOUND);
-
     }
+
+    @ExceptionHandler(DateTimeParseException.class)
+    public final ResponseEntity<ErrorDetails> handleDateTimeParseException(Exception ex) throws Exception {
+        ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), "Date input error", ex.getMessage());
+        return new ResponseEntity<ErrorDetails>(errorDetails, HttpStatus.BAD_REQUEST);
+    }
+
 }
