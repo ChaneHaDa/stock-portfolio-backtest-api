@@ -4,7 +4,6 @@ import com.chan.stock_portfolio_backtest_api.constants.AppConstants;
 import com.chan.stock_portfolio_backtest_api.db.dto.StockDTO;
 import com.chan.stock_portfolio_backtest_api.db.dto.StockSearchDTO;
 import com.chan.stock_portfolio_backtest_api.db.service.StockService;
-import com.chan.stock_portfolio_backtest_api.exception.EntityNotFoundException;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -31,20 +30,16 @@ public class StockController {
     public ResponseEntity<List<StockDTO>> getStocksByNamesAndDateRange(@RequestParam("names") List<String> names,
                                                                        @RequestParam(value = "startDate", defaultValue = AppConstants.DEFAULT_START_DATE) String startDate,
                                                                        @RequestParam(value = "endDate", defaultValue = AppConstants.DEFAULT_END_DATE) String endDate) {
-        List<StockDTO> stockDTOS = stockService.findStocksByNamesAndDateRange(names, startDate, endDate);
-        if (stockDTOS.isEmpty()) {
-            throw new EntityNotFoundException(String.format("stock is not founded"));
-        }
-        return ResponseEntity.ok().body(stockDTOS);
+        List<StockDTO> stockDTOList = stockService.findStocksByNamesAndDateRange(names, startDate, endDate);
+
+        return ResponseEntity.ok().body(stockDTOList);
     }
 
     @GetMapping("/search/{query}")
     public ResponseEntity<List<StockSearchDTO>> searchStocks(@PathVariable("query") String query) {
-        List<StockSearchDTO> stockList = stockService.findStocksByQuery(query);
-        if (stockList.isEmpty()) {
-            throw new EntityNotFoundException(String.format("Stock is not founded"));
-        }
-        return ResponseEntity.ok().body(stockList);
+        List<StockSearchDTO> stockSearchDTOList = stockService.findStocksByQuery(query);
+
+        return ResponseEntity.ok().body(stockSearchDTOList);
     }
 
 }

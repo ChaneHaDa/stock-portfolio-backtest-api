@@ -13,7 +13,7 @@ public interface StockRepository extends JpaRepository<Stock, Integer> {
 
     Stock findByName(String query);
 
-    @Query("SELECT new com.chan.stock_portfolio_backtest_api.db.dto.StockSearchDTO(e.name, e.shortCode, e.marketCategory) FROM Stock e WHERE e.name LIKE %:query% OR e.shortCode LIKE %:query%")
+    @Query("SELECT new com.chan.stock_portfolio_backtest_api.db.dto.StockSearchDTO(s.name, s.shortCode, s.marketCategory) FROM Stock s WHERE s.name LIKE %:query% OR s.shortCode LIKE %:query%")
     List<StockSearchDTO> findByNameOrShortCodeContaining(@Param("query") String query);
 
     @Query("SELECT s FROM Stock s JOIN FETCH s.stockPriceList sp " +

@@ -1,8 +1,8 @@
 package com.chan.stock_portfolio_backtest_api.controller;
 
+import com.chan.stock_portfolio_backtest_api.constants.AppConstants;
 import com.chan.stock_portfolio_backtest_api.db.dto.StockPriceDTO;
 import com.chan.stock_portfolio_backtest_api.db.service.StockPriceService;
-import com.chan.stock_portfolio_backtest_api.exception.EntityNotFoundException;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -26,18 +26,16 @@ public class StockPriceController {
 
     @GetMapping
     public ResponseEntity<List<StockPriceDTO>> getStockByName(@RequestParam("name") String name,
-                                                              @RequestParam(value = "startDate", required = false) String startDate,
-                                                              @RequestParam(value = "endDate", required = false) String endDate) {
-        List<StockPriceDTO> stockPriceList;
+                                                              @RequestParam(value = "startDate", defaultValue = AppConstants.DEFAULT_START_DATE) String startDate,
+                                                              @RequestParam(value = "endDate", defaultValue = AppConstants.DEFAULT_END_DATE) String endDate) {
+        List<StockPriceDTO> stockPriceDTOList;
         if (startDate != null && endDate != null) {
-            stockPriceList = stockPriceService.findStockPricesByStockNameAndDateRange(name, startDate, endDate);
+            stockPriceDTOList = stockPriceService.findStockPricesByStockNameAndDateRange(name, startDate, endDate);
         } else {
-            stockPriceList = stockPriceService.findStockPricesByStockName(name);
+            stockPriceDTOList = stockPriceService.findStockPricesByStockName(name);
         }
-        if (stockPriceList.isEmpty()) {
-            throw new EntityNotFoundException(String.format("Stock is not founded"));
-        }
-        return ResponseEntity.ok().body(stockPriceList);
+
+        return ResponseEntity.ok().body(stockPriceDTOList);
     }
 
 }
