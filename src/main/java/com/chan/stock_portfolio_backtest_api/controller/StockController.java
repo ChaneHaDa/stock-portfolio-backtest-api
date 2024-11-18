@@ -5,7 +5,9 @@ import com.chan.stock_portfolio_backtest_api.db.dto.StockDTO;
 import com.chan.stock_portfolio_backtest_api.db.dto.StockSearchDTO;
 import com.chan.stock_portfolio_backtest_api.db.service.StockService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.time.LocalDate;
 import java.util.List;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,8 +30,8 @@ public class StockController {
 
     @GetMapping
     public ResponseEntity<List<StockDTO>> getStocksByNamesAndDateRange(@RequestParam("names") List<String> names,
-                                                                       @RequestParam(value = "startDate", defaultValue = AppConstants.DEFAULT_START_DATE) String startDate,
-                                                                       @RequestParam(value = "endDate", defaultValue = AppConstants.DEFAULT_END_DATE) String endDate) {
+                                                                       @RequestParam(value = "startDate", defaultValue = AppConstants.DEFAULT_START_DATE) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+                                                                       @RequestParam(value = "endDate", defaultValue = AppConstants.DEFAULT_END_DATE) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
         List<StockDTO> stockDTOList = stockService.findStocksByNamesAndDateRange(names, startDate, endDate);
 
         return ResponseEntity.ok().body(stockDTOList);
