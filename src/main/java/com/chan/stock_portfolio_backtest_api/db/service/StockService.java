@@ -5,7 +5,6 @@ import com.chan.stock_portfolio_backtest_api.db.dto.StockSearchDTO;
 import com.chan.stock_portfolio_backtest_api.db.repository.StockRepository;
 import com.chan.stock_portfolio_backtest_api.exception.EntityNotFoundException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
@@ -27,12 +26,8 @@ public class StockService {
         return stockSearchDTOList;
     }
 
-    public List<StockDTO> findStocksByNamesAndDateRange(List<String> names, String startDate, String endDate) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate start = LocalDate.parse(startDate, formatter);
-        LocalDate end = LocalDate.parse(endDate, formatter);
-
-        List<StockDTO> stockDTOList = stockRepository.findByNameInAndStockPriceDateRange(names, start, end)
+    public List<StockDTO> findStocksByNamesAndDateRange(List<String> names, LocalDate startDate, LocalDate endDate) {
+        List<StockDTO> stockDTOList = stockRepository.findByNameInAndStockPriceDateRange(names, startDate, endDate)
                 .stream()
                 .map(StockDTO::entityToDTO)
                 .toList();
