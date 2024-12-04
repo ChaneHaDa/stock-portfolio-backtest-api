@@ -18,9 +18,11 @@ public class StockDTO {
     private String isinCode;
     private String marketCategory;
     private List<StockPriceDTO> stockPriceList;
+    private List<PortfolioStockPriceDTO> stockPortfolioPriceList;
 
     public static StockDTO entityToDTO(Stock stock) {
         return new StockDTO(stock.getId(), stock.getName(), stock.getShortCode(), stock.getIsinCode(),
-                stock.getMarketCategory(), stock.getStockPriceList().stream().map(StockPriceDTO::entityToDTO).toList());
+                stock.getMarketCategory(), stock.getStockPriceList().stream().map(StockPriceDTO::entityToDTO).toList(),
+                stock.getPortfolioStockPriceList().stream().map(PortfolioStockPriceDTO::entityToDTO).toList());
     }
 }

@@ -25,4 +25,7 @@ public class Stock {
 
     @OneToMany(mappedBy = "stock")
     private List<StockPrice> stockPriceList;
+
+    @OneToMany(mappedBy = "stock")
+    private List<PortfolioStockPrice> portfolioStockPriceList;
 }
