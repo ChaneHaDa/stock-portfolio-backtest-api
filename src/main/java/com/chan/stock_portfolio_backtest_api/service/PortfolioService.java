@@ -1,13 +1,18 @@
 package com.chan.stock_portfolio_backtest_api.service;
 
+import com.chan.stock_portfolio_backtest_api.db.dto.PortfolioStockPriceDTO;
 import com.chan.stock_portfolio_backtest_api.db.dto.StockDTO;
 import com.chan.stock_portfolio_backtest_api.db.dto.StockPriceDTO;
 import com.chan.stock_portfolio_backtest_api.db.service.StockService;
 import com.chan.stock_portfolio_backtest_api.dto.PortfolioInputItemDTO;
 import com.chan.stock_portfolio_backtest_api.dto.PortfolionputDTO;
+
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -35,18 +40,13 @@ public class PortfolioService {
 
         Float rorPortfolio = 0f;
 
-        Map<String, List<Integer>> prices = new HashMap<>();
-
-        for (StockDTO i : stockDTOList) {
-            List<Integer> t = i.getStockPriceList().stream().map(StockPriceDTO::getClosePrice).toList();
-            prices.put(i.getName(), t);
+        Map<String, Map<LocalDate, Integer>> stockPriceMap = new HashMap<>();
+        for (StockDTO stockDTO : stockDTOList) {
+            Map<LocalDate, Integer> stockDateMap = stockDTO.getPortfolioStockPriceList().stream().collect(Collectors.toMap(ps->ps.getBaseDate(), ps->ps.getClosePrice()));
+            stockPriceMap.put(stockDTO.getName(), stockDateMap);
         }
 
-        for (int i = 0; i < weightList.size(); i++) {
-            int start_price = prices.get(stockNameList.get(i)).get(0);
-            int end_price = prices.get(stockNameList.get(i)).get(prices.get(stockNameList.get(i)).size() - 1);
-            rorPortfolio += (float) (end_price - start_price) / start_price * weightList.get(i);
-        }
+        System.out.println(stockPriceMap);
 
         return rorPortfolio;
     }
