@@ -19,7 +19,8 @@ public class CalcStockPrice {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private Integer closePrice;
+    private Integer Price;
+    private float monthlyRor;
     private LocalDate baseDate;
 
     @JsonIgnore

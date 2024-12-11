@@ -14,11 +14,11 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class CalcStockPriceDTO {
     private Integer id;
-    private Integer closePrice;
+    private Integer Price;
+    private float monthlyRor;
     private LocalDate baseDate;
 
     public static CalcStockPriceDTO entityToDTO(CalcStockPrice calcStockPrice) {
-        return new CalcStockPriceDTO(calcStockPrice.getId(), calcStockPrice.getClosePrice(),
-                calcStockPrice.getBaseDate());
+        return new CalcStockPriceDTO(calcStockPrice.getId(), calcStockPrice.getPrice(), calcStockPrice.getMonthlyRor(), calcStockPrice.getBaseDate());
     }
 }
