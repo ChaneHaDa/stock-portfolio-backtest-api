@@ -24,48 +24,49 @@ public class PortfolioService {
     }
 
     public Object getBacktestResult(PortfolionputDTO portfolionputDTO) {
-        Map<String, Float> portfolioStock = portfolionputDTO.getPortfolioInputItemDTOList().stream()
+        Map<String, Float> stockWeightMap = portfolionputDTO.getPortfolioInputItemDTOList().stream()
                 .collect(Collectors.toMap(item -> item.getStockName(), item -> item.getWeight()));
 
         List<StockDTO> stockDTOList = stockService
-                .findStocksByNamesAndDateRange(portfolioStock.keySet().stream().toList(), portfolionputDTO.getStartDate(),
+                .findStocksByNamesAndDateRange(stockWeightMap.keySet().stream().toList(), portfolionputDTO.getStartDate(),
                         portfolionputDTO.getEndDate());
 
-        Map<LocalDate, Float> dateMap = new HashMap<>();
-        LocalDate currentDate = portfolionputDTO.getStartDate().withDayOfMonth(1);
+        Map<LocalDate, Float> totalDateRorMap = new HashMap<>();
 
+        LocalDate currentDate = portfolionputDTO.getStartDate().withDayOfMonth(1);
         while (!currentDate.isAfter(portfolionputDTO.getEndDate())) {
-            dateMap.put(currentDate, 0f);
+            totalDateRorMap.put(currentDate, 0f);
             currentDate = currentDate.plusMonths(1);
         }
 
+        Float totalPortfolioRor = 1f;
         List<PortfolioReturnItemDTO> portfolioReturnItemDTOS = new ArrayList<>();
-
-        Float totalRor = 1f;
-
         for (StockDTO stockDTO : stockDTOList) {
-            List<CalcStockPriceDTO> CalcStockPriceDTOS = stockDTO.getCalcStockPriceList();
             PortfolioReturnItemDTO portfolioReturnItemDTO = new PortfolioReturnItemDTO();
             String name = stockDTO.getName();
             portfolioReturnItemDTO.setName(name);
-            Map<LocalDate, Float> dateMapByStock = new HashMap<>();
+
+            Map<LocalDate, Float> stockDateMap = new HashMap<>();
+            List<CalcStockPriceDTO> CalcStockPriceDTOS = stockDTO.getCalcStockPriceList();
             Float totalRorByStock = 1f;
             for (CalcStockPriceDTO calcStockPriceDTO : CalcStockPriceDTOS) {
-                Float ror = calcStockPriceDTO.getMonthlyRor() * portfolioStock.get(name);
-                dateMap.put(calcStockPriceDTO.getBaseDate(), dateMap.get(calcStockPriceDTO.getBaseDate()) + ror);
-                dateMapByStock.put(calcStockPriceDTO.getBaseDate(), calcStockPriceDTO.getMonthlyRor());
-                totalRorByStock += 1 + (calcStockPriceDTO.getMonthlyRor() / 100);
-                totalRor *= 1 + (ror / 100);
+                Float stockRor = calcStockPriceDTO.getMonthlyRor() * stockWeightMap.get(name);
+
+                totalDateRorMap.put(calcStockPriceDTO.getBaseDate(), totalDateRorMap.get(calcStockPriceDTO.getBaseDate()) + stockRor);
+                totalPortfolioRor *= 1 + (stockRor / 100);
+
+                stockDateMap.put(calcStockPriceDTO.getBaseDate(), calcStockPriceDTO.getMonthlyRor());
+                totalRorByStock *= 1 + (calcStockPriceDTO.getMonthlyRor() / 100);
             }
             portfolioReturnItemDTO.setTotalRor((totalRorByStock - 1) * 100);
-            portfolioReturnItemDTO.setMonthlyRor(dateMapByStock);
+            portfolioReturnItemDTO.setMonthlyRor(stockDateMap);
             portfolioReturnItemDTOS.add(portfolioReturnItemDTO);
         }
 
         PortfolioReturnDTO portfolioReturnDTO = new PortfolioReturnDTO();
-        portfolioReturnDTO.setTotalRor((totalRor - 1) * 100);
+        portfolioReturnDTO.setTotalRor((totalPortfolioRor - 1) * 100);
         portfolioReturnDTO.setPortfolionput(portfolionputDTO);
-        portfolioReturnDTO.setMonthlyRor(dateMap);
+        portfolioReturnDTO.setMonthlyRor(totalDateRorMap);
         portfolioReturnDTO.setPortfolioReturnItemDTOS(portfolioReturnItemDTOS);
 
         return portfolioReturnDTO;
