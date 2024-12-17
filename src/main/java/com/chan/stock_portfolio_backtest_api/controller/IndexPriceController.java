@@ -1,6 +1,7 @@
 package com.chan.stock_portfolio_backtest_api.controller;
 
 import com.chan.stock_portfolio_backtest_api.db.dto.IndexInfoDTO;
+import com.chan.stock_portfolio_backtest_api.db.dto.IndexPriceDTO;
 import com.chan.stock_portfolio_backtest_api.db.service.IndexInfoService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,9 +19,15 @@ public class IndexPriceController {
     }
 
     @GetMapping("/{name}")
-    public ResponseEntity<IndexInfoDTO> searchStocks(@PathVariable("name") String name) {
+    public ResponseEntity<IndexInfoDTO> getIndex(@PathVariable("name") String name) {
         IndexInfoDTO indexInfoDTO = indexInfoService.findIndexInfoByName(name);
         return ResponseEntity.ok().body(indexInfoDTO);
+    }
+
+    @GetMapping("/{name}/price")
+    public ResponseEntity<IndexPriceDTO> getLastIndexPrice(@PathVariable("name") String name) {
+        IndexPriceDTO indexPriceDTO = indexInfoService.findLastIndexPriceByName(name);
+        return ResponseEntity.ok().body(indexPriceDTO);
     }
 
 }
