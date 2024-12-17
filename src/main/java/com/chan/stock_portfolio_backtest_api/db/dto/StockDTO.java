@@ -1,11 +1,12 @@
 package com.chan.stock_portfolio_backtest_api.db.dto;
 
 import com.chan.stock_portfolio_backtest_api.db.entity.Stock;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -18,9 +19,11 @@ public class StockDTO {
     private String isinCode;
     private String marketCategory;
     private List<StockPriceDTO> stockPriceList;
+    private List<CalcStockPriceDTO> calcStockPriceList;
 
     public static StockDTO entityToDTO(Stock stock) {
         return new StockDTO(stock.getId(), stock.getName(), stock.getShortCode(), stock.getIsinCode(),
-                stock.getMarketCategory(), stock.getStockPriceList().stream().map(StockPriceDTO::entityToDTO).toList());
+                stock.getMarketCategory(), stock.getStockPriceList().stream().map(StockPriceDTO::entityToDTO).toList(),
+                stock.getCalcStockPriceList().stream().map(CalcStockPriceDTO::entityToDTO).toList());
     }
 }

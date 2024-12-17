@@ -1,14 +1,11 @@
 package com.chan.stock_portfolio_backtest_api.db.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import java.util.List;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -25,4 +22,7 @@ public class Stock {
 
     @OneToMany(mappedBy = "stock")
     private List<StockPrice> stockPriceList;
+
+    @OneToMany(mappedBy = "stock")
+    private List<CalcStockPrice> calcStockPriceList;
 }
