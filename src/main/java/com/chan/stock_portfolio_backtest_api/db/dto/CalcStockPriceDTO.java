@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class CalcStockPriceDTO {
     private Integer id;
-    private Integer Price;
+    private Integer price;
     private float monthlyRor;
     private LocalDate baseDate;
 
