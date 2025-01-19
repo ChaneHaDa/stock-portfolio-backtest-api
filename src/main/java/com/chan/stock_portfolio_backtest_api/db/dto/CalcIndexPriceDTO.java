@@ -1,6 +1,6 @@
 package com.chan.stock_portfolio_backtest_api.db.dto;
 
-import com.chan.stock_portfolio_backtest_api.db.entity.CalcStockPrice;
+import com.chan.stock_portfolio_backtest_api.db.entity.CalcIndexPrice;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,13 +12,13 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CalcStockPriceDTO {
+public class CalcIndexPriceDTO {
     private Integer id;
     private Integer price;
     private float monthlyRor;
     private LocalDate baseDate;
 
-    public static CalcStockPriceDTO entityToDTO(CalcStockPrice calcStockPrice) {
-        return new CalcStockPriceDTO(calcStockPrice.getId(), calcStockPrice.getPrice(), calcStockPrice.getMonthlyRor(), calcStockPrice.getBaseDate());
+    public static CalcIndexPriceDTO entityToDTO(CalcIndexPrice calcIndexPrice) {
+        return new CalcIndexPriceDTO(calcIndexPrice.getId(), calcIndexPrice.getPrice(), calcIndexPrice.getMonthlyRor(), calcIndexPrice.getBaseDate());
     }
 }

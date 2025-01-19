@@ -10,20 +10,22 @@ import java.time.LocalDate;
 
 @Entity
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
-public class CalcStockPrice {
+@NoArgsConstructor
+public class IndexPrice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
-    private Integer price;
-    private float monthlyRor;
+    private Float closePrice;
+    private Float openPrice;
+    private Float lowPrice;
+    private Float highPrice;
+    private Float yearlyDiff;
     private LocalDate baseDate;
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "stock_id")
-    private Stock stock;
-}
+    @JoinColumn(name = "index_info_id")
+    private IndexInfo indexInfo;
 
+}

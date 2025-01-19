@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CalcStockPrice {
+public class CalcIndexPrice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -23,7 +23,6 @@ public class CalcStockPrice {
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "stock_id")
-    private Stock stock;
+    @JoinColumn(name = "index_info_id")
+    private IndexInfo indexInfo;
 }
-
