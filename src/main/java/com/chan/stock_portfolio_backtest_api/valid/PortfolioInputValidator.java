@@ -1,24 +1,24 @@
 package com.chan.stock_portfolio_backtest_api.valid;
 
-import com.chan.stock_portfolio_backtest_api.dto.PortfolioInputItemDTO;
-import com.chan.stock_portfolio_backtest_api.dto.PortfolionputDTO;
+import com.chan.stock_portfolio_backtest_api.dto.input.PortfolioInputItemDTO;
+import com.chan.stock_portfolio_backtest_api.dto.input.PortfolioInputDTO;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import java.time.LocalDate;
 import java.util.List;
 
-public class PortfolioInputValidator implements ConstraintValidator<ValidPortfolioInput, PortfolionputDTO> {
+public class PortfolioInputValidator implements ConstraintValidator<ValidPortfolioInput, PortfolioInputDTO> {
     @Override
-    public boolean isValid(PortfolionputDTO portfolionputDTO, ConstraintValidatorContext constraintValidatorContext) {
+    public boolean isValid(PortfolioInputDTO portfolioInputDTO, ConstraintValidatorContext constraintValidatorContext) {
         constraintValidatorContext.disableDefaultConstraintViolation();
 
-        if (portfolionputDTO == null) {
+        if (portfolioInputDTO == null) {
             return true;
         }
 
         //startDate < endDate valid
-        LocalDate startDate = portfolionputDTO.getStartDate();
-        LocalDate endDate = portfolionputDTO.getEndDate();
+        LocalDate startDate = portfolioInputDTO.getStartDate();
+        LocalDate endDate = portfolioInputDTO.getEndDate();
         if (startDate != null && endDate != null) {
             if (!startDate.isBefore(endDate)) {
                 constraintValidatorContext
@@ -30,7 +30,7 @@ public class PortfolioInputValidator implements ConstraintValidator<ValidPortfol
         }
 
         //weight sum == 1 valid
-        List<PortfolioInputItemDTO> portfolioInputItemDTOList = portfolionputDTO.getPortfolioInputItemDTOList();
+        List<PortfolioInputItemDTO> portfolioInputItemDTOList = portfolioInputDTO.getPortfolioInputItemDTOList();
         float weightSum = 0;
         for (PortfolioInputItemDTO i : portfolioInputItemDTOList) {
             weightSum += i.getWeight();

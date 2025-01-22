@@ -4,7 +4,7 @@ import com.chan.stock_portfolio_backtest_api.constants.Role;
 import com.chan.stock_portfolio_backtest_api.db.dto.UsersDTO;
 import com.chan.stock_portfolio_backtest_api.db.entity.Users;
 import com.chan.stock_portfolio_backtest_api.db.repository.UsersRepository;
-import com.chan.stock_portfolio_backtest_api.dto.RegisterInputDTO;
+import com.chan.stock_portfolio_backtest_api.dto.input.RegisterInputDTO;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

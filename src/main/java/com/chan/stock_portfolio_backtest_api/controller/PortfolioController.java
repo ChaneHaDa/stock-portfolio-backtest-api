@@ -1,6 +1,6 @@
 package com.chan.stock_portfolio_backtest_api.controller;
 
-import com.chan.stock_portfolio_backtest_api.dto.PortfolionputDTO;
+import com.chan.stock_portfolio_backtest_api.dto.input.PortfolioInputDTO;
 import com.chan.stock_portfolio_backtest_api.service.PortfolioService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +18,7 @@ public class PortfolioController {
 
     @PostMapping
     @CrossOrigin
-    public ResponseEntity<Object> postPortfolio(@RequestBody @Valid PortfolionputDTO portfolionputDTO) {
-        return ResponseEntity.ok().body(portfolioService.getBacktestResult(portfolionputDTO));
+    public ResponseEntity<Object> postPortfolio(@RequestBody @Valid PortfolioInputDTO portfolioInputDTO) {
+        return ResponseEntity.ok().body(portfolioService.getBacktestResult(portfolioInputDTO));
     }
 }

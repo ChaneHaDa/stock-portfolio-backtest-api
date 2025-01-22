@@ -3,9 +3,9 @@ package com.chan.stock_portfolio_backtest_api.service;
 import com.chan.stock_portfolio_backtest_api.db.dto.CalcStockPriceDTO;
 import com.chan.stock_portfolio_backtest_api.db.dto.StockDTO;
 import com.chan.stock_portfolio_backtest_api.db.service.StockService;
-import com.chan.stock_portfolio_backtest_api.dto.PortfolioReturnDTO;
-import com.chan.stock_portfolio_backtest_api.dto.PortfolioReturnItemDTO;
-import com.chan.stock_portfolio_backtest_api.dto.PortfolionputDTO;
+import com.chan.stock_portfolio_backtest_api.dto.input.PortfolioInputDTO;
+import com.chan.stock_portfolio_backtest_api.dto.output.PortfolioReturnDTO;
+import com.chan.stock_portfolio_backtest_api.dto.output.PortfolioReturnItemDTO;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -23,18 +23,18 @@ public class PortfolioService {
         this.stockService = stockService;
     }
 
-    public Object getBacktestResult(PortfolionputDTO portfolionputDTO) {
-        Map<String, Float> stockWeightMap = portfolionputDTO.getPortfolioInputItemDTOList().stream()
+    public Object getBacktestResult(PortfolioInputDTO portfolioInputDTO) {
+        Map<String, Float> stockWeightMap = portfolioInputDTO.getPortfolioInputItemDTOList().stream()
                 .collect(Collectors.toMap(item -> item.getStockName(), item -> item.getWeight()));
 
         List<StockDTO> stockDTOList = stockService
-                .findStocksByNamesAndDateRange(stockWeightMap.keySet().stream().toList(), portfolionputDTO.getStartDate(),
-                        portfolionputDTO.getEndDate());
+                .findStocksByNamesAndDateRange(stockWeightMap.keySet().stream().toList(), portfolioInputDTO.getStartDate(),
+                        portfolioInputDTO.getEndDate());
 
         Map<LocalDate, Float> totalDateRorMap = new HashMap<>();
 
-        LocalDate currentDate = portfolionputDTO.getStartDate().withDayOfMonth(1);
-        while (!currentDate.isAfter(portfolionputDTO.getEndDate())) {
+        LocalDate currentDate = portfolioInputDTO.getStartDate().withDayOfMonth(1);
+        while (!currentDate.isAfter(portfolioInputDTO.getEndDate())) {
             totalDateRorMap.put(currentDate, 0f);
             currentDate = currentDate.plusMonths(1);
         }
@@ -65,7 +65,7 @@ public class PortfolioService {
 
         PortfolioReturnDTO portfolioReturnDTO = new PortfolioReturnDTO();
         portfolioReturnDTO.setTotalRor((totalPortfolioRor - 1) * 100);
-        portfolioReturnDTO.setPortfolionput(portfolionputDTO);
+        portfolioReturnDTO.setPortfolionput(portfolioInputDTO);
         portfolioReturnDTO.setMonthlyRor(totalDateRorMap);
         portfolioReturnDTO.setPortfolioReturnItemDTOS(portfolioReturnItemDTOS);
 

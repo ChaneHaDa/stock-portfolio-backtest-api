@@ -1,4 +1,4 @@
-package com.chan.stock_portfolio_backtest_api.dto;
+package com.chan.stock_portfolio_backtest_api.dto.input;
 
 import com.chan.stock_portfolio_backtest_api.valid.ValidPortfolioInput;
 import jakarta.validation.Valid;
@@ -16,7 +16,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 @NoArgsConstructor
 @AllArgsConstructor
 @ValidPortfolioInput
-public class PortfolionputDTO {
+public class PortfolioInputDTO {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @NotNull(message = "Start date must not be null")
     private LocalDate startDate;
