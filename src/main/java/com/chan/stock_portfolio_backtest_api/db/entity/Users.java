@@ -23,7 +23,7 @@ public class Users {
     @Column(nullable = false, unique = true)
     private String email;
     @Column
-    private String fullName;
+    private String name;
     @Column
     private String phoneNumber;
     @Column
