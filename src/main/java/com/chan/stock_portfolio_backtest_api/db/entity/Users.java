@@ -26,7 +26,7 @@ public class Users {
     private String name;
     @Column
     private String phoneNumber;
-    @Column
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
     @Column
     private LocalDateTime lastLoginAt;
