@@ -1,12 +1,7 @@
 package com.chan.stock_portfolio_backtest_api;
 
-import com.chan.stock_portfolio_backtest_api.db.entity.Stock;
-import com.chan.stock_portfolio_backtest_api.db.entity.StockPrice;
-import com.chan.stock_portfolio_backtest_api.db.repository.StockPriceRepository;
-import com.chan.stock_portfolio_backtest_api.db.repository.StockRepository;
-import jakarta.transaction.Transactional;
-import java.time.LocalDate;
-import org.junit.jupiter.api.Test;
+import com.chan.stock_portfolio_backtest_api.repository.StockPriceRepository;
+import com.chan.stock_portfolio_backtest_api.repository.StockRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 

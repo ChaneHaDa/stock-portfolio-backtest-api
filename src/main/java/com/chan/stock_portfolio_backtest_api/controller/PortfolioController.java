@@ -1,6 +1,6 @@
 package com.chan.stock_portfolio_backtest_api.controller;
 
-import com.chan.stock_portfolio_backtest_api.dto.input.PortfolioInputDTO;
+import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioInputDTO;
 import com.chan.stock_portfolio_backtest_api.service.PortfolioService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;

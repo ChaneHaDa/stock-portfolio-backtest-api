@@ -1,9 +1,10 @@
 package com.chan.stock_portfolio_backtest_api.valid;
 
-import com.chan.stock_portfolio_backtest_api.dto.input.PortfolioInputItemDTO;
-import com.chan.stock_portfolio_backtest_api.dto.input.PortfolioInputDTO;
+import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioInputItemDTO;
+import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioInputDTO;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+
 import java.time.LocalDate;
 import java.util.List;
 

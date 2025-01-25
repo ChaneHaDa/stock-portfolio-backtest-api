@@ -1,8 +1,8 @@
 package com.chan.stock_portfolio_backtest_api.controller;
 
-import com.chan.stock_portfolio_backtest_api.db.dto.IndexInfoDTO;
-import com.chan.stock_portfolio_backtest_api.db.dto.IndexPriceDTO;
-import com.chan.stock_portfolio_backtest_api.db.service.IndexInfoService;
+import com.chan.stock_portfolio_backtest_api.dto.IndexInfoDTO;
+import com.chan.stock_portfolio_backtest_api.dto.IndexPriceDTO;
+import com.chan.stock_portfolio_backtest_api.service.IndexInfoService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

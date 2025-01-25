@@ -1,12 +1,14 @@
 package com.chan.stock_portfolio_backtest_api.controller;
 
 import com.chan.stock_portfolio_backtest_api.constants.AppConstants;
-import com.chan.stock_portfolio_backtest_api.db.dto.StockDTO;
-import com.chan.stock_portfolio_backtest_api.db.dto.StockSearchDTO;
-import com.chan.stock_portfolio_backtest_api.db.service.StockService;
+import com.chan.stock_portfolio_backtest_api.dto.StockDTO;
+import com.chan.stock_portfolio_backtest_api.dto.StockSearchDTO;
+import com.chan.stock_portfolio_backtest_api.service.StockService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import java.time.LocalDate;
 import java.util.List;
+
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

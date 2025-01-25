@@ -1,10 +1,12 @@
 package com.chan.stock_portfolio_backtest_api.controller;
 
 import com.chan.stock_portfolio_backtest_api.constants.AppConstants;
-import com.chan.stock_portfolio_backtest_api.db.dto.StockPriceDTO;
-import com.chan.stock_portfolio_backtest_api.db.service.StockPriceService;
+import com.chan.stock_portfolio_backtest_api.dto.StockPriceDTO;
+import com.chan.stock_portfolio_backtest_api.service.StockPriceService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

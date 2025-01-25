@@ -1,11 +1,10 @@
 package com.chan.stock_portfolio_backtest_api.service;
 
-import com.chan.stock_portfolio_backtest_api.db.dto.CalcStockPriceDTO;
-import com.chan.stock_portfolio_backtest_api.db.dto.StockDTO;
-import com.chan.stock_portfolio_backtest_api.db.service.StockService;
-import com.chan.stock_portfolio_backtest_api.dto.input.PortfolioInputDTO;
-import com.chan.stock_portfolio_backtest_api.dto.output.PortfolioReturnDTO;
-import com.chan.stock_portfolio_backtest_api.dto.output.PortfolioReturnItemDTO;
+import com.chan.stock_portfolio_backtest_api.dto.CalcStockPriceDTO;
+import com.chan.stock_portfolio_backtest_api.dto.StockDTO;
+import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioInputDTO;
+import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioReturnDTO;
+import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioReturnItemDTO;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
