@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class ResponseDTO {
+public class ResponseDTO<T> {
     private String status;
     private String message;
     private T data;
