@@ -1,11 +1,11 @@
 package com.chan.stock_portfolio_backtest_api.service;
 
 import com.chan.stock_portfolio_backtest_api.constants.Role;
-import com.chan.stock_portfolio_backtest_api.dto.UsersDTO;
 import com.chan.stock_portfolio_backtest_api.domain.Users;
-import com.chan.stock_portfolio_backtest_api.repository.UsersRepository;
-import com.chan.stock_portfolio_backtest_api.dto.request.RegisterInputDTO;
+import com.chan.stock_portfolio_backtest_api.dto.request.UsersRequestDTO;
+import com.chan.stock_portfolio_backtest_api.dto.response.UsersResponseDTO;
 import com.chan.stock_portfolio_backtest_api.exception.UserAlreadyExistsException;
+import com.chan.stock_portfolio_backtest_api.repository.UsersRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +21,7 @@ public class UsersService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public UsersDTO createUser(RegisterInputDTO dto) {
+    public UsersResponseDTO createUser(UsersRequestDTO dto) {
         if (usersRepository.existsByUsername(dto.getUsername())) {
             throw new UserAlreadyExistsException("이미 사용 중인 아이디입니다.");
         }
@@ -44,7 +44,7 @@ public class UsersService {
 
         Users savedUser = usersRepository.save(user);
 
-        return UsersDTO.fromEntity(savedUser);
+        return UsersResponseDTO.fromEntity(savedUser);
     }
 
     public Users getUsers(String username) {

@@ -1,9 +1,9 @@
 package com.chan.stock_portfolio_backtest_api.controller;
 
-import com.chan.stock_portfolio_backtest_api.dto.UsersDTO;
-import com.chan.stock_portfolio_backtest_api.dto.request.LoginDTO;
-import com.chan.stock_portfolio_backtest_api.dto.request.RegisterInputDTO;
+import com.chan.stock_portfolio_backtest_api.dto.request.LoginRequestDTO;
+import com.chan.stock_portfolio_backtest_api.dto.request.UsersRequestDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.ResponseDTO;
+import com.chan.stock_portfolio_backtest_api.dto.response.UsersResponseDTO;
 import com.chan.stock_portfolio_backtest_api.service.UsersService;
 import com.chan.stock_portfolio_backtest_api.util.JWTUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -43,10 +43,10 @@ public class AuthController {
             @ApiResponse(responseCode = "201", description = "회원 가입 성공"),
             @ApiResponse(responseCode = "401", description = "회원 가입 실패")
     })
-    public ResponseEntity<ResponseDTO<UsersDTO>> registerUser(
-            @RequestBody RegisterInputDTO registerInputDTO
+    public ResponseEntity<ResponseDTO<UsersResponseDTO>> registerUser(
+            @RequestBody UsersRequestDTO usersRequestDTO
     ) {
-        UsersDTO createdUser = usersService.createUser(registerInputDTO);
+        UsersResponseDTO createdUser = usersService.createUser(usersRequestDTO);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -56,7 +56,7 @@ public class AuthController {
 
         return ResponseEntity
                 .created(location) // 201 Created
-                .body(ResponseDTO.<UsersDTO>builder()
+                .body(ResponseDTO.<UsersResponseDTO>builder()
                         .status("success")
                         .message("회원가입 성공") // 메시지 수정
                         .data(createdUser)
@@ -69,11 +69,11 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "로그인 성공"),
             @ApiResponse(responseCode = "401", description = "로그인 실패")
     })
-    public ResponseEntity<ResponseDTO> loginUser(@RequestBody LoginDTO loginDTO) {
+    public ResponseEntity<ResponseDTO> loginUser(@RequestBody LoginRequestDTO loginRequestDTO) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        loginDTO.getId(),
-                        loginDTO.getPassword()
+                        loginRequestDTO.getId(),
+                        loginRequestDTO.getPassword()
                 )
         );
 

@@ -13,7 +13,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RegisterInputDTO {
+public class UsersRequestDTO {
     @NotBlank(message = "Username is required.")
     @Size(min = 3, max = 20, message = "ID must be between 3 and 20 characters.")
     private String username;

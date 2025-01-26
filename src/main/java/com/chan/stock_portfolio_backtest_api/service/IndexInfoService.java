@@ -1,7 +1,7 @@
 package com.chan.stock_portfolio_backtest_api.service;
 
-import com.chan.stock_portfolio_backtest_api.dto.IndexInfoDTO;
-import com.chan.stock_portfolio_backtest_api.dto.IndexPriceDTO;
+import com.chan.stock_portfolio_backtest_api.dto.request.IndexInfoRequestDTO;
+import com.chan.stock_portfolio_backtest_api.dto.request.IndexPriceRequestDTO;
 import com.chan.stock_portfolio_backtest_api.repository.IndexInfoRepository;
 import org.springframework.stereotype.Service;
 
@@ -15,13 +15,13 @@ public class IndexInfoService {
         this.indexInfoRepository = indexInfoRepository;
     }
 
-    public IndexInfoDTO findIndexInfoByName(String name) {
-        return IndexInfoDTO.entityToDTO(indexInfoRepository.findByName(name));
+    public IndexInfoRequestDTO findIndexInfoByName(String name) {
+        return IndexInfoRequestDTO.entityToDTO(indexInfoRepository.findByName(name));
     }
 
-    public IndexPriceDTO findLastIndexPriceByName(String name) {
-        return IndexInfoDTO.entityToDTO(indexInfoRepository.findByName(name)).getIndexPriceList().stream()
-                .max(Comparator.comparing(IndexPriceDTO::getBaseDate))
+    public IndexPriceRequestDTO findLastIndexPriceByName(String name) {
+        return IndexInfoRequestDTO.entityToDTO(indexInfoRepository.findByName(name)).getIndexPriceList().stream()
+                .max(Comparator.comparing(IndexPriceRequestDTO::getBaseDate))
                 .orElse(null);
     }
 }

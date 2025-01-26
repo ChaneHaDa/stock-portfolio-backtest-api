@@ -1,4 +1,4 @@
-package com.chan.stock_portfolio_backtest_api.dto;
+package com.chan.stock_portfolio_backtest_api.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class StockSearchDTO {
+public class StockSearchResponseDTO {
     private String name;
     private String shortCode;
     private String marketCategory;

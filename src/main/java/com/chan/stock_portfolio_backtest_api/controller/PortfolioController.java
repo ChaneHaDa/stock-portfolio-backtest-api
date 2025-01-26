@@ -1,7 +1,7 @@
 package com.chan.stock_portfolio_backtest_api.controller;
 
-import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioInputDTO;
-import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioReturnDTO;
+import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioRequestDTO;
+import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioResponseDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.ResponseDTO;
 import com.chan.stock_portfolio_backtest_api.service.PortfolioService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,12 +31,12 @@ public class PortfolioController {
             @ApiResponse(responseCode = "200", description = "백테스팅 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 입력값")
     })
-    public ResponseEntity<ResponseDTO<PortfolioReturnDTO>> createBacktest(
-            @RequestBody @Valid PortfolioInputDTO portfolioInputDTO
+    public ResponseEntity<ResponseDTO<PortfolioResponseDTO>> createBacktest(
+            @RequestBody @Valid PortfolioRequestDTO portfolioRequestDTO
     ) {
 
-        PortfolioReturnDTO result = portfolioService.getBacktestResult(portfolioInputDTO);
-        ResponseDTO<PortfolioReturnDTO> response = ResponseDTO.<PortfolioReturnDTO>builder()
+        PortfolioResponseDTO result = portfolioService.getBacktestResult(portfolioRequestDTO);
+        ResponseDTO<PortfolioResponseDTO> response = ResponseDTO.<PortfolioResponseDTO>builder()
                 .status("success")
                 .data(result)
                 .build();

@@ -1,7 +1,7 @@
 package com.chan.stock_portfolio_backtest_api.controller;
 
-import com.chan.stock_portfolio_backtest_api.dto.IndexInfoDTO;
-import com.chan.stock_portfolio_backtest_api.dto.IndexPriceDTO;
+import com.chan.stock_portfolio_backtest_api.dto.request.IndexInfoRequestDTO;
+import com.chan.stock_portfolio_backtest_api.dto.request.IndexPriceRequestDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.ResponseDTO;
 import com.chan.stock_portfolio_backtest_api.service.IndexInfoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,28 +32,28 @@ public class IndexPriceController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터")
     })
     @GetMapping("/{name}")
-    public ResponseEntity<ResponseDTO<IndexInfoDTO>> getIndex(
+    public ResponseEntity<ResponseDTO<IndexInfoRequestDTO>> getIndex(
             @PathVariable("name")
             @NotBlank(message = "지수명은 필수 입력값입니다.") String name
     ) {
-        IndexInfoDTO indexInfoDTO = indexInfoService.findIndexInfoByName(name);
-        ResponseDTO<IndexInfoDTO> response = ResponseDTO.<IndexInfoDTO>builder()
+        IndexInfoRequestDTO indexInfoRequestDTO = indexInfoService.findIndexInfoByName(name);
+        ResponseDTO<IndexInfoRequestDTO> response = ResponseDTO.<IndexInfoRequestDTO>builder()
                 .status("success")
-                .data(indexInfoDTO)
+                .data(indexInfoRequestDTO)
                 .build();
         return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "지수 최종 가격 조회")
     @GetMapping("/{name}/price")
-    public ResponseEntity<ResponseDTO<IndexPriceDTO>> getLastIndexPrice(
+    public ResponseEntity<ResponseDTO<IndexPriceRequestDTO>> getLastIndexPrice(
             @PathVariable("name")
             @NotBlank(message = "지수명은 필수 입력값입니다.") String name
     ) {
-        IndexPriceDTO indexPriceDTO = indexInfoService.findLastIndexPriceByName(name);
-        ResponseDTO<IndexPriceDTO> response = ResponseDTO.<IndexPriceDTO>builder()
+        IndexPriceRequestDTO indexPriceRequestDTO = indexInfoService.findLastIndexPriceByName(name);
+        ResponseDTO<IndexPriceRequestDTO> response = ResponseDTO.<IndexPriceRequestDTO>builder()
                 .status("success")
-                .data(indexPriceDTO)
+                .data(indexPriceRequestDTO)
                 .build();
         return ResponseEntity.ok(response);
     }

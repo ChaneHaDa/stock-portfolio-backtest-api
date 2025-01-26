@@ -1,10 +1,10 @@
 package com.chan.stock_portfolio_backtest_api.service;
 
-import com.chan.stock_portfolio_backtest_api.dto.CalcStockPriceDTO;
-import com.chan.stock_portfolio_backtest_api.dto.StockDTO;
-import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioInputDTO;
-import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioReturnDTO;
-import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioReturnItemDTO;
+import com.chan.stock_portfolio_backtest_api.dto.request.CalcStockPriceRequestDTO;
+import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioRequestDTO;
+import com.chan.stock_portfolio_backtest_api.dto.request.StockRequestDTO;
+import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioResponseDTO;
+import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioResponseItemDTO;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -22,53 +22,53 @@ public class PortfolioService {
         this.stockService = stockService;
     }
 
-    public PortfolioReturnDTO getBacktestResult(PortfolioInputDTO portfolioInputDTO) {
-        Map<String, Float> stockWeightMap = portfolioInputDTO.getPortfolioInputItemDTOList().stream()
+    public PortfolioResponseDTO getBacktestResult(PortfolioRequestDTO portfolioRequestDTO) {
+        Map<String, Float> stockWeightMap = portfolioRequestDTO.getPortfolioRequestItemDTOList().stream()
                 .collect(Collectors.toMap(item -> item.getStockName(), item -> item.getWeight()));
 
-        List<StockDTO> stockDTOList = stockService
-                .findStocksByNamesAndDateRange(stockWeightMap.keySet().stream().toList(), portfolioInputDTO.getStartDate(),
-                        portfolioInputDTO.getEndDate());
+        List<StockRequestDTO> stockRequestDTOList = stockService
+                .findStocksByNamesAndDateRange(stockWeightMap.keySet().stream().toList(), portfolioRequestDTO.getStartDate(),
+                        portfolioRequestDTO.getEndDate());
 
         Map<LocalDate, Float> totalDateRorMap = new HashMap<>();
 
-        LocalDate currentDate = portfolioInputDTO.getStartDate().withDayOfMonth(1);
-        while (!currentDate.isAfter(portfolioInputDTO.getEndDate())) {
+        LocalDate currentDate = portfolioRequestDTO.getStartDate().withDayOfMonth(1);
+        while (!currentDate.isAfter(portfolioRequestDTO.getEndDate())) {
             totalDateRorMap.put(currentDate, 0f);
             currentDate = currentDate.plusMonths(1);
         }
 
         Float totalPortfolioRor = 1f;
-        List<PortfolioReturnItemDTO> portfolioReturnItemDTOS = new ArrayList<>();
-        for (StockDTO stockDTO : stockDTOList) {
-            PortfolioReturnItemDTO portfolioReturnItemDTO = new PortfolioReturnItemDTO();
-            String name = stockDTO.getName();
-            portfolioReturnItemDTO.setName(name);
+        List<PortfolioResponseItemDTO> portfolioResponseItemDTOS = new ArrayList<>();
+        for (StockRequestDTO stockRequestDTO : stockRequestDTOList) {
+            PortfolioResponseItemDTO portfolioResponseItemDTO = new PortfolioResponseItemDTO();
+            String name = stockRequestDTO.getName();
+            portfolioResponseItemDTO.setName(name);
 
             Map<LocalDate, Float> stockDateMap = new HashMap<>();
-            List<CalcStockPriceDTO> CalcStockPriceDTOS = stockDTO.getCalcStockPriceList();
+            List<CalcStockPriceRequestDTO> calcStockPriceRequestDTOS = stockRequestDTO.getCalcStockPriceList();
             Float totalRorByStock = 1f;
-            for (CalcStockPriceDTO calcStockPriceDTO : CalcStockPriceDTOS) {
-                Float stockRor = calcStockPriceDTO.getMonthlyRor() * stockWeightMap.get(name);
+            for (CalcStockPriceRequestDTO calcStockPriceRequestDTO : calcStockPriceRequestDTOS) {
+                Float stockRor = calcStockPriceRequestDTO.getMonthlyRor() * stockWeightMap.get(name);
 
-                totalDateRorMap.put(calcStockPriceDTO.getBaseDate(), totalDateRorMap.get(calcStockPriceDTO.getBaseDate()) + stockRor);
+                totalDateRorMap.put(calcStockPriceRequestDTO.getBaseDate(), totalDateRorMap.get(calcStockPriceRequestDTO.getBaseDate()) + stockRor);
                 totalPortfolioRor *= 1 + (stockRor / 100);
 
-                stockDateMap.put(calcStockPriceDTO.getBaseDate(), calcStockPriceDTO.getMonthlyRor());
-                totalRorByStock *= 1 + (calcStockPriceDTO.getMonthlyRor() / 100);
+                stockDateMap.put(calcStockPriceRequestDTO.getBaseDate(), calcStockPriceRequestDTO.getMonthlyRor());
+                totalRorByStock *= 1 + (calcStockPriceRequestDTO.getMonthlyRor() / 100);
             }
-            portfolioReturnItemDTO.setTotalRor((totalRorByStock - 1) * 100);
-            portfolioReturnItemDTO.setMonthlyRor(stockDateMap);
-            portfolioReturnItemDTOS.add(portfolioReturnItemDTO);
+            portfolioResponseItemDTO.setTotalRor((totalRorByStock - 1) * 100);
+            portfolioResponseItemDTO.setMonthlyRor(stockDateMap);
+            portfolioResponseItemDTOS.add(portfolioResponseItemDTO);
         }
 
-        PortfolioReturnDTO portfolioReturnDTO = new PortfolioReturnDTO();
-        portfolioReturnDTO.setTotalRor((totalPortfolioRor - 1) * 100);
-        portfolioReturnDTO.setPortfolionput(portfolioInputDTO);
-        portfolioReturnDTO.setMonthlyRor(totalDateRorMap);
-        portfolioReturnDTO.setPortfolioReturnItemDTOS(portfolioReturnItemDTOS);
+        PortfolioResponseDTO portfolioResponseDTO = new PortfolioResponseDTO();
+        portfolioResponseDTO.setTotalRor((totalPortfolioRor - 1) * 100);
+        portfolioResponseDTO.setPortfolionput(portfolioRequestDTO);
+        portfolioResponseDTO.setMonthlyRor(totalDateRorMap);
+        portfolioResponseDTO.setPortfolioResponseItemDTOS(portfolioResponseItemDTOS);
 
-        return portfolioReturnDTO;
+        return portfolioResponseDTO;
     }
 
 }

@@ -12,7 +12,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PortfolioInputItemDTO {
+public class PortfolioRequestItemDTO {
     @NotNull(message = "Stock name must not be null")
     private String stockName;
 

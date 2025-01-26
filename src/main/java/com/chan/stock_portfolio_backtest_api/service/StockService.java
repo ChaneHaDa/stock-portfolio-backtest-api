@@ -1,14 +1,13 @@
 package com.chan.stock_portfolio_backtest_api.service;
 
-import com.chan.stock_portfolio_backtest_api.dto.StockDTO;
-import com.chan.stock_portfolio_backtest_api.dto.StockSearchDTO;
-import com.chan.stock_portfolio_backtest_api.repository.StockRepository;
+import com.chan.stock_portfolio_backtest_api.dto.request.StockRequestDTO;
+import com.chan.stock_portfolio_backtest_api.dto.response.StockSearchResponseDTO;
 import com.chan.stock_portfolio_backtest_api.exception.EntityNotFoundException;
+import com.chan.stock_portfolio_backtest_api.repository.StockRepository;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-
-import org.springframework.stereotype.Service;
 
 @Service
 public class StockService {
@@ -18,27 +17,27 @@ public class StockService {
         this.stockRepository = stockRepository;
     }
 
-    public List<StockSearchDTO> findStocksByQuery(String query) {
-        List<StockSearchDTO> stockSearchDTOList = stockRepository.findByNameOrShortCodeContaining(query);
+    public List<StockSearchResponseDTO> findStocksByQuery(String query) {
+        List<StockSearchResponseDTO> stockSearchResponseDTOList = stockRepository.findByNameOrShortCodeContaining(query);
 
-        if (stockSearchDTOList.isEmpty()) {
+        if (stockSearchResponseDTOList.isEmpty()) {
             throw new EntityNotFoundException(String.format("Stock not found"));
         }
 
-        return stockSearchDTOList;
+        return stockSearchResponseDTOList;
     }
 
-    public List<StockDTO> findStocksByNamesAndDateRange(List<String> names, LocalDate startDate, LocalDate endDate) {
-        List<StockDTO> stockDTOList = stockRepository.findByNameInAndStockPriceDateRange(names, startDate, endDate)
+    public List<StockRequestDTO> findStocksByNamesAndDateRange(List<String> names, LocalDate startDate, LocalDate endDate) {
+        List<StockRequestDTO> stockRequestDTOList = stockRepository.findByNameInAndStockPriceDateRange(names, startDate, endDate)
                 .stream()
-                .map(StockDTO::entityToDTO)
+                .map(StockRequestDTO::entityToDTO)
                 .toList();
 
-        if (stockDTOList.isEmpty()) {
+        if (stockRequestDTOList.isEmpty()) {
             throw new EntityNotFoundException(String.format("Stock not found"));
         }
 
-        return stockDTOList;
+        return stockRequestDTOList;
     }
 
 }

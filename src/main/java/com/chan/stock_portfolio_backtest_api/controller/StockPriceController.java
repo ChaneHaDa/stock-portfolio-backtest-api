@@ -1,6 +1,6 @@
 package com.chan.stock_portfolio_backtest_api.controller;
 
-import com.chan.stock_portfolio_backtest_api.dto.StockPriceDTO;
+import com.chan.stock_portfolio_backtest_api.dto.request.StockPriceRequestDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.ResponseDTO;
 import com.chan.stock_portfolio_backtest_api.service.StockPriceService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,22 +35,22 @@ public class StockPriceController {
             @ApiResponse(responseCode = "404", description = "주식 정보 없음")
     })
     @GetMapping
-    public ResponseEntity<ResponseDTO<List<StockPriceDTO>>> getStockByName(
+    public ResponseEntity<ResponseDTO<List<StockPriceRequestDTO>>> getStockByName(
             @RequestParam("name") String name,
             @RequestParam(value = "startDate", required = false)
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
             @RequestParam(value = "endDate", required = false)
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
-        List<StockPriceDTO> stockPriceDTOList;
+        List<StockPriceRequestDTO> stockPriceRequestDTOList;
         if (startDate != null && endDate != null) {
-            stockPriceDTOList = stockPriceService.findStockPricesByStockNameAndDateRange(name, startDate, endDate);
+            stockPriceRequestDTOList = stockPriceService.findStockPricesByStockNameAndDateRange(name, startDate, endDate);
         } else {
-            stockPriceDTOList = stockPriceService.findStockPricesByStockName(name);
+            stockPriceRequestDTOList = stockPriceService.findStockPricesByStockName(name);
         }
 
-        ResponseDTO<List<StockPriceDTO>> response = ResponseDTO.<List<StockPriceDTO>>builder()
+        ResponseDTO<List<StockPriceRequestDTO>> response = ResponseDTO.<List<StockPriceRequestDTO>>builder()
                 .status("success")
-                .data(stockPriceDTOList)
+                .data(stockPriceRequestDTOList)
                 .build();
 
         return ResponseEntity.ok().body(response);

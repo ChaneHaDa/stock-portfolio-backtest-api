@@ -1,6 +1,6 @@
 package com.chan.stock_portfolio_backtest_api.service;
 
-import com.chan.stock_portfolio_backtest_api.dto.StockPriceDTO;
+import com.chan.stock_portfolio_backtest_api.dto.request.StockPriceRequestDTO;
 import com.chan.stock_portfolio_backtest_api.exception.EntityNotFoundException;
 import com.chan.stock_portfolio_backtest_api.repository.StockPriceRepository;
 import org.springframework.stereotype.Service;
@@ -16,29 +16,29 @@ public class StockPriceService {
         this.stockPriceRepository = stockPriceRepository;
     }
 
-    public List<StockPriceDTO> findStockPricesByStockName(String stockName) {
-        List<StockPriceDTO> stockPriceDTOList = stockPriceRepository.findByStockName(stockName)
+    public List<StockPriceRequestDTO> findStockPricesByStockName(String stockName) {
+        List<StockPriceRequestDTO> stockPriceRequestDTOList = stockPriceRepository.findByStockName(stockName)
                 .stream()
-                .map(StockPriceDTO::entityToDTO)
+                .map(StockPriceRequestDTO::entityToDTO)
                 .toList();
 
-        if (stockPriceDTOList.isEmpty()) {
+        if (stockPriceRequestDTOList.isEmpty()) {
             throw new EntityNotFoundException(String.format("%s not found", stockName));
         }
 
-        return stockPriceDTOList;
+        return stockPriceRequestDTOList;
     }
 
-    public List<StockPriceDTO> findStockPricesByStockNameAndDateRange(String name, LocalDate startDate, LocalDate endDate) {
-        List<StockPriceDTO> stockPriceDTOList = stockPriceRepository.findByStockNameAndDateRange(name, startDate, endDate)
+    public List<StockPriceRequestDTO> findStockPricesByStockNameAndDateRange(String name, LocalDate startDate, LocalDate endDate) {
+        List<StockPriceRequestDTO> stockPriceRequestDTOList = stockPriceRepository.findByStockNameAndDateRange(name, startDate, endDate)
                 .stream()
-                .map(StockPriceDTO::entityToDTO)
+                .map(StockPriceRequestDTO::entityToDTO)
                 .toList();
 
-        if (stockPriceDTOList.isEmpty()) {
+        if (stockPriceRequestDTOList.isEmpty()) {
             throw new EntityNotFoundException(String.format("%s not found", name));
         }
 
-        return stockPriceDTOList;
+        return stockPriceRequestDTOList;
     }
 }
