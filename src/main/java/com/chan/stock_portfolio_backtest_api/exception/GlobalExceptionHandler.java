@@ -1,8 +1,6 @@
 package com.chan.stock_portfolio_backtest_api.exception;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Builder;
-import lombok.Getter;
+import com.chan.stock_portfolio_backtest_api.dto.response.ResponseDTO;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -16,13 +14,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
+    // 1. 유효성 검사 실패 (400)
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex,
@@ -30,25 +28,24 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             HttpStatusCode status,
             WebRequest request
     ) {
-        Map<String, Object> fieldErrors = new HashMap<>();
+        Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach(error -> {
             String field = ((FieldError) error).getField();
-            String msg = error.getDefaultMessage();
-            fieldErrors.put(field, msg);
+            String message = error.getDefaultMessage();
+            errors.put(field, message);
         });
 
-        ErrorResponse response = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
+        ResponseDTO<Map<String, String>> response = ResponseDTO.<Map<String, String>>builder()
+                .status("error")
                 .code("VALIDATION_FAILED")
                 .message("입력값 검증 실패")
-                .details(fieldErrors)
+                .data(errors)
                 .build();
 
         return ResponseEntity.badRequest().body(response);
     }
 
-    // 1. Spring MVC 기본 예외 처리 (400 에러) ========================
-
+    // 2. 잘못된 요청 본문 (400)
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(
             HttpMessageNotReadableException ex,
@@ -56,33 +53,32 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             HttpStatusCode status,
             WebRequest request
     ) {
-        ErrorResponse response = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
+        ResponseDTO<Void> response = ResponseDTO.<Void>builder()
+                .status("error")
                 .code("INVALID_REQUEST")
-                .message("잘못된 요청 형식")
-                .details(Map.of("hint", "JSON 문법을 확인하세요"))
+                .message("잘못된 요청 형식입니다.")
                 .build();
 
         return ResponseEntity.badRequest().body(response);
     }
 
+    // 3. 인증 실패 (401)
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException ex) {
-        ErrorResponse response = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
+    public ResponseEntity<ResponseDTO<Void>> handleBadCredentials(BadCredentialsException ex) {
+        ResponseDTO<Void> response = ResponseDTO.<Void>builder()
+                .status("error")
                 .code("AUTH_FAILED")
-                .message("아이디/비밀번호 불일치")
+                .message("아이디/비밀번호가 일치하지 않습니다.")
                 .build();
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
-    // 2. 커스텀 예외 처리 ============================================
-
+    // 4. 엔티티 없음 (404)
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleEntityNotFound(EntityNotFoundException ex) {
-        ErrorResponse response = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
+    public ResponseEntity<ResponseDTO<Void>> handleEntityNotFound(EntityNotFoundException ex) {
+        ResponseDTO<Void> response = ResponseDTO.<Void>builder()
+                .status("error")
                 .code("ENTITY_NOT_FOUND")
                 .message(ex.getMessage())
                 .build();
@@ -90,29 +86,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
+    // 5. 기타 서버 오류 (500)
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleAll(Exception ex) {
-        logger.error("Unexpected error occurred", ex);
+    public ResponseEntity<ResponseDTO<Void>> handleAll(Exception ex) {
+        logger.error("서버 오류 발생: ", ex);
 
-        ErrorResponse response = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
+        ResponseDTO<Void> response = ResponseDTO.<Void>builder()
+                .status("error")
                 .code("INTERNAL_ERROR")
-                .message("서버 내부 오류")
+                .message("서버 내부 오류가 발생했습니다.")
                 .build();
 
         return ResponseEntity.internalServerError().body(response);
-    }
-
-    // 3. 기타 예외 처리 (500 에러) ===================================
-
-    // 공통 에러 응답 DTO ============================================
-    @Getter
-    @Builder
-    private static class ErrorResponse {
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-        private LocalDateTime timestamp;
-        private String code;
-        private String message;
-        private Map<String, Object> details;
     }
 }

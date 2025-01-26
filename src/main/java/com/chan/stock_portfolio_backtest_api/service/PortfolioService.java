@@ -22,7 +22,7 @@ public class PortfolioService {
         this.stockService = stockService;
     }
 
-    public Object getBacktestResult(PortfolioInputDTO portfolioInputDTO) {
+    public PortfolioReturnDTO getBacktestResult(PortfolioInputDTO portfolioInputDTO) {
         Map<String, Float> stockWeightMap = portfolioInputDTO.getPortfolioInputItemDTOList().stream()
                 .collect(Collectors.toMap(item -> item.getStockName(), item -> item.getWeight()));
 
@@ -70,6 +70,5 @@ public class PortfolioService {
 
         return portfolioReturnDTO;
     }
-
 
 }

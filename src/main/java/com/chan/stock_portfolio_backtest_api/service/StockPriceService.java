@@ -1,14 +1,12 @@
 package com.chan.stock_portfolio_backtest_api.service;
 
 import com.chan.stock_portfolio_backtest_api.dto.StockPriceDTO;
-import com.chan.stock_portfolio_backtest_api.repository.StockPriceRepository;
 import com.chan.stock_portfolio_backtest_api.exception.EntityNotFoundException;
+import com.chan.stock_portfolio_backtest_api.repository.StockPriceRepository;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-
-import org.springframework.stereotype.Service;
 
 @Service
 public class StockPriceService {
@@ -31,12 +29,8 @@ public class StockPriceService {
         return stockPriceDTOList;
     }
 
-    public List<StockPriceDTO> findStockPricesByStockNameAndDateRange(String name, String startDate, String endDate) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate start = LocalDate.parse(startDate, formatter);
-        LocalDate end = LocalDate.parse(endDate, formatter);
-
-        List<StockPriceDTO> stockPriceDTOList = stockPriceRepository.findByStockNameAndDateRange(name, start, end)
+    public List<StockPriceDTO> findStockPricesByStockNameAndDateRange(String name, LocalDate startDate, LocalDate endDate) {
+        List<StockPriceDTO> stockPriceDTOList = stockPriceRepository.findByStockNameAndDateRange(name, startDate, endDate)
                 .stream()
                 .map(StockPriceDTO::entityToDTO)
                 .toList();

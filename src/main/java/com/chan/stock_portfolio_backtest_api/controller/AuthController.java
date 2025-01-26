@@ -1,12 +1,15 @@
 package com.chan.stock_portfolio_backtest_api.controller;
 
 import com.chan.stock_portfolio_backtest_api.dto.UsersDTO;
-import com.chan.stock_portfolio_backtest_api.service.UsersService;
 import com.chan.stock_portfolio_backtest_api.dto.request.LoginDTO;
 import com.chan.stock_portfolio_backtest_api.dto.request.RegisterInputDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.ResponseDTO;
+import com.chan.stock_portfolio_backtest_api.service.UsersService;
 import com.chan.stock_portfolio_backtest_api.util.JWTUtil;
-import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,6 +27,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/auth")
+@Tag(name = "Auth API", description = "인증, 인가 API")
 public class AuthController {
     private final UsersService usersService;
     private final AuthenticationManager authenticationManager;
@@ -34,8 +38,13 @@ public class AuthController {
     }
 
     @PostMapping("/register")
+    @Operation(summary = "회원가입")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "회원 가입 성공"),
+            @ApiResponse(responseCode = "401", description = "회원 가입 실패")
+    })
     public ResponseEntity<ResponseDTO<UsersDTO>> registerUser(
-            @Valid @RequestBody RegisterInputDTO registerInputDTO // 유효성 검사 추가
+            @RequestBody RegisterInputDTO registerInputDTO
     ) {
         UsersDTO createdUser = usersService.createUser(registerInputDTO);
 
@@ -55,7 +64,12 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ResponseDTO> loginUser(@Valid @RequestBody LoginDTO loginDTO) {
+    @Operation(summary = "지수 기본 정보 조회")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "로그인 성공"),
+            @ApiResponse(responseCode = "401", description = "로그인 실패")
+    })
+    public ResponseEntity<ResponseDTO> loginUser(@RequestBody LoginDTO loginDTO) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginDTO.getId(),

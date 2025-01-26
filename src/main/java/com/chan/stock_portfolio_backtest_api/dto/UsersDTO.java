@@ -8,6 +8,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE) // 외부에서 생성자 호출 방지
 public class UsersDTO {
+    private final Long id;
     private final String username;
     private final String email;
     private final String name;
@@ -15,6 +16,7 @@ public class UsersDTO {
 
     public static UsersDTO fromEntity(Users users) {
         return new UsersDTO(
+                users.getId(),
                 users.getUsername(),
                 users.getEmail(),
                 users.getName(),

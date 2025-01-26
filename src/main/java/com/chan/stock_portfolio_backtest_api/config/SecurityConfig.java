@@ -11,6 +11,11 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 public class SecurityConfig {
@@ -27,29 +32,52 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
         http.authorizeHttpRequests(requests -> requests
-                .requestMatchers("/api-docs",
+                .requestMatchers(
+                        // swagger-page
+                        "/api-docs/**",
+                        "/api/v3/**",
                         "/swagger-ui/**",
                         "/swagger-resources/**",
-                        "/api/v3/**",
-                        "/api/v1/auth/login",
-                        "/api/v1/auth/register").permitAll()
-                .requestMatchers("/h2-console/**").hasRole("ADMIN")
-                .anyRequest().authenticated());
+                        "/h2-console/**",
 
-        http.formLogin(Customizer.withDefaults());
+                        //api
+                        "/api/v1/auth/**",
+                        "/api/v1/index/**",
+                        "/api/v1/stock/**",
+                        "/api/v1/stock/**",
+                        "/api/v1/portfolio/**"
+
+                ).permitAll()
+                .anyRequest().authenticated()
+        );
+
         http.httpBasic(Customizer.withDefaults());
 
-        http.cors(Customizer.withDefaults());
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
         http.csrf(csrf -> csrf.disable());
-        http.headers(headersConfigurer -> headersConfigurer
-                .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
 
-        http.sessionManagement((sessionManagement) ->
-                sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        http.headers(headers -> headers
+                .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
+        );
+
+        http.sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         );
 
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of("http://localhost:3000"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 }
