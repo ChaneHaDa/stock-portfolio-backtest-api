@@ -55,19 +55,20 @@ public class AuthController {
                 .toUri();
 
         return ResponseEntity
-                .created(location) // 201 Created
+                .created(location)
                 .body(ResponseDTO.<UsersResponseDTO>builder()
                         .status("success")
-                        .message("회원가입 성공") // 메시지 수정
+                        .message("회원가입 성공")
                         .data(createdUser)
                         .build());
     }
 
     @PostMapping("/login")
-    @Operation(summary = "지수 기본 정보 조회")
+    @Operation(summary = "로그인")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "로그인 성공"),
-            @ApiResponse(responseCode = "401", description = "로그인 실패")
+            @ApiResponse(responseCode = "400", description = "잘못된 요청"),
+            @ApiResponse(responseCode = "401", description = "인증 실패")
     })
     public ResponseEntity<ResponseDTO> loginUser(@RequestBody LoginRequestDTO loginRequestDTO) {
         Authentication authentication = authenticationManager.authenticate(
