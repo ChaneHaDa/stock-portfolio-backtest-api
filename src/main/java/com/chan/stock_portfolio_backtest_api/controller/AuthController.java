@@ -79,7 +79,7 @@ public class AuthController {
         );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String token = JWTUtil.createToken(authentication.getName());
+        String token = JWTUtil.createToken(authentication.getName(), authentication.getAuthorities());
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
