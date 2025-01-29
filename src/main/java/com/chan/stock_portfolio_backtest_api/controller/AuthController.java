@@ -10,16 +10,15 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -88,6 +87,34 @@ public class AuthController {
                         .message("로그인 성공")
                         .data(Map.of("accessToken", token))
                         .build());
+    }
+
+    @Operation(summary = "아이디 중복 체크", description = "사용 가능한 아이디인지 확인합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "아이디 사용 가능"),
+            @ApiResponse(responseCode = "409", description = "아이디 중복됨"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터")
+    })
+    @GetMapping("/check-username/{username}")
+    public ResponseEntity<ResponseDTO<String>> checkUsername(
+            @PathVariable("username")
+            @NotBlank(message = "아이디는 필수 입력값입니다.") String username
+    ) {
+        boolean isAvailable = usersService.isUsernameAvailable(username);
+
+        if (isAvailable) {
+            ResponseDTO<String> response = ResponseDTO.<String>builder()
+                    .status("success")
+                    .data("The username is available.")
+                    .build();
+            return ResponseEntity.ok(response);
+        } else {
+            ResponseDTO<String> response = ResponseDTO.<String>builder()
+                    .status("fail")
+                    .data("The username is already taken.")
+                    .build();
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        }
     }
 
 }
