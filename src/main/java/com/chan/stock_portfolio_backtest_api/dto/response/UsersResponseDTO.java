@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor(access = AccessLevel.PRIVATE) // 외부에서 생성자 호출 방지
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class UsersResponseDTO {
     private final Long id;
     private final String username;
