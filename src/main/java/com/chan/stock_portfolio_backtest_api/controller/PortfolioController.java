@@ -34,8 +34,6 @@ public class PortfolioController {
     public ResponseEntity<ResponseDTO<PortfolioResponseDTO>> createBacktest(
             @RequestBody @Valid PortfolioRequestDTO portfolioRequestDTO
     ) {
-
-//        PortfolioResponseDTO result = portfolioService.getBacktestResult(portfolioRequestDTO);
         PortfolioResponseDTO result = portfolioService.calculatePortfolio(portfolioRequestDTO);
         ResponseDTO<PortfolioResponseDTO> response = ResponseDTO.<PortfolioResponseDTO>builder()
                 .status("success")
