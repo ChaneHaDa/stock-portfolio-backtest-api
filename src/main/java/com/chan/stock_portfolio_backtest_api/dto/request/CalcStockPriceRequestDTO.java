@@ -17,6 +17,11 @@ public class CalcStockPriceRequestDTO {
     private LocalDate baseDate;
 
     public static CalcStockPriceRequestDTO entityToDTO(CalcStockPrice calcStockPrice) {
-        return new CalcStockPriceRequestDTO(calcStockPrice.getId(), calcStockPrice.getPrice(), calcStockPrice.getMonthlyRor(), calcStockPrice.getBaseDate());
+        return CalcStockPriceRequestDTO.builder()
+                .id(calcStockPrice.getId())
+                .price(calcStockPrice.getPrice())
+                .monthlyRor(calcStockPrice.getMonthlyRor())
+                .baseDate(calcStockPrice.getBaseDate())
+                .build();
     }
 }

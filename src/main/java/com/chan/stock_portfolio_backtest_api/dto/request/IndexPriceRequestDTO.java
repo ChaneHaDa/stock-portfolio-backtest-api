@@ -21,8 +21,15 @@ public class IndexPriceRequestDTO {
     private LocalDate baseDate;
 
     public static IndexPriceRequestDTO entityToDTO(IndexPrice indexPrice) {
-        return new IndexPriceRequestDTO(indexPrice.getId(), indexPrice.getClosePrice(), indexPrice.getOpenPrice(),
-                indexPrice.getLowPrice(), indexPrice.getHighPrice(), indexPrice.getYearlyDiff(), indexPrice.getBaseDate());
+        return IndexPriceRequestDTO.builder()
+                .id(indexPrice.getId())
+                .closePrice(indexPrice.getClosePrice())
+                .openPrice(indexPrice.getOpenPrice())
+                .lowPrice(indexPrice.getLowPrice())
+                .highPrice(indexPrice.getHighPrice())
+                .yearlyDiff(indexPrice.getYearlyDiff())
+                .baseDate(indexPrice.getBaseDate())
+                .build();
     }
 
 }

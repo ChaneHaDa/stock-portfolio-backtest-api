@@ -18,7 +18,11 @@ public class IndexInfoRequestDTO {
     private List<IndexPriceRequestDTO> indexPriceList;
 
     public static IndexInfoRequestDTO entityToDTO(IndexInfo indexInfo) {
-        return new IndexInfoRequestDTO(indexInfo.getId(), indexInfo.getName(), indexInfo.getCategory(),
-                indexInfo.getIndexPriceList().stream().map(IndexPriceRequestDTO::entityToDTO).toList());
+        return IndexInfoRequestDTO.builder()
+                .id(indexInfo.getId())
+                .name(indexInfo.getName())
+                .category(indexInfo.getCategory())
+                .indexPriceList(indexInfo.getIndexPriceList().stream().map(IndexPriceRequestDTO::entityToDTO).toList())
+                .build();
     }
 }

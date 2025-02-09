@@ -20,8 +20,14 @@ public class StockRequestDTO {
     private List<CalcStockPriceRequestDTO> calcStockPriceList;
 
     public static StockRequestDTO entityToDTO(Stock stock) {
-        return new StockRequestDTO(stock.getId(), stock.getName(), stock.getShortCode(), stock.getIsinCode(),
-                stock.getMarketCategory(), stock.getStockPriceList().stream().map(StockPriceRequestDTO::entityToDTO).toList(),
-                stock.getCalcStockPriceList().stream().map(CalcStockPriceRequestDTO::entityToDTO).toList());
+        return StockRequestDTO.builder()
+                .id(stock.getId())
+                .name(stock.getName())
+                .shortCode(stock.getShortCode())
+                .isinCode(stock.getIsinCode())
+                .marketCategory(stock.getMarketCategory())
+                .stockPriceList(stock.getStockPriceList().stream().map(StockPriceRequestDTO::entityToDTO).toList())
+                .calcStockPriceList(stock.getCalcStockPriceList().stream().map(CalcStockPriceRequestDTO::entityToDTO).toList())
+                .build();
     }
 }

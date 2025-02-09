@@ -22,8 +22,16 @@ public class StockPriceRequestDTO {
     private LocalDate baseDate;
 
     public static StockPriceRequestDTO entityToDTO(StockPrice stockPrice) {
-        return new StockPriceRequestDTO(stockPrice.getId(), stockPrice.getClosePrice(), stockPrice.getOpenPrice(),
-                stockPrice.getLowPrice(), stockPrice.getHighPrice(), stockPrice.getTradeQuantity(),
-                stockPrice.getTradeAmount(), stockPrice.getIssuedCount(), stockPrice.getBaseDate());
+        return StockPriceRequestDTO.builder()
+                .id(stockPrice.getId())
+                .closePrice(stockPrice.getClosePrice())
+                .openPrice(stockPrice.getOpenPrice())
+                .lowPrice(stockPrice.getLowPrice())
+                .highPrice(stockPrice.getHighPrice())
+                .tradeQuantity(stockPrice.getTradeQuantity())
+                .tradeAmount(stockPrice.getTradeAmount())
+                .issuedCount(stockPrice.getIssuedCount())
+                .baseDate(stockPrice.getBaseDate())
+                .build();
     }
 }
