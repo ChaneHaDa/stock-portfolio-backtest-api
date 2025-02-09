@@ -105,13 +105,13 @@ public class AuthController {
         if (isAvailable) {
             ResponseDTO<String> response = ResponseDTO.<String>builder()
                     .status("success")
-                    .data("The username is available.")
+                    .message("The username is available.")
                     .build();
             return ResponseEntity.ok(response);
         } else {
             ResponseDTO<String> response = ResponseDTO.<String>builder()
                     .status("fail")
-                    .data("The username is already taken.")
+                    .message("The username is already taken.")
                     .build();
             return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
         }

@@ -52,6 +52,6 @@ public class UsersService {
     }
 
     public Boolean isUsernameAvailable(String username) {
-        return usersRepository.existsByUsername(username);
+        return !usersRepository.existsByUsername(username);
     }
 }
