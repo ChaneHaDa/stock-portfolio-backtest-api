@@ -3,10 +3,12 @@ package com.chan.stock_portfolio_backtest_api.dto.response;
 import com.chan.stock_portfolio_backtest_api.domain.Users;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class UsersResponseDTO {
     private final Long id;
     private final String username;
