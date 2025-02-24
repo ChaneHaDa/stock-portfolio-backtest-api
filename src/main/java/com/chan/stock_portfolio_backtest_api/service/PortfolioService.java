@@ -73,11 +73,15 @@ public class PortfolioService {
         // 6. 포트폴리오 전체 누적(복리) 수익률 계산
         float totalRor = PortfolioCalculator.calculateCompoundRor(new TreeMap<>(portfolioMonthlyRor), startMonth, endMonth);
 
+        // 7. 월별 누적 자산 금액 계산 (초기 자산: request.getAmount())
+        Map<LocalDate, Long> monthlyAmount = calculateMonthlyAmounts(portfolioMonthlyRor, startMonth, endMonth, request.getAmount());
+
         return PortfolioResponseDTO.builder()
                 .portfolioInput(request)
                 .totalRor(totalRor)
                 .totalAmount((long) (request.getAmount() * (totalRor / 100 + 1)))
                 .monthlyRor(new TreeMap<>(portfolioMonthlyRor))
+                .monthlyAmount(monthlyAmount)
                 .portfolioResponseItemDTOList(responseItemDTOs)
                 .build();
     }
@@ -89,5 +93,26 @@ public class PortfolioService {
             stockMonthlyRor.put(csp.getBaseDate(), csp.getMonthlyRor());
         }
         return stockMonthlyRor;
+    }
+
+    /**
+     * 포트폴리오의 월별 수익률을 기반으로 누적 자산 금액을 계산합니다.
+     * 초기 자산에서 시작하여 매월 해당 월의 수익률을 적용한 후, 누적 금액을 계산합니다.
+     */
+    private Map<LocalDate, Long> calculateMonthlyAmounts(Map<LocalDate, Float> monthlyRorMap,
+                                                         LocalDate startMonth,
+                                                         LocalDate endMonth,
+                                                         Long initialAmount) {
+        Map<LocalDate, Long> monthlyAmounts = new TreeMap<>();
+        double currentAmount = initialAmount; // double로 계산하여 정밀도 유지
+        LocalDate current = startMonth;
+        while (!current.isAfter(endMonth)) {
+            // 월별 수익률을 가져와서 누적 계산 (월별 수익률은 백분율임)
+            float monthlyRor = monthlyRorMap.getOrDefault(current, 0f);
+            currentAmount = currentAmount * (1 + monthlyRor / 100.0);
+            monthlyAmounts.put(current, (long) currentAmount);
+            current = current.plusMonths(1);
+        }
+        return monthlyAmounts;
     }
 }

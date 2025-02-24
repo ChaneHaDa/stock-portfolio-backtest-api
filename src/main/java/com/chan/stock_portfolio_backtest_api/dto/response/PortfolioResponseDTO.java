@@ -17,5 +17,6 @@ public class PortfolioResponseDTO {
     private Float totalRor;
     private Long totalAmount;
     private Map<LocalDate, Float> monthlyRor;
+    private Map<LocalDate, Long> monthlyAmount;
     private List<PortfolioResponseItemDTO> portfolioResponseItemDTOList;
 }
