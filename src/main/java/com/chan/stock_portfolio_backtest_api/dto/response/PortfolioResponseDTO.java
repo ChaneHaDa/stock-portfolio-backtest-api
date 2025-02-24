@@ -15,6 +15,7 @@ import java.util.Map;
 public class PortfolioResponseDTO {
     private PortfolioRequestDTO portfolioInput;
     private Float totalRor;
+    private Long totalAmount;
     private Map<LocalDate, Float> monthlyRor;
     private List<PortfolioResponseItemDTO> portfolioResponseItemDTOList;
 }

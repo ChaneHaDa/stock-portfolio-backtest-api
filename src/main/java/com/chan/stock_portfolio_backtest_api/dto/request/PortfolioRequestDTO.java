@@ -24,6 +24,8 @@ public class PortfolioRequestDTO {
     @NotNull(message = "End date must not be null")
     private LocalDate endDate;
 
+    private Long amount;
+
     @Valid
     private List<PortfolioRequestItemDTO> portfolioRequestItemDTOList;
 }
