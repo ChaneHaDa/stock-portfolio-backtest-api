@@ -77,7 +77,7 @@ public class PortfolioService {
                 .portfolioInput(request)
                 .totalRor(totalRor)
                 .monthlyRor(new TreeMap<>(portfolioMonthlyRor))
-                .portfolioResponseItemDTOS(responseItemDTOs)
+                .portfolioResponseItemDTOList(responseItemDTOs)
                 .build();
     }
 
