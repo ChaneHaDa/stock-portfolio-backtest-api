@@ -1,6 +1,7 @@
 package com.chan.stock_portfolio_backtest_api.util;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Map;
 
 public class PortfolioCalculator {
@@ -45,5 +46,35 @@ public class PortfolioCalculator {
             portfolioRor.merge(current, weight * monthlyRor, Float::sum);
             current = current.plusMonths(1);
         }
+    }
+
+
+    /**
+     * 주어진 월별 수익률 데이터를 이용해 표준편차(변동성)를 계산합니다.
+     * 월별 수익률은 백분율로 저장되어 있다고 가정합니다.
+     *
+     * @param monthlyRorMap 월별 수익률을 담은 Map (키: LocalDate, 값: 월별 수익률(%))
+     * @return 월별 수익률의 표준편차 (변동성, 백분율 단위)
+     */
+    public static float calculateVolatility(Map<LocalDate, Float> monthlyRorMap) {
+        Collection<Float> returns = monthlyRorMap.values();
+        int n = returns.size();
+        if (n == 0) {
+            return 0f;
+        }
+
+        // 평균 수익률 계산
+        double sum = returns.stream().mapToDouble(r -> r).sum();
+        double mean = sum / n;
+
+        // 분산 계산
+        double variance = returns.stream()
+                .mapToDouble(r -> Math.pow(r - mean, 2))
+                .sum() / n;
+
+        double stdDev = Math.sqrt(variance);
+
+        // 결과는 월별 변동성이며, 필요한 경우 연율화: stdDev * Math.sqrt(12)
+        return (float) stdDev;
     }
 }

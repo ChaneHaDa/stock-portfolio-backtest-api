@@ -77,7 +77,7 @@ public class PortfolioService {
         Map<LocalDate, Long> monthlyAmount = calculateMonthlyAmounts(portfolioMonthlyRor, startMonth, endMonth, request.getAmount());
 
         // 8. 변동성 계산 (전체 포트폴리오 월별 수익률 기반)
-        float volatility = calculateVolatility(portfolioMonthlyRor);
+        float volatility = PortfolioCalculator.calculateVolatility(portfolioMonthlyRor);
 
         return PortfolioResponseDTO.builder()
                 .portfolioInput(request)
@@ -122,32 +122,6 @@ public class PortfolioService {
             current = current.plusMonths(1);
         }
         return monthlyAmounts;
-    }
-
-    /**
-     * 주어진 월별 수익률 데이터를 이용해 표준편차(변동성)를 계산합니다.
-     * 월별 수익률은 백분율로 저장되어 있다고 가정합니다.
-     */
-    private float calculateVolatility(Map<LocalDate, Float> monthlyRorMap) {
-        Collection<Float> returns = monthlyRorMap.values();
-        int n = returns.size();
-        if (n == 0) {
-            return 0f;
-        }
-
-        // 평균 수익률 계산
-        double sum = returns.stream().mapToDouble(r -> r).sum();
-        double mean = sum / n;
-
-        // 분산 계산
-        double variance = returns.stream()
-                .mapToDouble(r -> Math.pow(r - mean, 2))
-                .sum() / n;
-
-        double stdDev = Math.sqrt(variance);
-
-        // 결과는 월별 변동성이며, 필요한 경우 연율화: stdDev * Math.sqrt(12)
-        return (float) stdDev;
     }
 
 }
