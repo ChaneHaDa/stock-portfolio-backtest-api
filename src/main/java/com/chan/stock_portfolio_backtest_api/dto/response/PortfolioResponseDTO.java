@@ -16,6 +16,7 @@ public class PortfolioResponseDTO {
     private PortfolioRequestDTO portfolioInput;
     private Float totalRor;
     private Long totalAmount;
+    private Float volatility;
     private Map<LocalDate, Float> monthlyRor;
     private Map<LocalDate, Long> monthlyAmount;
     private List<PortfolioResponseItemDTO> portfolioResponseItemDTOList;
