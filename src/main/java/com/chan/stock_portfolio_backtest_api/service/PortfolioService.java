@@ -90,6 +90,10 @@ public class PortfolioService {
                 .build();
     }
 
+    /**
+     * 주어진 주식(stock)의 CalcStockPrice 데이터를 조회하여,
+     * 시작 날짜(startDate)와 종료 날짜(endDate) 사이에 해당하는 월별 수익률을 계산합니다.
+     */
     private Map<LocalDate, Float> calculateStockMonthlyRor(Stock stock, LocalDate startDate, LocalDate endDate) {
         List<CalcStockPrice> calcPrices = calcStockPriceRepository.findByStockAndBaseDateBetween(stock, startDate, endDate);
         Map<LocalDate, Float> stockMonthlyRor = new TreeMap<>();
