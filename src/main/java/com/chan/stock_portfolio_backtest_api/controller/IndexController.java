@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("api/v1/index")
 @Tag(name = "Index API", description = "지수 정보 조회 API")
-public class IndexPriceController {
+public class IndexController {
     private final IndexInfoService indexInfoService;
 
-    public IndexPriceController(IndexInfoService indexInfoService) {
+    public IndexController(IndexInfoService indexInfoService) {
         this.indexInfoService = indexInfoService;
     }
 
