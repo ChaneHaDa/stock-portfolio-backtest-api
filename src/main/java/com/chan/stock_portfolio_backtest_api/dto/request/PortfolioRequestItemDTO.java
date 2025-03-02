@@ -3,15 +3,13 @@ package com.chan.stock_portfolio_backtest_api.dto.request;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class PortfolioRequestItemDTO {
     @NotNull(message = "Stock name must not be null")
     private String stockName;

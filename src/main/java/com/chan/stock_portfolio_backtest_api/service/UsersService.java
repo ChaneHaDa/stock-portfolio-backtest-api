@@ -50,4 +50,8 @@ public class UsersService {
     public Users getUsers(String username) {
         return usersRepository.findByUsername(username);
     }
+
+    public Boolean isUsernameAvailable(String username) {
+        return !usersRepository.existsByUsername(username);
+    }
 }

@@ -1,23 +1,19 @@
 package com.chan.stock_portfolio_backtest_api.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-
-import java.time.LocalDate;
-
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
 
 @Entity
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class StockPrice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
