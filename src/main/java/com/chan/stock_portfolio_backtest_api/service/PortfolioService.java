@@ -1,74 +1,127 @@
 package com.chan.stock_portfolio_backtest_api.service;
 
-import com.chan.stock_portfolio_backtest_api.dto.request.CalcStockPriceRequestDTO;
+import com.chan.stock_portfolio_backtest_api.domain.CalcStockPrice;
+import com.chan.stock_portfolio_backtest_api.domain.Stock;
 import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioRequestDTO;
-import com.chan.stock_portfolio_backtest_api.dto.request.StockRequestDTO;
+import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioRequestItemDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioResponseDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioResponseItemDTO;
+import com.chan.stock_portfolio_backtest_api.exception.EntityNotFoundException;
+import com.chan.stock_portfolio_backtest_api.repository.CalcStockPriceRepository;
+import com.chan.stock_portfolio_backtest_api.repository.StockRepository;
+import com.chan.stock_portfolio_backtest_api.util.PortfolioCalculator;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Service
 public class PortfolioService {
-    private final StockService stockService;
 
-    public PortfolioService(StockService stockService) {
-        this.stockService = stockService;
+    private final StockRepository stockRepository;
+    private final CalcStockPriceRepository calcStockPriceRepository;
+
+    public PortfolioService(StockRepository stockRepository, CalcStockPriceRepository calcStockPriceRepository) {
+        this.stockRepository = stockRepository;
+        this.calcStockPriceRepository = calcStockPriceRepository;
     }
 
-    public PortfolioResponseDTO getBacktestResult(PortfolioRequestDTO portfolioRequestDTO) {
-        Map<String, Float> stockWeightMap = portfolioRequestDTO.getPortfolioRequestItemDTOList().stream()
-                .collect(Collectors.toMap(item -> item.getStockName(), item -> item.getWeight()));
+    public PortfolioResponseDTO calculatePortfolio(PortfolioRequestDTO request) {
+        LocalDate startDate = request.getStartDate();
+        LocalDate endDate = request.getEndDate();
 
-        List<StockRequestDTO> stockRequestDTOList = stockService
-                .findStocksByNamesAndDateRange(stockWeightMap.keySet().stream().toList(), portfolioRequestDTO.getStartDate(),
-                        portfolioRequestDTO.getEndDate());
-
-        Map<LocalDate, Float> totalDateRorMap = new HashMap<>();
-
-        LocalDate currentDate = portfolioRequestDTO.getStartDate().withDayOfMonth(1);
-        while (!currentDate.isAfter(portfolioRequestDTO.getEndDate())) {
-            totalDateRorMap.put(currentDate, 0f);
-            currentDate = currentDate.plusMonths(1);
+        if (startDate.isAfter(endDate)) {
+            throw new IllegalArgumentException("Start date must not be after end date.");
         }
 
-        Float totalPortfolioRor = 1f;
-        List<PortfolioResponseItemDTO> portfolioResponseItemDTOS = new ArrayList<>();
-        for (StockRequestDTO stockRequestDTO : stockRequestDTOList) {
-            PortfolioResponseItemDTO portfolioResponseItemDTO = new PortfolioResponseItemDTO();
-            String name = stockRequestDTO.getName();
-            portfolioResponseItemDTO.setName(name);
+        List<PortfolioRequestItemDTO> requestItems = request.getPortfolioRequestItemDTOList();
 
-            Map<LocalDate, Float> stockDateMap = new HashMap<>();
-            List<CalcStockPriceRequestDTO> calcStockPriceRequestDTOS = stockRequestDTO.getCalcStockPriceList();
-            Float totalRorByStock = 1f;
-            for (CalcStockPriceRequestDTO calcStockPriceRequestDTO : calcStockPriceRequestDTOS) {
-                Float stockRor = calcStockPriceRequestDTO.getMonthlyRor() * stockWeightMap.get(name);
+        // 전체 포트폴리오 월별 수익률을 누적할 Map
+        Map<LocalDate, Float> portfolioMonthlyRor = new HashMap<>();
 
-                totalDateRorMap.put(calcStockPriceRequestDTO.getBaseDate(), totalDateRorMap.get(calcStockPriceRequestDTO.getBaseDate()) + stockRor);
-                totalPortfolioRor *= 1 + (stockRor / 100);
+        // 개별 주식 결과를 저장할 리스트
+        List<PortfolioResponseItemDTO> responseItemDTOs = new ArrayList<>();
 
-                stockDateMap.put(calcStockPriceRequestDTO.getBaseDate(), calcStockPriceRequestDTO.getMonthlyRor());
-                totalRorByStock *= 1 + (calcStockPriceRequestDTO.getMonthlyRor() / 100);
+        LocalDate startMonth = startDate.withDayOfMonth(1);
+        LocalDate endMonth = endDate.withDayOfMonth(1);
+
+        for (PortfolioRequestItemDTO item : requestItems) {
+            // 1. 주식 엔티티 조회
+            Stock stock = stockRepository.findByName(item.getStockName());
+            if (stock == null) {
+                throw new EntityNotFoundException("Stock with name '" + item.getStockName() + "' does not exist.");
             }
-            portfolioResponseItemDTO.setTotalRor((totalRorByStock - 1) * 100);
-            portfolioResponseItemDTO.setMonthlyRor(stockDateMap);
-            portfolioResponseItemDTOS.add(portfolioResponseItemDTO);
+
+            // 2. 해당 주식의 월별 수익률 계산
+            Map<LocalDate, Float> stockMonthlyRor = calculateStockMonthlyRor(stock, startDate, endDate);
+
+            // 3. 주식별 누적(복리) 수익률 계산
+            float stockTotalRor = PortfolioCalculator.calculateCompoundRor(stockMonthlyRor, startMonth, endMonth);
+
+            // 4. 개별 주식 결과 DTO 생성
+            PortfolioResponseItemDTO responseItem = PortfolioResponseItemDTO.builder()
+                    .name(stock.getName())
+                    .totalRor(stockTotalRor)
+                    .monthlyRor(stockMonthlyRor)
+                    .build();
+            responseItemDTOs.add(responseItem);
+
+            // 5. 포트폴리오 전체 월별 수익률에 가중치 적용하여 합산
+            PortfolioCalculator.mergeStockIntoPortfolioRor(portfolioMonthlyRor, stockMonthlyRor, item.getWeight(), startMonth, endMonth);
         }
 
-        PortfolioResponseDTO portfolioResponseDTO = new PortfolioResponseDTO();
-        portfolioResponseDTO.setTotalRor((totalPortfolioRor - 1) * 100);
-        portfolioResponseDTO.setPortfolionput(portfolioRequestDTO);
-        portfolioResponseDTO.setMonthlyRor(totalDateRorMap);
-        portfolioResponseDTO.setPortfolioResponseItemDTOS(portfolioResponseItemDTOS);
+        // 6. 포트폴리오 전체 누적(복리) 수익률 계산
+        float totalRor = PortfolioCalculator.calculateCompoundRor(new TreeMap<>(portfolioMonthlyRor), startMonth, endMonth);
 
-        return portfolioResponseDTO;
+        // 7. 월별 누적 자산 금액 계산 (초기 자산: request.getAmount())
+        Map<LocalDate, Long> monthlyAmount = calculateMonthlyAmounts(portfolioMonthlyRor, startMonth, endMonth, request.getAmount());
+
+        // 8. 변동성 계산 (전체 포트폴리오 월별 수익률 기반)
+        float volatility = PortfolioCalculator.calculateVolatility(portfolioMonthlyRor);
+
+        return PortfolioResponseDTO.builder()
+                .portfolioInput(request)
+                .totalRor(totalRor)
+                .totalAmount((long) (request.getAmount() * (totalRor / 100 + 1)))
+                .monthlyRor(new TreeMap<>(portfolioMonthlyRor))
+                .monthlyAmount(monthlyAmount)
+                .volatility(volatility)
+                .portfolioResponseItemDTOList(responseItemDTOs)
+                .build();
+    }
+
+    /**
+     * 주어진 주식(stock)의 CalcStockPrice 데이터를 조회하여,
+     * 시작 날짜(startDate)와 종료 날짜(endDate) 사이에 해당하는 월별 수익률을 계산합니다.
+     */
+    private Map<LocalDate, Float> calculateStockMonthlyRor(Stock stock, LocalDate startDate, LocalDate endDate) {
+        List<CalcStockPrice> calcPrices = calcStockPriceRepository.findByStockAndBaseDateBetween(stock, startDate, endDate);
+        Map<LocalDate, Float> stockMonthlyRor = new TreeMap<>();
+        for (CalcStockPrice csp : calcPrices) {
+            stockMonthlyRor.put(csp.getBaseDate(), csp.getMonthlyRor());
+        }
+        return stockMonthlyRor;
+    }
+
+    /**
+     * 포트폴리오의 월별 수익률을 기반으로 누적 자산 금액을 계산합니다.
+     * 초기 자산에서 시작하여 매월 해당 월의 수익률을 적용한 후, 누적 금액을 계산합니다.
+     */
+    private Map<LocalDate, Long> calculateMonthlyAmounts(Map<LocalDate, Float> monthlyRorMap,
+                                                         LocalDate startMonth,
+                                                         LocalDate endMonth,
+                                                         Long initialAmount) {
+        Map<LocalDate, Long> monthlyAmounts = new TreeMap<>();
+        double currentAmount = initialAmount; // double로 계산하여 정밀도 유지
+        LocalDate current = startMonth;
+        while (!current.isAfter(endMonth)) {
+            // 월별 수익률을 가져와서 누적 계산 (월별 수익률은 백분율임)
+            float monthlyRor = monthlyRorMap.getOrDefault(current, 0f);
+            currentAmount = currentAmount * (1 + monthlyRor / 100.0);
+            monthlyAmounts.put(current, (long) currentAmount);
+            current = current.plusMonths(1);
+        }
+        return monthlyAmounts;
     }
 
 }

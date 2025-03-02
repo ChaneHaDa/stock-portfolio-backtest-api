@@ -1,10 +1,7 @@
 package com.chan.stock_portfolio_backtest_api.dto.request;
 
 import com.chan.stock_portfolio_backtest_api.domain.IndexInfo;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
@@ -12,6 +9,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class IndexInfoRequestDTO {
 
     private Integer id;
@@ -20,7 +18,11 @@ public class IndexInfoRequestDTO {
     private List<IndexPriceRequestDTO> indexPriceList;
 
     public static IndexInfoRequestDTO entityToDTO(IndexInfo indexInfo) {
-        return new IndexInfoRequestDTO(indexInfo.getId(), indexInfo.getName(), indexInfo.getCategory(),
-                indexInfo.getIndexPriceList().stream().map(IndexPriceRequestDTO::entityToDTO).toList());
+        return IndexInfoRequestDTO.builder()
+                .id(indexInfo.getId())
+                .name(indexInfo.getName())
+                .category(indexInfo.getCategory())
+                .indexPriceList(indexInfo.getIndexPriceList().stream().map(IndexPriceRequestDTO::entityToDTO).toList())
+                .build();
     }
 }

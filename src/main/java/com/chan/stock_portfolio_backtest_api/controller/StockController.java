@@ -22,7 +22,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("api/v1/stock")
-@Tag(name = "Stock", description = "주식 정보 및 가격 조회 API")
+@Tag(name = "Stock API", description = "주식 정보 및 가격 조회 API")
 @Validated
 public class StockController {
     private final StockService stockService;
