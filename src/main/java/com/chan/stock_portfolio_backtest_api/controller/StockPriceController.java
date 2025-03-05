@@ -9,17 +9,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
 
 
 @RestController
-@RequestMapping("api/v1/stock-price")
+@RequestMapping("api/v1/stocks/{stock_id}/prices")
 @Tag(name = "Stock Price API", description = "주식 가격 조회 API")
 public class StockPriceController {
     private final StockPriceService stockPriceService;
@@ -28,7 +25,7 @@ public class StockPriceController {
         this.stockPriceService = stockPriceService;
     }
 
-    @Operation(summary = "주식 가격 조회", description = "이름 으로 주식 가격 조회")
+    @Operation(summary = "주식 가격 조회", description = "stock id로 주식 가격 조회")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 입력값"),
@@ -36,16 +33,16 @@ public class StockPriceController {
     })
     @GetMapping
     public ResponseEntity<ResponseDTO<List<StockPriceRequestDTO>>> getStockByName(
-            @RequestParam("name") String name,
+            @PathVariable("stock_id") Integer stockId,
             @RequestParam(value = "startDate", required = false)
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
             @RequestParam(value = "endDate", required = false)
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
         List<StockPriceRequestDTO> stockPriceRequestDTOList;
         if (startDate != null && endDate != null) {
-            stockPriceRequestDTOList = stockPriceService.findStockPricesByStockNameAndDateRange(name, startDate, endDate);
+            stockPriceRequestDTOList = stockPriceService.findStockPricesByStockIdAndDateRange(stockId, startDate, endDate);
         } else {
-            stockPriceRequestDTOList = stockPriceService.findStockPricesByStockName(name);
+            stockPriceRequestDTOList = stockPriceService.findStockPricesByStockId(stockId);
         }
 
         ResponseDTO<List<StockPriceRequestDTO>> response = ResponseDTO.<List<StockPriceRequestDTO>>builder()
