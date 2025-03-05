@@ -1,9 +1,9 @@
 package com.chan.stock_portfolio_backtest_api.controller;
 
 import com.chan.stock_portfolio_backtest_api.dto.request.IndexBacktestRequestDTO;
-import com.chan.stock_portfolio_backtest_api.dto.request.IndexInfoRequestDTO;
-import com.chan.stock_portfolio_backtest_api.dto.request.IndexPriceRequestDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.IndexBacktestResponseDTO;
+import com.chan.stock_portfolio_backtest_api.dto.response.IndexInfoResponseDTO;
+import com.chan.stock_portfolio_backtest_api.dto.response.IndexPriceResponseDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.ResponseDTO;
 import com.chan.stock_portfolio_backtest_api.service.IndexBacktestService;
 import com.chan.stock_portfolio_backtest_api.service.IndexInfoService;
@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,35 +28,35 @@ public class IndexController {
         this.indexBacktestService = indexBacktestService;
     }
 
-    @Operation(summary = "지수 기본 정보 조회")
+    @Operation(summary = "특정 지수 기본 정보 조회")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "404", description = "지수 정보 없음"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터")
     })
-    @GetMapping("/{name}")
-    public ResponseEntity<ResponseDTO<IndexInfoRequestDTO>> getIndex(
-            @PathVariable("name")
-            @NotBlank(message = "지수명은 필수 입력값입니다.") String name
+    @GetMapping("/{id}")
+    public ResponseEntity<ResponseDTO<IndexInfoResponseDTO>> getIndex(
+            @PathVariable("id")
+            @NotNull(message = "id는 필수 입력값입니다.") Integer id
     ) {
-        IndexInfoRequestDTO indexInfoRequestDTO = indexInfoService.findIndexInfoByName(name);
-        ResponseDTO<IndexInfoRequestDTO> response = ResponseDTO.<IndexInfoRequestDTO>builder()
+        IndexInfoResponseDTO indexInfoResponseDTO = indexInfoService.findIndexInfoById(id);
+        ResponseDTO<IndexInfoResponseDTO> response = ResponseDTO.<IndexInfoResponseDTO>builder()
                 .status("success")
-                .data(indexInfoRequestDTO)
+                .data(indexInfoResponseDTO)
                 .build();
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "지수 최종 가격 조회")
-    @GetMapping("/{name}/price")
-    public ResponseEntity<ResponseDTO<IndexPriceRequestDTO>> getLastIndexPrice(
-            @PathVariable("name")
-            @NotBlank(message = "지수명은 필수 입력값입니다.") String name
+    @Operation(summary = "특정 지수 마지막 가격 조회")
+    @GetMapping("/{id}/price/last")
+    public ResponseEntity<ResponseDTO<IndexPriceResponseDTO>> getLastIndexPrice(
+            @PathVariable("id")
+            @NotNull(message = "id는 필수 입력값입니다.") Integer id
     ) {
-        IndexPriceRequestDTO indexPriceRequestDTO = indexInfoService.findLastIndexPriceByName(name);
-        ResponseDTO<IndexPriceRequestDTO> response = ResponseDTO.<IndexPriceRequestDTO>builder()
+        IndexPriceResponseDTO indexPriceResponseDTO = indexInfoService.findLastIndexPriceById(id);
+        ResponseDTO<IndexPriceResponseDTO> response = ResponseDTO.<IndexPriceResponseDTO>builder()
                 .status("success")
-                .data(indexPriceRequestDTO)
+                .data(indexPriceResponseDTO)
                 .build();
         return ResponseEntity.ok(response);
     }
@@ -67,13 +67,14 @@ public class IndexController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청"),
             @ApiResponse(responseCode = "404", description = "지수 정보 없음")
     })
-    @GetMapping("/{name}/portfolio")
+    @GetMapping("/{id}/portfolio")
     public ResponseEntity<ResponseDTO<IndexBacktestResponseDTO>> getIndexPortfolio(
-            @PathVariable("name")
-            @NotBlank(message = "지수명은 필수 입력값입니다.") String name,
+            @PathVariable("id")
+            @NotNull(message = "id는 필수 입력값입니다.") Integer id,
             @ModelAttribute @Valid IndexBacktestRequestDTO indexBacktestRequestDTO
     ) {
-        indexBacktestRequestDTO.setName(name);
+        IndexInfoResponseDTO indexPriceResponseDTO = indexInfoService.findIndexInfoById(id);
+
         IndexBacktestResponseDTO backtestResult = indexBacktestService.calculateIndexBacktest(indexBacktestRequestDTO);
 
         ResponseDTO<IndexBacktestResponseDTO> response = ResponseDTO.<IndexBacktestResponseDTO>builder()
