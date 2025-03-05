@@ -73,9 +73,7 @@ public class IndexController {
             @NotNull(message = "id는 필수 입력값입니다.") Integer id,
             @ModelAttribute @Valid IndexBacktestRequestDTO indexBacktestRequestDTO
     ) {
-        IndexInfoResponseDTO indexPriceResponseDTO = indexInfoService.findIndexInfoById(id);
-
-        IndexBacktestResponseDTO backtestResult = indexBacktestService.calculateIndexBacktest(indexBacktestRequestDTO);
+        IndexBacktestResponseDTO backtestResult = indexBacktestService.calculateIndexBacktest(indexBacktestRequestDTO, id);
 
         ResponseDTO<IndexBacktestResponseDTO> response = ResponseDTO.<IndexBacktestResponseDTO>builder()
                 .status("success")
