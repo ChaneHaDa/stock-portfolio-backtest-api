@@ -17,7 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api/v1/index")
+@RequestMapping("api/v1/indexs")
 @Tag(name = "Index API", description = "지수 정보 조회 API")
 public class IndexController {
     private final IndexInfoService indexInfoService;

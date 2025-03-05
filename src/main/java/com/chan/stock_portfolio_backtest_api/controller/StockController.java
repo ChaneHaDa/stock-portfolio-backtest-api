@@ -21,7 +21,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/stock")
+@RequestMapping("api/v1/stocks")
 @Tag(name = "Stock API", description = "주식 정보 및 가격 조회 API")
 @Validated
 public class StockController {
