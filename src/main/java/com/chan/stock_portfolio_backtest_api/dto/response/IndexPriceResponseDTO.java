@@ -1,4 +1,4 @@
-package com.chan.stock_portfolio_backtest_api.dto.request;
+package com.chan.stock_portfolio_backtest_api.dto.response;
 
 import com.chan.stock_portfolio_backtest_api.domain.IndexPrice;
 import lombok.*;
@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class IndexPriceRequestDTO {
+public class IndexPriceResponseDTO {
 
     private Integer id;
     private Float closePrice;
@@ -20,8 +20,8 @@ public class IndexPriceRequestDTO {
     private Float yearlyDiff;
     private LocalDate baseDate;
 
-    public static IndexPriceRequestDTO entityToDTO(IndexPrice indexPrice) {
-        return IndexPriceRequestDTO.builder()
+    public static IndexPriceResponseDTO entityToDTO(IndexPrice indexPrice) {
+        return IndexPriceResponseDTO.builder()
                 .id(indexPrice.getId())
                 .closePrice(indexPrice.getClosePrice())
                 .openPrice(indexPrice.getOpenPrice())
