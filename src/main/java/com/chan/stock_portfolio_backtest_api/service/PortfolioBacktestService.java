@@ -2,10 +2,10 @@ package com.chan.stock_portfolio_backtest_api.service;
 
 import com.chan.stock_portfolio_backtest_api.domain.CalcStockPrice;
 import com.chan.stock_portfolio_backtest_api.domain.Stock;
-import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioRequestDTO;
-import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioRequestItemDTO;
-import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioResponseDTO;
-import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioResponseItemDTO;
+import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioBacktestRequestDTO;
+import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioBacktestRequestItemDTO;
+import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioBacktestResponseDTO;
+import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioBacktestResponseItemDTO;
 import com.chan.stock_portfolio_backtest_api.exception.EntityNotFoundException;
 import com.chan.stock_portfolio_backtest_api.repository.CalcStockPriceRepository;
 import com.chan.stock_portfolio_backtest_api.repository.StockRepository;
@@ -26,7 +26,7 @@ public class PortfolioBacktestService {
         this.calcStockPriceRepository = calcStockPriceRepository;
     }
 
-    public PortfolioResponseDTO calculatePortfolio(PortfolioRequestDTO request) {
+    public PortfolioBacktestResponseDTO calculatePortfolio(PortfolioBacktestRequestDTO request) {
         LocalDate startDate = request.getStartDate();
         LocalDate endDate = request.getEndDate();
 
@@ -34,18 +34,18 @@ public class PortfolioBacktestService {
             throw new IllegalArgumentException("Start date must not be after end date.");
         }
 
-        List<PortfolioRequestItemDTO> requestItems = request.getPortfolioRequestItemDTOList();
+        List<PortfolioBacktestRequestItemDTO> requestItems = request.getPortfolioBacktestRequestItemDTOList();
 
         // 전체 포트폴리오 월별 수익률을 누적할 Map
         Map<LocalDate, Float> portfolioMonthlyRor = new HashMap<>();
 
         // 개별 주식 결과를 저장할 리스트
-        List<PortfolioResponseItemDTO> responseItemDTOs = new ArrayList<>();
+        List<PortfolioBacktestResponseItemDTO> responseItemDTOs = new ArrayList<>();
 
         LocalDate startMonth = startDate.withDayOfMonth(1);
         LocalDate endMonth = endDate.withDayOfMonth(1);
 
-        for (PortfolioRequestItemDTO item : requestItems) {
+        for (PortfolioBacktestRequestItemDTO item : requestItems) {
             // 1. 주식 엔티티 조회
             Stock stock = stockRepository.findByName(item.getStockName());
             if (stock == null) {
@@ -59,7 +59,7 @@ public class PortfolioBacktestService {
             float stockTotalRor = PortfolioCalculator.calculateCompoundRor(stockMonthlyRor, startMonth, endMonth);
 
             // 4. 개별 주식 결과 DTO 생성
-            PortfolioResponseItemDTO responseItem = PortfolioResponseItemDTO.builder()
+            PortfolioBacktestResponseItemDTO responseItem = PortfolioBacktestResponseItemDTO.builder()
                     .name(stock.getName())
                     .totalRor(stockTotalRor)
                     .monthlyRor(stockMonthlyRor)
@@ -79,14 +79,14 @@ public class PortfolioBacktestService {
         // 8. 변동성 계산 (전체 포트폴리오 월별 수익률 기반)
         float volatility = PortfolioCalculator.calculateVolatility(portfolioMonthlyRor);
 
-        return PortfolioResponseDTO.builder()
+        return PortfolioBacktestResponseDTO.builder()
                 .portfolioInput(request)
                 .totalRor(totalRor)
                 .totalAmount((long) (request.getAmount() * (totalRor / 100 + 1)))
                 .monthlyRor(new TreeMap<>(portfolioMonthlyRor))
                 .monthlyAmount(monthlyAmount)
                 .volatility(volatility)
-                .portfolioResponseItemDTOList(responseItemDTOs)
+                .portfolioBacktestResponseItemDTOList(responseItemDTOs)
                 .build();
     }
 

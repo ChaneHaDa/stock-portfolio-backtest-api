@@ -10,7 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PortfolioRequestItemDTO {
+public class PortfolioBacktestRequestItemDTO {
     @NotNull(message = "Stock name must not be null")
     private String stockName;
 

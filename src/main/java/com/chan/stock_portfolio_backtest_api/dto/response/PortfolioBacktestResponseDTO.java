@@ -1,6 +1,6 @@
 package com.chan.stock_portfolio_backtest_api.dto.response;
 
-import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioRequestDTO;
+import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioBacktestRequestDTO;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -12,12 +12,12 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PortfolioResponseDTO {
-    private PortfolioRequestDTO portfolioInput;
+public class PortfolioBacktestResponseDTO {
+    private PortfolioBacktestRequestDTO portfolioInput;
     private Float totalRor;
     private Long totalAmount;
     private Float volatility;
     private Map<LocalDate, Float> monthlyRor;
     private Map<LocalDate, Long> monthlyAmount;
-    private List<PortfolioResponseItemDTO> portfolioResponseItemDTOList;
+    private List<PortfolioBacktestResponseItemDTO> portfolioBacktestResponseItemDTOList;
 }

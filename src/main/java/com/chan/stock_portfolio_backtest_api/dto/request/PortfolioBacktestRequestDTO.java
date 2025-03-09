@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @ValidPortfolioInput
 @Builder
-public class PortfolioRequestDTO {
+public class PortfolioBacktestRequestDTO {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @NotNull(message = "Start date must not be null")
     private LocalDate startDate;
@@ -27,5 +27,5 @@ public class PortfolioRequestDTO {
     private Long amount = 100000L;
 
     @Valid
-    private List<PortfolioRequestItemDTO> portfolioRequestItemDTOList;
+    private List<PortfolioBacktestRequestItemDTO> portfolioBacktestRequestItemDTOList;
 }
