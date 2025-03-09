@@ -16,27 +16,27 @@ public class StockPriceService {
         this.stockPriceRepository = stockPriceRepository;
     }
 
-    public List<StockPriceRequestDTO> findStockPricesByStockName(String stockName) {
-        List<StockPriceRequestDTO> stockPriceRequestDTOList = stockPriceRepository.findByStockName(stockName)
+    public List<StockPriceRequestDTO> findStockPricesByStockId(Integer id) {
+        List<StockPriceRequestDTO> stockPriceRequestDTOList = stockPriceRepository.findByStockId(id)
                 .stream()
                 .map(StockPriceRequestDTO::entityToDTO)
                 .toList();
 
         if (stockPriceRequestDTOList.isEmpty()) {
-            throw new EntityNotFoundException(String.format("%s not found", stockName));
+            throw new EntityNotFoundException(String.format("%s not found", id));
         }
 
         return stockPriceRequestDTOList;
     }
 
-    public List<StockPriceRequestDTO> findStockPricesByStockNameAndDateRange(String name, LocalDate startDate, LocalDate endDate) {
-        List<StockPriceRequestDTO> stockPriceRequestDTOList = stockPriceRepository.findByStockNameAndDateRange(name, startDate, endDate)
+    public List<StockPriceRequestDTO> findStockPricesByStockIdAndDateRange(Integer id, LocalDate startDate, LocalDate endDate) {
+        List<StockPriceRequestDTO> stockPriceRequestDTOList = stockPriceRepository.findByStockIdAndDateRange(id, startDate, endDate)
                 .stream()
                 .map(StockPriceRequestDTO::entityToDTO)
                 .toList();
 
         if (stockPriceRequestDTOList.isEmpty()) {
-            throw new EntityNotFoundException(String.format("%s not found", name));
+            throw new EntityNotFoundException(String.format("id: %s not found", id));
         }
 
         return stockPriceRequestDTOList;

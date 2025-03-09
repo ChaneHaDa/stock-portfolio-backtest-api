@@ -44,10 +44,9 @@ public class SecurityConfig {
 
                         //api
                         "/api/v1/auth/**",
-                        "/api/v1/index/**",
-                        "/api/v1/stock/**",
+                        "/api/v1/indexs/**",
+                        "/api/v1/stocks/**",
                         "/api/v1/portfolio/**"
-
                 ).permitAll()
                 .anyRequest().authenticated()
         );

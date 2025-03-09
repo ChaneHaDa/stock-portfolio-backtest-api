@@ -25,7 +25,7 @@ public class IndexBacktestService {
         this.calcIndexPriceRepository = calcIndexPriceRepository;
     }
 
-    public IndexBacktestResponseDTO calculateIndexBacktest(IndexBacktestRequestDTO requestDTO) {
+    public IndexBacktestResponseDTO calculateIndexBacktest(IndexBacktestRequestDTO requestDTO, Integer id) {
         LocalDate startDate = requestDTO.getStartDate();
         LocalDate endDate = requestDTO.getEndDate();
 
@@ -34,8 +34,7 @@ public class IndexBacktestService {
         }
 
         // 1. 인덱스 정보 조회
-        String indexName = requestDTO.getName();
-        IndexInfo indexInfo = indexInfoRepository.findByName(indexName);
+        IndexInfo indexInfo = indexInfoRepository.findById(id).orElse(null);
 
         // 2. 인덱스의 CalcIndexPrice 데이터를 조회하여, 월별 수익률 Map 구성 (TreeMap으로 날짜 정렬 보장)
         List<CalcIndexPrice> calcPrices = calcIndexPriceRepository.findByIndexInfoAndBaseDateBetween(indexInfo, startDate, endDate);
