@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("api/v1/portfolio")
+@RequestMapping("api/v1/portfolios")
 @Tag(name = "Portfolio API", description = "포트폴리오 백테스트 API")
 public class PortfolioController {
     private final PortfolioService portfolioService;

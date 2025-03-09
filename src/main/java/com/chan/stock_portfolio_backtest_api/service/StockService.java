@@ -1,6 +1,6 @@
 package com.chan.stock_portfolio_backtest_api.service;
 
-import com.chan.stock_portfolio_backtest_api.dto.request.StockRequestDTO;
+import com.chan.stock_portfolio_backtest_api.dto.response.StockResponseDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.StockSearchResponseDTO;
 import com.chan.stock_portfolio_backtest_api.exception.EntityNotFoundException;
 import com.chan.stock_portfolio_backtest_api.repository.StockRepository;
@@ -27,17 +27,20 @@ public class StockService {
         return stockSearchResponseDTOList;
     }
 
-    public List<StockRequestDTO> findStocksByNamesAndDateRange(List<String> names, LocalDate startDate, LocalDate endDate) {
-        List<StockRequestDTO> stockRequestDTOList = stockRepository.findByNameInAndStockPriceDateRange(names, startDate, endDate)
+    public List<StockResponseDTO> findStocksByNamesAndDateRange(List<String> names, LocalDate startDate, LocalDate endDate) {
+        List<StockResponseDTO> stockResponseDTOList = stockRepository.findByNameInAndStockPriceDateRange(names, startDate, endDate)
                 .stream()
-                .map(StockRequestDTO::entityToDTO)
+                .map(StockResponseDTO::entityToDTO)
                 .toList();
 
-        if (stockRequestDTOList.isEmpty()) {
+        if (stockResponseDTOList.isEmpty()) {
             throw new EntityNotFoundException(String.format("Stock not found"));
         }
 
-        return stockRequestDTOList;
+        return stockResponseDTOList;
     }
 
+    public StockResponseDTO findStockById(Integer id) {
+        return StockResponseDTO.entityToDTO(stockRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Stock not found")));
+    }
 }
