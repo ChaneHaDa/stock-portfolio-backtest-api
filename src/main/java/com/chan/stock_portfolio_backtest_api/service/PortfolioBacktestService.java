@@ -16,12 +16,12 @@ import java.time.LocalDate;
 import java.util.*;
 
 @Service
-public class PortfolioService {
+public class PortfolioBacktestService {
 
     private final StockRepository stockRepository;
     private final CalcStockPriceRepository calcStockPriceRepository;
 
-    public PortfolioService(StockRepository stockRepository, CalcStockPriceRepository calcStockPriceRepository) {
+    public PortfolioBacktestService(StockRepository stockRepository, CalcStockPriceRepository calcStockPriceRepository) {
         this.stockRepository = stockRepository;
         this.calcStockPriceRepository = calcStockPriceRepository;
     }
