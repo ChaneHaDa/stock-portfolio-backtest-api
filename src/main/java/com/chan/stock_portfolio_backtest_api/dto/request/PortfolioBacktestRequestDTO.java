@@ -24,6 +24,7 @@ public class PortfolioBacktestRequestDTO {
     @NotNull(message = "End date must not be null")
     private LocalDate endDate;
 
+    @Builder.Default
     private Long amount = 100000L;
 
     @Valid
