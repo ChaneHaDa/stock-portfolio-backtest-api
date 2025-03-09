@@ -25,7 +25,7 @@ public class PortfolioController {
         this.portfolioService = portfolioService;
     }
 
-    @PostMapping
+    @PostMapping("/backtest")
     @Operation(summary = "포트폴리오 백테스팅", description = "포트폴리오 백테스팅 결과를 반환합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "백테스팅 성공"),
@@ -42,4 +42,5 @@ public class PortfolioController {
 
         return ResponseEntity.ok(response);
     }
+
 }
