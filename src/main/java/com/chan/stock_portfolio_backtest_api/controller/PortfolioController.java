@@ -44,12 +44,12 @@ public class PortfolioController {
     }
 
     @PostMapping
-    @Operation(summary = "포트폴리오 백테스팅", description = "포트폴리오 백테스팅 결과를 반환합니다.")
+    @Operation(summary = "포트폴리오 저장", description = "사용자가 만든 포트폴리오를 저장합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "백테스팅 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 입력값")
     })
-    public ResponseEntity<ResponseDTO<?>> saveBacktest(
+    public ResponseEntity<ResponseDTO<?>> savePortfolio(
             @RequestBody @Valid PortfolioRequestDTO portfolioRequestDTO
     ) {
 
