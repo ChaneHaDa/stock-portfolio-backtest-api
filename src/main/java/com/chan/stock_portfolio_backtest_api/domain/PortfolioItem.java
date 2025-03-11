@@ -1,7 +1,10 @@
 package com.chan.stock_portfolio_backtest_api.domain;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
@@ -12,6 +15,9 @@ public class PortfolioItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    private String name;
+    private Float weight;
 
     @ManyToOne
     @JoinColumn(name = "portfolio_id")
