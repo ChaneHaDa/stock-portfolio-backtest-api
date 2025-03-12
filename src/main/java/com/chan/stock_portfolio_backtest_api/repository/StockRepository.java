@@ -23,4 +23,10 @@ public interface StockRepository extends JpaRepository<Stock, Integer> {
     List<Stock> findByNameInAndStockPriceDateRange(@Param("names") List<String> names,
                                                    @Param("startDate") LocalDate startDate,
                                                    @Param("endDate") LocalDate endDate);
+
+    List<Stock> findAllByName(String name);
+
+    List<Stock> findAllByShortCode(String shortCode);
+
+    List<Stock> findAllByIsinCode(String isinCode);
 }
