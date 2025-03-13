@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class PortfolioItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     private String name;
     private Float weight;

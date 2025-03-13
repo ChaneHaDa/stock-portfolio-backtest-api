@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     @Column(nullable = false, unique = true)
     private String username;
     @Column(nullable = false)
@@ -33,6 +33,7 @@ public class Users {
     @Column
     private LocalDateTime lastLoginAt;
     @Column
+    @Builder.Default
     private Boolean isActive = true;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

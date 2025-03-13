@@ -11,7 +11,6 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class IndexInfoResponseDTO {
-
     private Integer id;
     private String name;
     private String category;
