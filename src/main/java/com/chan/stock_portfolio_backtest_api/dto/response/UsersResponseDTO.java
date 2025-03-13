@@ -17,12 +17,12 @@ public class UsersResponseDTO {
     private final String phoneNumber;
 
     public static UsersResponseDTO fromEntity(Users users) {
-        return new UsersResponseDTO(
-                users.getId(),
-                users.getUsername(),
-                users.getEmail(),
-                users.getName(),
-                users.getPhoneNumber()
-        );
+        return UsersResponseDTO.builder()
+                .id(users.getId())
+                .username(users.getUsername())
+                .email(users.getEmail())
+                .name(users.getName())
+                .phoneNumber(users.getPhoneNumber())
+                .build();
     }
 }
