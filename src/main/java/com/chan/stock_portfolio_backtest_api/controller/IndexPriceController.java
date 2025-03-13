@@ -42,7 +42,8 @@ public class IndexPriceController {
             @RequestParam(value = "startDate", required = false)
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
             @RequestParam(value = "endDate", required = false)
-            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
+            @RequestParam(value = "is_last", required = false, defaultValue = "false") Boolean isLast
     ) {
         List<IndexPriceResponseDTO> indexPriceResponseDTOList;
 
@@ -50,6 +51,10 @@ public class IndexPriceController {
             indexPriceResponseDTOList = indexPriceService.findIndexPriceByIndexInfoIdAndDateRange(indexId, startDate, endDate);
         } else {
             indexPriceResponseDTOList = indexPriceService.findIndexPriceByIndexId(indexId);
+        }
+
+        if (Boolean.TRUE.equals(isLast) && !indexPriceResponseDTOList.isEmpty()) {
+            indexPriceResponseDTOList = List.of(indexPriceResponseDTOList.get(indexPriceResponseDTOList.size() - 1));
         }
 
         ResponseDTO<List<IndexPriceResponseDTO>> response = ResponseDTO.<List<IndexPriceResponseDTO>>builder()
