@@ -16,7 +16,7 @@ public class PortfolioItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private String name;
+    private Integer stockId;
     private Float weight;
 
     @ManyToOne

@@ -11,12 +11,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class PortfolioItemRequestDTO {
-    private String name;
+    private Integer stockId;
     private Float weight;
 
     public static PortfolioItemRequestDTO entityToDTO(PortfolioItem portfolioItem) {
         return PortfolioItemRequestDTO.builder()
-                .name(portfolioItem.getName())
+                .stockId(portfolioItem.getStockId())
                 .weight(portfolioItem.getWeight())
                 .build();
     }
