@@ -1,14 +1,16 @@
 package com.chan.stock_portfolio_backtest_api.dto.request;
 
 import com.chan.stock_portfolio_backtest_api.domain.Portfolio;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

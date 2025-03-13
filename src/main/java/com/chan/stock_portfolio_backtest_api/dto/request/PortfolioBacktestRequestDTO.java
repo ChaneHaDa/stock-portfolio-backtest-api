@@ -3,14 +3,16 @@ package com.chan.stock_portfolio_backtest_api.dto.request;
 import com.chan.stock_portfolio_backtest_api.valid.ValidPortfolioInput;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @ValidPortfolioInput
