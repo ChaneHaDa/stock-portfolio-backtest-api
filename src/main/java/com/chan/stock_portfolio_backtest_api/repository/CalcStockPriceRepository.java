@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.LocalDate;
 import java.util.List;
 
-public interface CalcStockPriceRepository extends JpaRepository<CalcStockPrice, Long> {
+public interface CalcStockPriceRepository extends JpaRepository<CalcStockPrice, Integer> {
     List<CalcStockPrice> findByStockAndBaseDateBetween(Stock stock, LocalDate startDate, LocalDate endDate);
 }
