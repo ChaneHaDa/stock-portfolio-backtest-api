@@ -47,10 +47,7 @@ public class PortfolioBacktestService {
 
         for (PortfolioBacktestRequestItemDTO item : requestItems) {
             // 1. 주식 엔티티 조회
-            Stock stock = stockRepository.findByName(item.getStockName());
-            if (stock == null) {
-                throw new EntityNotFoundException("Stock with name '" + item.getStockName() + "' does not exist.");
-            }
+            Stock stock = stockRepository.findById(item.getStockId()).orElseThrow(EntityNotFoundException::new);
 
             // 2. 해당 주식의 월별 수익률 계산
             Map<LocalDate, Float> stockMonthlyRor = calculateStockMonthlyRor(stock, startDate, endDate);

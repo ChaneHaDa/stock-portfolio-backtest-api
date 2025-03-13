@@ -11,8 +11,8 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class PortfolioBacktestRequestItemDTO {
-    @NotNull(message = "Stock name must not be null")
-    private String stockName;
+    @NotNull(message = "StockId must not be null")
+    private Integer stockId;
 
     @Min(value = 0, message = "Weight must be at least 0")
     @Max(value = 1, message = "Weight must be at most 1")
