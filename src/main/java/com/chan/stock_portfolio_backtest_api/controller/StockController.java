@@ -50,6 +50,11 @@ public class StockController {
     }
 
     @Operation(summary = "주식 검색", description = "검색어로 주식 목록 조회")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "검색 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 입력값"),
+            @ApiResponse(responseCode = "404", description = "검색 결과 없음")
+    })
     @GetMapping("/search/{query}")
     public ResponseEntity<ResponseDTO<List<StockSearchResponseDTO>>> searchStocks(
             @PathVariable("query")
@@ -66,15 +71,20 @@ public class StockController {
     }
 
     @Operation(summary = "특정 주식 검색", description = "id로 주식 상세 조회")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청값"),
+            @ApiResponse(responseCode = "404", description = "주식 정보 없음")
+    })
     @GetMapping("/{id}")
     public ResponseEntity<ResponseDTO<StockResponseDTO>> getStocksById(
             @PathVariable("id")
             @NotNull(message = "id는 필수입니다.") Integer id
     ) {
-        StockResponseDTO stockResponseDTOist = stockService.findStockById(id);
+        StockResponseDTO stockResponseDTO = stockService.findStockById(id);
         ResponseDTO<StockResponseDTO> response = ResponseDTO.<StockResponseDTO>builder()
                 .status("success")
-                .data(stockResponseDTOist)
+                .data(stockResponseDTO)
                 .build();
 
         return ResponseEntity.ok(response);
