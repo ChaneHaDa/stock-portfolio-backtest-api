@@ -1,25 +1,25 @@
 package com.chan.stock_portfolio_backtest_api.valid;
 
-import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioRequestDTO;
-import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioRequestItemDTO;
+import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioBacktestRequestDTO;
+import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioBacktestRequestItemDTO;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 import java.time.LocalDate;
 import java.util.List;
 
-public class PortfolioInputValidator implements ConstraintValidator<ValidPortfolioInput, PortfolioRequestDTO> {
+public class PortfolioInputValidator implements ConstraintValidator<ValidPortfolioInput, PortfolioBacktestRequestDTO> {
     @Override
-    public boolean isValid(PortfolioRequestDTO portfolioRequestDTO, ConstraintValidatorContext constraintValidatorContext) {
+    public boolean isValid(PortfolioBacktestRequestDTO portfolioBacktestRequestDTO, ConstraintValidatorContext constraintValidatorContext) {
         constraintValidatorContext.disableDefaultConstraintViolation();
 
-        if (portfolioRequestDTO == null) {
+        if (portfolioBacktestRequestDTO == null) {
             return true;
         }
 
         //startDate < endDate valid
-        LocalDate startDate = portfolioRequestDTO.getStartDate();
-        LocalDate endDate = portfolioRequestDTO.getEndDate();
+        LocalDate startDate = portfolioBacktestRequestDTO.getStartDate();
+        LocalDate endDate = portfolioBacktestRequestDTO.getEndDate();
         if (startDate != null && endDate != null) {
             if (!startDate.isBefore(endDate)) {
                 constraintValidatorContext
@@ -31,9 +31,9 @@ public class PortfolioInputValidator implements ConstraintValidator<ValidPortfol
         }
 
         //weight sum == 1 valid
-        List<PortfolioRequestItemDTO> portfolioRequestItemDTOList = portfolioRequestDTO.getPortfolioRequestItemDTOList();
+        List<PortfolioBacktestRequestItemDTO> portfolioBacktestRequestItemDTOList = portfolioBacktestRequestDTO.getPortfolioBacktestRequestItemDTOList();
         float weightSum = 0;
-        for (PortfolioRequestItemDTO i : portfolioRequestItemDTOList) {
+        for (PortfolioBacktestRequestItemDTO i : portfolioBacktestRequestItemDTOList) {
             weightSum += i.getWeight();
         }
 
