@@ -13,10 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api/v1/portfolios")
@@ -55,11 +52,30 @@ public class PortfolioController {
             @ApiResponse(responseCode = "400", description = "잘못된 입력값으로 저장 실패"),
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
-    public ResponseEntity<ResponseDTO<?>> savePortfolio(
+    public ResponseEntity<ResponseDTO<PortfolioResponseDTO>> savePortfolio(
             @RequestBody @Valid PortfolioRequestDTO portfolioRequestDTO
     ) {
 
         PortfolioResponseDTO savedPortfolio = portfolioService.createPortfolio(portfolioRequestDTO);
+
+        ResponseDTO<PortfolioResponseDTO> response = ResponseDTO.<PortfolioResponseDTO>builder()
+                .status("success")
+                .data(savedPortfolio)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping
+    @Operation(summary = "포트폴리오 조회", description = "로그인한 사용자가 저장한 모든 포트폴리오 리스트 반환")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "포트폴리오 저장 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 입력값으로 저장 실패"),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+    })
+    public ResponseEntity<ResponseDTO<?>> getPortfolios() {
+
+        PortfolioResponseDTO savedPortfolio = null;
 
         ResponseDTO<PortfolioResponseDTO> response = ResponseDTO.<PortfolioResponseDTO>builder()
                 .status("success")

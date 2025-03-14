@@ -4,8 +4,12 @@ import com.chan.stock_portfolio_backtest_api.domain.Portfolio;
 import com.chan.stock_portfolio_backtest_api.domain.Users;
 import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioRequestDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioResponseDTO;
+import com.chan.stock_portfolio_backtest_api.exception.EntityNotFoundException;
 import com.chan.stock_portfolio_backtest_api.repository.PortfolioRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class PortfolioService {
@@ -33,5 +37,19 @@ public class PortfolioService {
                 .build();
         
         return PortfolioResponseDTO.entityToDTO(portfolioRepository.save(portfolio));
+    }
+
+    public List<PortfolioResponseDTO> findPortfolioByUser() {
+        Users user = authService.getCurrentUser();
+        List<PortfolioResponseDTO> portfolioResponseDTOList = portfolioRepository.findAllByUser(user)
+                .stream()
+                .map(PortfolioResponseDTO::entityToDTO)
+                .toList();
+
+        if(portfolioResponseDTOList.isEmpty()){
+            throw new EntityNotFoundException("Portfolio Not Found");
+        }
+
+        return portfolioResponseDTOList;
     }
 }
