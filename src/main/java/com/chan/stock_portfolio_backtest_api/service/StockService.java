@@ -1,12 +1,12 @@
 package com.chan.stock_portfolio_backtest_api.service;
 
+import com.chan.stock_portfolio_backtest_api.domain.Stock;
 import com.chan.stock_portfolio_backtest_api.dto.response.StockResponseDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.StockSearchResponseDTO;
 import com.chan.stock_portfolio_backtest_api.exception.EntityNotFoundException;
 import com.chan.stock_portfolio_backtest_api.repository.StockRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -27,20 +27,32 @@ public class StockService {
         return stockSearchResponseDTOList;
     }
 
-    public List<StockResponseDTO> findStocksByNamesAndDateRange(List<String> names, LocalDate startDate, LocalDate endDate) {
-        List<StockResponseDTO> stockResponseDTOList = stockRepository.findByNameInAndStockPriceDateRange(names, startDate, endDate)
-                .stream()
-                .map(StockResponseDTO::entityToDTO)
-                .toList();
-
-        if (stockResponseDTOList.isEmpty()) {
-            throw new EntityNotFoundException(String.format("Stock not found"));
-        }
-
-        return stockResponseDTOList;
-    }
-
     public StockResponseDTO findStockById(Integer id) {
         return StockResponseDTO.entityToDTO(stockRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Stock not found")));
+    }
+
+    public List<StockResponseDTO> findStocksByParams(String name, String shortCode, String isinCode) {
+        if ((name == null || name.isEmpty()) && (shortCode == null || shortCode.isEmpty()) && (isinCode == null || isinCode.isEmpty())) {
+            throw new IllegalArgumentException("At least one search parameter must be provided.");
+        }
+
+        List<Stock> stockList = List.of();
+
+        if (name != null && !name.isEmpty()) {
+            stockList = stockRepository.findAllByName(name);
+        } else if (shortCode != null && !shortCode.isEmpty()) {
+            stockList = stockRepository.findAllByShortCode(shortCode);
+        } else if (isinCode != null && !isinCode.isEmpty()) {
+            stockList = stockRepository.findAllByIsinCode(isinCode);
+        }
+
+        if (stockList.isEmpty()) {
+            throw new EntityNotFoundException(String.format("Stock not found for name='%s', shortCode='%s', isinCode='%s'",
+                    name, shortCode, isinCode));
+        }
+
+        return stockList.stream()
+                .map(StockResponseDTO::entityToDTO)
+                .toList();
     }
 }

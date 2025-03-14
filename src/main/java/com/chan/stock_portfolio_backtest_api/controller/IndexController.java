@@ -3,7 +3,6 @@ package com.chan.stock_portfolio_backtest_api.controller;
 import com.chan.stock_portfolio_backtest_api.dto.request.IndexBacktestRequestDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.IndexBacktestResponseDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.IndexInfoResponseDTO;
-import com.chan.stock_portfolio_backtest_api.dto.response.IndexPriceResponseDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.ResponseDTO;
 import com.chan.stock_portfolio_backtest_api.service.IndexBacktestService;
 import com.chan.stock_portfolio_backtest_api.service.IndexInfoService;
@@ -47,27 +46,13 @@ public class IndexController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "특정 지수 마지막 가격 조회")
-    @GetMapping("/{id}/price/last")
-    public ResponseEntity<ResponseDTO<IndexPriceResponseDTO>> getLastIndexPrice(
-            @PathVariable("id")
-            @NotNull(message = "id는 필수 입력값입니다.") Integer id
-    ) {
-        IndexPriceResponseDTO indexPriceResponseDTO = indexInfoService.findLastIndexPriceById(id);
-        ResponseDTO<IndexPriceResponseDTO> response = ResponseDTO.<IndexPriceResponseDTO>builder()
-                .status("success")
-                .data(indexPriceResponseDTO)
-                .build();
-        return ResponseEntity.ok(response);
-    }
-
     @Operation(summary = "지수 기반 백테스트")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "백테스트 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청"),
             @ApiResponse(responseCode = "404", description = "지수 정보 없음")
     })
-    @GetMapping("/{id}/portfolio")
+    @GetMapping("/{id}/portfolios")
     public ResponseEntity<ResponseDTO<IndexBacktestResponseDTO>> getIndexPortfolio(
             @PathVariable("id")
             @NotNull(message = "id는 필수 입력값입니다.") Integer id,

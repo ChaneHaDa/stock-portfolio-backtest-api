@@ -10,19 +10,19 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 public class UsersResponseDTO {
-    private final Long id;
+    private final Integer id;
     private final String username;
     private final String email;
     private final String name;
     private final String phoneNumber;
 
     public static UsersResponseDTO fromEntity(Users users) {
-        return new UsersResponseDTO(
-                users.getId(),
-                users.getUsername(),
-                users.getEmail(),
-                users.getName(),
-                users.getPhoneNumber()
-        );
+        return UsersResponseDTO.builder()
+                .id(users.getId())
+                .username(users.getUsername())
+                .email(users.getEmail())
+                .name(users.getName())
+                .phoneNumber(users.getPhoneNumber())
+                .build();
     }
 }

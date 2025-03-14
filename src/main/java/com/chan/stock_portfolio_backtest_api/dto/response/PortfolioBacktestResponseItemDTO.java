@@ -10,7 +10,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PortfolioResponseItemDTO {
+public class PortfolioBacktestResponseItemDTO {
     private String name;
     private Float totalRor;
     private Map<LocalDate, Float> monthlyRor;

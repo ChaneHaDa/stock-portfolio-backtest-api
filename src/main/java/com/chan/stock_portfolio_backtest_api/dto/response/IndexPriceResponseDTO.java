@@ -11,7 +11,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class IndexPriceResponseDTO {
-
     private Integer id;
     private Float closePrice;
     private Float openPrice;

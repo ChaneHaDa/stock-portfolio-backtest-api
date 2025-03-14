@@ -1,11 +1,9 @@
 package com.chan.stock_portfolio_backtest_api.dto.response;
 
-import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioRequestDTO;
+import com.chan.stock_portfolio_backtest_api.domain.Portfolio;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
 
 @Getter
 @Setter
@@ -13,11 +11,26 @@ import java.util.Map;
 @AllArgsConstructor
 @Builder
 public class PortfolioResponseDTO {
-    private PortfolioRequestDTO portfolioInput;
-    private Float totalRor;
-    private Long totalAmount;
+    private String name;
+    private String description;
+    private Long amount;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private Float ror;
     private Float volatility;
-    private Map<LocalDate, Float> monthlyRor;
-    private Map<LocalDate, Long> monthlyAmount;
-    private List<PortfolioResponseItemDTO> portfolioResponseItemDTOList;
+    private Float price;
+
+    public static PortfolioResponseDTO entityToDTO(Portfolio portfolio) {
+        return PortfolioResponseDTO.builder()
+                .name(portfolio.getName())
+                .description(portfolio.getDescription())
+                .amount(portfolio.getAmount())
+                .startDate(portfolio.getStartDate())
+                .endDate(portfolio.getEndDate())
+                .ror(portfolio.getRor())
+                .volatility(portfolio.getVolatility())
+                .price(portfolio.getPrice())
+                .build();
+    }
+
 }

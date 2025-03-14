@@ -1,31 +1,41 @@
 package com.chan.stock_portfolio_backtest_api.dto.request;
 
-import com.chan.stock_portfolio_backtest_api.valid.ValidPortfolioInput;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import lombok.*;
-import org.springframework.format.annotation.DateTimeFormat;
+import com.chan.stock_portfolio_backtest_api.domain.Portfolio;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ValidPortfolioInput
 @Builder
 public class PortfolioRequestDTO {
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @NotNull(message = "Start date must not be null")
+    private String name;
+    private String description;
+    private Long amount;
     private LocalDate startDate;
-
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @NotNull(message = "End date must not be null")
     private LocalDate endDate;
+    private Float ror;
+    private Float volatility;
+    private Float price;
+    private List<PortfolioItemRequestDTO> portfolioItemRequestDTOList;
 
-    private Long amount = 100000L;
-
-    @Valid
-    private List<PortfolioRequestItemDTO> portfolioRequestItemDTOList;
+    public static PortfolioRequestDTO entityToDTO(Portfolio portfolio) {
+        return PortfolioRequestDTO.builder()
+                .name(portfolio.getName())
+                .description(portfolio.getDescription())
+                .amount(portfolio.getAmount())
+                .startDate(portfolio.getStartDate())
+                .endDate(portfolio.getEndDate())
+                .ror(portfolio.getRor())
+                .volatility(portfolio.getVolatility())
+                .price(portfolio.getPrice())
+                .portfolioItemRequestDTOList(portfolio.getPortfolioItemList().stream().map(PortfolioItemRequestDTO::entityToDTO).collect(Collectors.toList()))
+                .build();
+    }
 }
