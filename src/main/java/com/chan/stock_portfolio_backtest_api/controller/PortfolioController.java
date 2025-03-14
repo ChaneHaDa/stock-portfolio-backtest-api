@@ -15,6 +15,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("api/v1/portfolios")
 @Tag(name = "Portfolio API", description = "포트폴리오 백테스트 API")
@@ -69,17 +71,18 @@ public class PortfolioController {
     @GetMapping
     @Operation(summary = "포트폴리오 조회", description = "로그인한 사용자가 저장한 모든 포트폴리오 리스트 반환")
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "포트폴리오 저장 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 입력값으로 저장 실패"),
+            @ApiResponse(responseCode = "200", description = "포트폴리오 조회 성공"),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자"),
+            @ApiResponse(responseCode = "403", description = "접근 권한 없음"),
+            @ApiResponse(responseCode = "404", description = "포트폴리오가 존재하지 않음"),
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
-    public ResponseEntity<ResponseDTO<?>> getPortfolios() {
+    public ResponseEntity<ResponseDTO<List<PortfolioResponseDTO>>> getPortfolios() {
+        List<PortfolioResponseDTO> portfolioResponseDTOList = portfolioService.findPortfolioByUser();
 
-        PortfolioResponseDTO savedPortfolio = null;
-
-        ResponseDTO<PortfolioResponseDTO> response = ResponseDTO.<PortfolioResponseDTO>builder()
+        ResponseDTO<List<PortfolioResponseDTO>> response = ResponseDTO.<List<PortfolioResponseDTO>>builder()
                 .status("success")
-                .data(savedPortfolio)
+                .data(portfolioResponseDTOList)
                 .build();
 
         return ResponseEntity.ok(response);
