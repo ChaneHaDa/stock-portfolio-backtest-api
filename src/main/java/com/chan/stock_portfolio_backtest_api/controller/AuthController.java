@@ -92,8 +92,8 @@ public class AuthController {
     @Operation(summary = "아이디 중복 체크", description = "사용 가능한 아이디인지 확인합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "아이디 사용 가능"),
-            @ApiResponse(responseCode = "409", description = "아이디 중복됨"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터")
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터"),
+            @ApiResponse(responseCode = "409", description = "아이디 중복됨")
     })
     @GetMapping("/check-username/{username}")
     public ResponseEntity<ResponseDTO<String>> checkUsername(

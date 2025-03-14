@@ -30,8 +30,8 @@ public class IndexController {
     @Operation(summary = "특정 지수 기본 정보 조회")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공"),
-            @ApiResponse(responseCode = "404", description = "지수 정보 없음"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터")
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터"),
+            @ApiResponse(responseCode = "404", description = "지수 정보 없음")
     })
     @GetMapping("/{id}")
     public ResponseEntity<ResponseDTO<IndexInfoResponseDTO>> getIndex(
