@@ -3,6 +3,7 @@ package com.chan.stock_portfolio_backtest_api.controller;
 import com.chan.stock_portfolio_backtest_api.dto.response.ResponseDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.StockResponseDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.StockSearchResponseDTO;
+import com.chan.stock_portfolio_backtest_api.exception.EntityNotFoundException;
 import com.chan.stock_portfolio_backtest_api.service.StockService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -35,37 +36,30 @@ public class StockController {
             @ApiResponse(responseCode = "404", description = "주식 정보 없음")
     })
     @GetMapping
-    public ResponseEntity<ResponseDTO<List<StockResponseDTO>>> getStocksByParams(
+    public ResponseEntity<ResponseDTO<?>> getStocksByParams(
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "shortCode", required = false) String shortCode,
-            @RequestParam(value = "isinCode", required = false) String isinCode
+            @RequestParam(value = "isinCode", required = false) String isinCode,
+            @RequestParam(value = "q", required = false) String q
     ) {
-        List<StockResponseDTO> stockResponseDTOList = stockService.findStocksByParams(name, shortCode, isinCode);
-        ResponseDTO<List<StockResponseDTO>> response = ResponseDTO.<List<StockResponseDTO>>builder()
-                .status("success")
-                .data(stockResponseDTOList)
-                .build();
+        if (name == null && shortCode == null && isinCode == null && q == null) {
+            throw new EntityNotFoundException("Stock을 찾을 수 없습니다.");
+        }
 
-        return ResponseEntity.ok(response);
-    }
-
-    @Operation(summary = "주식 검색", description = "검색어로 주식 목록 조회")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "검색 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 입력값"),
-            @ApiResponse(responseCode = "404", description = "검색 결과 없음")
-    })
-    @GetMapping("/search/{query}")
-    public ResponseEntity<ResponseDTO<List<StockSearchResponseDTO>>> searchStocks(
-            @PathVariable("query")
-            @NotBlank(message = "검색어는 필수입니다.")
-            @Size(min = 2, message = "검색어는 2자 이상이어야 합니다.") String query
-    ) {
-        List<StockSearchResponseDTO> stockSearchResponseDTOList = stockService.findStocksByQuery(query.trim());
-        ResponseDTO<List<StockSearchResponseDTO>> response = ResponseDTO.<List<StockSearchResponseDTO>>builder()
-                .status("success")
-                .data(stockSearchResponseDTOList)
-                .build();
+        ResponseDTO<List<?>> response;
+        if(q != null) {
+            List<StockSearchResponseDTO> stockSearchResponseDTOList = stockService.findStocksByQuery(q.trim());
+            response = ResponseDTO.<List<?>>builder()
+                    .status("success")
+                    .data(stockSearchResponseDTOList)
+                    .build();
+        }else{
+            List<StockResponseDTO> stockResponseDTOList = stockService.findStocksByParams(name, shortCode, isinCode);
+            response = ResponseDTO.<List<?>>builder()
+                    .status("success")
+                    .data(stockResponseDTOList)
+                    .build();
+        }
 
         return ResponseEntity.ok(response);
     }
