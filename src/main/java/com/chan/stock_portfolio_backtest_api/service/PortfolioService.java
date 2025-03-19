@@ -2,13 +2,13 @@ package com.chan.stock_portfolio_backtest_api.service;
 
 import com.chan.stock_portfolio_backtest_api.domain.Portfolio;
 import com.chan.stock_portfolio_backtest_api.domain.Users;
+import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioItemRequestDTO;
 import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioRequestDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioResponseDTO;
 import com.chan.stock_portfolio_backtest_api.exception.EntityNotFoundException;
 import com.chan.stock_portfolio_backtest_api.repository.PortfolioRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -35,7 +35,11 @@ public class PortfolioService {
                 .volatility(portfolioRequestDTO.getVolatility())
                 .user(user)
                 .build();
-        
+
+        portfolioRequestDTO.getPortfolioItemRequestDTOList().forEach(item -> {
+            portfolio.addPortfolioItem(PortfolioItemRequestDTO.DTOToEntity(item));
+        });
+
         return PortfolioResponseDTO.entityToDTO(portfolioRepository.save(portfolio));
     }
 
@@ -46,7 +50,7 @@ public class PortfolioService {
                 .map(PortfolioResponseDTO::entityToDTO)
                 .toList();
 
-        if(portfolioResponseDTOList.isEmpty()){
+        if (portfolioResponseDTOList.isEmpty()) {
             throw new EntityNotFoundException("Portfolio Not Found");
         }
 
