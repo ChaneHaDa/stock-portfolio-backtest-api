@@ -57,9 +57,7 @@ public class PortfolioController {
     public ResponseEntity<ResponseDTO<PortfolioResponseDTO>> savePortfolio(
             @RequestBody @Valid PortfolioRequestDTO portfolioRequestDTO
     ) {
-
         PortfolioResponseDTO savedPortfolio = portfolioService.createPortfolio(portfolioRequestDTO);
-
         ResponseDTO<PortfolioResponseDTO> response = ResponseDTO.<PortfolioResponseDTO>builder()
                 .status("success")
                 .data(savedPortfolio)
@@ -79,7 +77,6 @@ public class PortfolioController {
     })
     public ResponseEntity<ResponseDTO<List<PortfolioResponseDTO>>> getPortfolios() {
         List<PortfolioResponseDTO> portfolioResponseDTOList = portfolioService.findPortfolioByUser();
-
         ResponseDTO<List<PortfolioResponseDTO>> response = ResponseDTO.<List<PortfolioResponseDTO>>builder()
                 .status("success")
                 .data(portfolioResponseDTOList)
