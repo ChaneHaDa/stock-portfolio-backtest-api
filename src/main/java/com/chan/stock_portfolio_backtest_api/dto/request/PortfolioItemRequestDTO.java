@@ -20,4 +20,12 @@ public class PortfolioItemRequestDTO {
                 .weight(portfolioItem.getWeight())
                 .build();
     }
+
+    public static PortfolioItem DTOToEntity(PortfolioItemRequestDTO portfolioItemRequestDTO) {
+        return PortfolioItem.builder()
+                .stockId(portfolioItemRequestDTO.getStockId())
+                .weight(portfolioItemRequestDTO.getWeight())
+                .build();
+    }
+
 }
