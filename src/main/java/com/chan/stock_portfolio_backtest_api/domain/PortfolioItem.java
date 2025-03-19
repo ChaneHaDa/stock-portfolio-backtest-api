@@ -23,4 +23,7 @@ public class PortfolioItem {
     @JoinColumn(name = "portfolio_id")
     private Portfolio portfolio;
 
+    public void setPortfolio(Portfolio portfolio) {
+        this.portfolio = portfolio;
+    }
 }

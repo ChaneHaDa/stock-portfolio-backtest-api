@@ -40,4 +40,9 @@ public class Portfolio {
     @Builder.Default
     private List<PortfolioItem> portfolioItemList = new ArrayList<>();
 
+    public void addPortfolioItem(PortfolioItem item) {
+        portfolioItemList.add(item);
+        item.setPortfolio(this);
+    }
+
 }
