@@ -66,6 +66,26 @@ public class PortfolioController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("{/id}")
+    @Operation(summary = "사용자 포트폴리오 리스트 조회", description = "로그인한 사용자가 저장한 모든 포트폴리오 리스트 반환")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "포트폴리오 조회 성공"),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자"),
+            @ApiResponse(responseCode = "403", description = "접근 권한 없음"),
+            @ApiResponse(responseCode = "404", description = "포트폴리오가 존재하지 않음"),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+    })
+    public ResponseEntity<ResponseDTO<?>> getPortfolios(@PathVariable Integer id) {
+//        List<PortfolioResponseDTO> portfolioResponseDTOList = portfolioService.findPortfolioByUser();
+
+        ResponseDTO<List<PortfolioResponseDTO>> response = ResponseDTO.<List<PortfolioResponseDTO>>builder()
+                .status("success")
+                .data(null)
+                .build();
+
+        return ResponseEntity.ok(null);
+    }
+
     @GetMapping
     @Operation(summary = "사용자 포트폴리오 리스트 조회", description = "로그인한 사용자가 저장한 모든 포트폴리오 리스트 반환")
     @ApiResponses({
@@ -75,7 +95,7 @@ public class PortfolioController {
             @ApiResponse(responseCode = "404", description = "포트폴리오가 존재하지 않음"),
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
-    public ResponseEntity<ResponseDTO<List<PortfolioResponseDTO>>> getPortfolios() {
+    public ResponseEntity<ResponseDTO<List<PortfolioResponseDTO>>> getPortfolioById() {
         List<PortfolioResponseDTO> portfolioResponseDTOList = portfolioService.findPortfolioByUser();
         ResponseDTO<List<PortfolioResponseDTO>> response = ResponseDTO.<List<PortfolioResponseDTO>>builder()
                 .status("success")
