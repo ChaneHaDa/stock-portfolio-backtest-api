@@ -66,7 +66,7 @@ public class PortfolioController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("{/id}")
+    @GetMapping("/{id}")
     @Operation(summary = "사용자 포트폴리오 리스트 조회", description = "로그인한 사용자가 저장한 모든 포트폴리오 리스트 반환")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "포트폴리오 조회 성공"),
