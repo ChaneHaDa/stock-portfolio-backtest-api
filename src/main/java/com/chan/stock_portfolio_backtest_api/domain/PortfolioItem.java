@@ -16,8 +16,11 @@ public class PortfolioItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private Integer stockId;
     private Float weight;
+    
+    @ManyToOne
+    @JoinColumn(name = "stock_id")
+    private Stock stock;
 
     @ManyToOne
     @JoinColumn(name = "portfolio_id")
