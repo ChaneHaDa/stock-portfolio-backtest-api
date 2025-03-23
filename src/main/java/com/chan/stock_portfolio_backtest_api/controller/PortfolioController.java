@@ -3,6 +3,7 @@ package com.chan.stock_portfolio_backtest_api.controller;
 import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioBacktestRequestDTO;
 import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioRequestDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioBacktestResponseDTO;
+import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioDetailResponseDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioResponseDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.ResponseDTO;
 import com.chan.stock_portfolio_backtest_api.service.PortfolioBacktestService;
@@ -95,14 +96,14 @@ public class PortfolioController {
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
     public ResponseEntity<ResponseDTO<?>> getPortfolioDetails(@PathVariable Integer id) {
-//        List<PortfolioResponseDTO> portfolioResponseDTOList = portfolioService.findPortfolioByUser();
+        PortfolioDetailResponseDTO portfolioDetailResponseDTO = portfolioService.findPortfolioById(id);
 
-        ResponseDTO<List<PortfolioResponseDTO>> response = ResponseDTO.<List<PortfolioResponseDTO>>builder()
+        ResponseDTO<PortfolioDetailResponseDTO> response = ResponseDTO.<PortfolioDetailResponseDTO>builder()
                 .status("success")
-                .data(null)
+                .data(portfolioDetailResponseDTO)
                 .build();
 
-        return ResponseEntity.ok(null);
+        return ResponseEntity.ok(response);
     }
 
 }

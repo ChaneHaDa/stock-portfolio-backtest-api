@@ -5,6 +5,7 @@ import com.chan.stock_portfolio_backtest_api.domain.Stock;
 import com.chan.stock_portfolio_backtest_api.domain.Users;
 import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioItemRequestDTO;
 import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioRequestDTO;
+import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioDetailResponseDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioResponseDTO;
 import com.chan.stock_portfolio_backtest_api.exception.EntityNotFoundException;
 import com.chan.stock_portfolio_backtest_api.repository.PortfolioRepository;
@@ -60,5 +61,11 @@ public class PortfolioService {
         }
 
         return portfolioResponseDTOList;
+    }
+
+    public PortfolioDetailResponseDTO findPortfolioById(Integer id) {
+        Portfolio portfolio = portfolioRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        
+        return PortfolioDetailResponseDTO.entityToDTO(portfolio);
     }
 }
