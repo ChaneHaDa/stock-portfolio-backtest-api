@@ -27,6 +27,7 @@ public class PortfolioService {
         this.stockRepository = stockRepository;
     }
 
+    // save
     public PortfolioResponseDTO createPortfolio(PortfolioRequestDTO portfolioRequestDTO) {
         Users user = authService.getCurrentUser();
         Portfolio portfolio = Portfolio.builder()
@@ -49,6 +50,7 @@ public class PortfolioService {
         return PortfolioResponseDTO.entityToDTO(portfolioRepository.save(portfolio));
     }
 
+    // find: By User, 현재 로그인한 유저의 포트폴리오 리스트 반환
     public List<PortfolioResponseDTO> findPortfolioByUser() {
         Users user = authService.getCurrentUser();
         List<PortfolioResponseDTO> portfolioResponseDTOList = portfolioRepository.findAllByUser(user)
@@ -63,9 +65,10 @@ public class PortfolioService {
         return portfolioResponseDTOList;
     }
 
+    // find: By Id, Id로 포트폴리오 상세 반환
     public PortfolioDetailResponseDTO findPortfolioById(Integer id) {
         Portfolio portfolio = portfolioRepository.findById(id).orElseThrow(EntityNotFoundException::new);
-        
+
         return PortfolioDetailResponseDTO.entityToDTO(portfolio);
     }
 }
