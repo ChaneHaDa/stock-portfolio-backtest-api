@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor
@@ -35,7 +34,9 @@ public class PortfolioRequestDTO {
                 .ror(portfolio.getRor())
                 .volatility(portfolio.getVolatility())
                 .price(portfolio.getPrice())
-                .portfolioItemRequestDTOList(portfolio.getPortfolioItemList().stream().map(PortfolioItemRequestDTO::entityToDTO).collect(Collectors.toList()))
+                .portfolioItemRequestDTOList(portfolio.getPortfolioItemList().stream()
+                        .map(PortfolioItemRequestDTO::entityToDTO)
+                        .toList())
                 .build();
     }
 }
