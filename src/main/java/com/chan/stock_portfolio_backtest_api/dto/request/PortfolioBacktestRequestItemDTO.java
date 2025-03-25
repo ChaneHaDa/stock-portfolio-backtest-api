@@ -16,6 +16,8 @@ public class PortfolioBacktestRequestItemDTO {
     @NotNull(message = "StockId must not be null")
     private Integer stockId;
 
+    private String stockName;
+
     @Min(value = 0, message = "Weight must be at least 0")
     @Max(value = 1, message = "Weight must be at most 1")
     @NotNull(message = "weight must not be null")

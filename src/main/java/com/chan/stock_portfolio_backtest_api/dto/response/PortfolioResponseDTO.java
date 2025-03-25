@@ -11,6 +11,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class PortfolioResponseDTO {
+    private Integer id;
     private String name;
     private String description;
     private Long amount;
@@ -22,6 +23,7 @@ public class PortfolioResponseDTO {
 
     public static PortfolioResponseDTO entityToDTO(Portfolio portfolio) {
         return PortfolioResponseDTO.builder()
+                .id(portfolio.getId())
                 .name(portfolio.getName())
                 .description(portfolio.getDescription())
                 .amount(portfolio.getAmount())

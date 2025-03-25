@@ -3,6 +3,7 @@ package com.chan.stock_portfolio_backtest_api.controller;
 import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioBacktestRequestDTO;
 import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioRequestDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioBacktestResponseDTO;
+import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioDetailResponseDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioResponseDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.ResponseDTO;
 import com.chan.stock_portfolio_backtest_api.service.PortfolioBacktestService;
@@ -57,9 +58,7 @@ public class PortfolioController {
     public ResponseEntity<ResponseDTO<PortfolioResponseDTO>> savePortfolio(
             @RequestBody @Valid PortfolioRequestDTO portfolioRequestDTO
     ) {
-
         PortfolioResponseDTO savedPortfolio = portfolioService.createPortfolio(portfolioRequestDTO);
-
         ResponseDTO<PortfolioResponseDTO> response = ResponseDTO.<PortfolioResponseDTO>builder()
                 .status("success")
                 .data(savedPortfolio)
@@ -69,7 +68,7 @@ public class PortfolioController {
     }
 
     @GetMapping
-    @Operation(summary = "포트폴리오 조회", description = "로그인한 사용자가 저장한 모든 포트폴리오 리스트 반환")
+    @Operation(summary = "사용자 포트폴리오 리스트 조회", description = "로그인한 사용자가 저장한 모든 포트폴리오 리스트 반환")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "포트폴리오 조회 성공"),
             @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자"),
@@ -77,12 +76,31 @@ public class PortfolioController {
             @ApiResponse(responseCode = "404", description = "포트폴리오가 존재하지 않음"),
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
-    public ResponseEntity<ResponseDTO<List<PortfolioResponseDTO>>> getPortfolios() {
+    public ResponseEntity<ResponseDTO<List<PortfolioResponseDTO>>> getPortfolioById() {
         List<PortfolioResponseDTO> portfolioResponseDTOList = portfolioService.findPortfolioByUser();
-
         ResponseDTO<List<PortfolioResponseDTO>> response = ResponseDTO.<List<PortfolioResponseDTO>>builder()
                 .status("success")
                 .data(portfolioResponseDTOList)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "포트폴리오 상세 조회", description = "포트폴리오 및 구성요소 상세 조회")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "포트폴리오 조회 성공"),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자"),
+            @ApiResponse(responseCode = "403", description = "접근 권한 없음"),
+            @ApiResponse(responseCode = "404", description = "포트폴리오가 존재하지 않음"),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+    })
+    public ResponseEntity<ResponseDTO<?>> getPortfolioDetails(@PathVariable Integer id) {
+        PortfolioDetailResponseDTO portfolioDetailResponseDTO = portfolioService.findPortfolioById(id);
+
+        ResponseDTO<PortfolioDetailResponseDTO> response = ResponseDTO.<PortfolioDetailResponseDTO>builder()
+                .status("success")
+                .data(portfolioDetailResponseDTO)
                 .build();
 
         return ResponseEntity.ok(response);

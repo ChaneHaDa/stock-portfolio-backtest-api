@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface StockRepository extends JpaRepository<Stock, Integer> {
-    @Query("SELECT new com.chan.stock_portfolio_backtest_api.dto.response.StockSearchResponseDTO(s.name, s.shortCode, s.marketCategory) FROM Stock s WHERE s.name LIKE %:query% OR s.shortCode LIKE %:query%")
+    @Query("SELECT new com.chan.stock_portfolio_backtest_api.dto.response.StockSearchResponseDTO(s.id, s.name, s.shortCode, s.marketCategory) FROM Stock s WHERE s.name LIKE %:query% OR s.shortCode LIKE %:query%")
     List<StockSearchResponseDTO> findByNameOrShortCodeContaining(@Param("query") String query);
 
     Stock findByName(String query);

@@ -1,19 +1,18 @@
-package com.chan.stock_portfolio_backtest_api.dto.request;
+package com.chan.stock_portfolio_backtest_api.dto.response;
 
 import com.chan.stock_portfolio_backtest_api.domain.Portfolio;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PortfolioRequestDTO {
+public class PortfolioDetailResponseDTO {
+    private Integer id;
     private String name;
     private String description;
     private Long amount;
@@ -22,10 +21,11 @@ public class PortfolioRequestDTO {
     private Float ror;
     private Float volatility;
     private Float price;
-    private List<PortfolioItemRequestDTO> portfolioItemRequestDTOList;
+    private List<PortfolioDetailItemResponseDTO> items;
 
-    public static PortfolioRequestDTO entityToDTO(Portfolio portfolio) {
-        return PortfolioRequestDTO.builder()
+    public static PortfolioDetailResponseDTO entityToDTO(Portfolio portfolio) {
+        return PortfolioDetailResponseDTO.builder()
+                .id(portfolio.getId())
                 .name(portfolio.getName())
                 .description(portfolio.getDescription())
                 .amount(portfolio.getAmount())
@@ -34,8 +34,8 @@ public class PortfolioRequestDTO {
                 .ror(portfolio.getRor())
                 .volatility(portfolio.getVolatility())
                 .price(portfolio.getPrice())
-                .portfolioItemRequestDTOList(portfolio.getPortfolioItemList().stream()
-                        .map(PortfolioItemRequestDTO::entityToDTO)
+                .items(portfolio.getPortfolioItemList().stream()
+                        .map(PortfolioDetailItemResponseDTO::entityToDTO)
                         .toList())
                 .build();
     }
