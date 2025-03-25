@@ -28,7 +28,7 @@ public class EmailService {
                 "    <div style=\"background-color:#f2f2f2; padding:10px; border:1px solid #ccc; text-align:center; margin:20px 0;\">" +
                 "      <span style=\"font-size:18px; font-weight:bold;\">" + token + "</span>" +
                 "    </div>" +
-                "    <p>감사합니다.<br/><strong>AIVLE 08조</strong></p>" +
+                "    <p>감사합니다.<br/><strong>Stock helper</strong></p>" +
                 "  </div>" +
                 "</body>" +
                 "</html>";
