@@ -1,6 +1,7 @@
 package com.chan.stock_portfolio_backtest_api.service;
 
 import com.chan.stock_portfolio_backtest_api.constants.Role;
+import com.chan.stock_portfolio_backtest_api.data.EmailVerificationQueue;
 import com.chan.stock_portfolio_backtest_api.domain.Users;
 import com.chan.stock_portfolio_backtest_api.dto.request.UsersRequestDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.UsersResponseDTO;
@@ -10,15 +11,20 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 public class UsersService {
     private final UsersRepository usersRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
+    private EmailVerificationQueue verificationQueue = new EmailVerificationQueue();
 
-    public UsersService(UsersRepository usersRepository, PasswordEncoder passwordEncoder) {
+
+    public UsersService(UsersRepository usersRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
         this.usersRepository = usersRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
     public UsersResponseDTO createUser(UsersRequestDTO dto) {
@@ -54,4 +60,20 @@ public class UsersService {
     public Boolean isUsernameAvailable(String username) {
         return !usersRepository.existsByUsername(username);
     }
+
+    public Boolean isEmailAvailable(String email) {
+        return !usersRepository.existsByEmail(email) || !verificationQueue.containsEmail(email);
+    }
+
+    public void requestEmailVerification(String email) {
+        if (!isEmailAvailable(email)) {
+            throw new IllegalArgumentException("이미 등록되었거나 인증 중인 이메일입니다.");
+        }
+
+        String token = UUID.randomUUID().toString();
+        verificationQueue.add(email, token, 5);
+
+        emailService.sendVerificationEmail(email, token);
+    }
+
 }

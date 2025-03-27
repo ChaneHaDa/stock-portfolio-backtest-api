@@ -2,36 +2,50 @@ package com.chan.stock_portfolio_backtest_api.data;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class EmailVerificationQueue {
-    private final PriorityQueue<EmailVerificationToken> queue = new PriorityQueue<>(
+    // 이메일을 키로, 토큰 정보를 저장
+    private final Map<String, EmailVerificationToken> tokenMap = new ConcurrentHashMap<>();
+
+    // 만료 시간 기준으로 정렬된 큐
+    private final PriorityQueue<EmailVerificationToken> expiryQueue = new PriorityQueue<>(
             Comparator.comparing(EmailVerificationToken::getExpiresAt)
     );
 
-    public void add(String email, String token, int ttlMinutes) {
+    public synchronized void add(String email, String token, int ttlMinutes) {
+        if (tokenMap.containsKey(email)) {
+            EmailVerificationToken oldEntry = tokenMap.get(email);
+            expiryQueue.remove(oldEntry);
+        }
         EmailVerificationToken entry = new EmailVerificationToken(
                 email,
                 token,
                 LocalDateTime.now().plusMinutes(ttlMinutes)
         );
-        queue.offer(entry);
+        tokenMap.put(email, entry);
+        expiryQueue.offer(entry);
     }
 
-    public boolean verify(String email, String token) {
+    public synchronized boolean verify(String email, String token) {
         cleanupExpired();
-        return queue.stream()
-                .anyMatch(e -> e.getEmail().equals(email) && e.getToken().equals(token));
+        EmailVerificationToken entry = tokenMap.get(email);
+        return entry != null && entry.getToken().equals(token);
     }
 
-    private void cleanupExpired() {
-        while (!queue.isEmpty() && queue.peek().isExpired()) {
-            queue.poll();
+    private synchronized void cleanupExpired() {
+        LocalDateTime now = LocalDateTime.now();
+        while (!expiryQueue.isEmpty() && expiryQueue.peek().getExpiresAt().isBefore(now)) {
+            EmailVerificationToken expired = expiryQueue.poll();
+            // Map에서도 해당 이메일 토큰이 만료된 토큰과 일치하면 제거
+            tokenMap.remove(expired.getEmail(), expired);
         }
     }
 
-    private boolean isInEmail(String email) {
+    public synchronized boolean containsEmail(String email) {
         cleanupExpired();
-        return queue.stream().anyMatch(e -> e.getEmail().equals(email));
+        return tokenMap.containsKey(email);
     }
 }
