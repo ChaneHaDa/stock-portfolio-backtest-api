@@ -95,9 +95,9 @@ public class AuthController {
             @ApiResponse(responseCode = "409", description = "아이디 중복됨"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터")
     })
-    @GetMapping("/check-username/{username}")
+    @GetMapping("/check-username")
     public ResponseEntity<ResponseDTO<String>> checkUsername(
-            @PathVariable("username")
+            @RequestParam("username")
             @NotBlank(message = "아이디는 필수 입력값입니다.") String username
     ) {
         boolean isAvailable = usersService.isUsernameAvailable(username);
@@ -112,6 +112,32 @@ public class AuthController {
             ResponseDTO<String> response = ResponseDTO.<String>builder()
                     .status("fail")
                     .message("The username is already taken.")
+                    .build();
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        }
+    }
+
+    @Operation(summary = "이메일 중복 체크", description = "사용 가능한 이메일인지 확인합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "이메일 사용 가능"),
+            @ApiResponse(responseCode = "409", description = "이메일 중복됨"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터")
+    })
+    @GetMapping("/check-email")
+    public ResponseEntity<ResponseDTO<String>> checkEmail(
+            @RequestParam("email")
+            @NotBlank(message = "이메일는 필수 입력값입니다.") String email) {
+        boolean isAvailable = usersService.isEmailAvailable(email);
+        if (isAvailable) {
+            ResponseDTO<String> response = ResponseDTO.<String>builder()
+                    .status("success")
+                    .message("The email is available.")
+                    .build();
+            return ResponseEntity.ok(response);
+        } else {
+            ResponseDTO<String> response = ResponseDTO.<String>builder()
+                    .status("fail")
+                    .message("The email is already taken.")
                     .build();
             return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
         }
