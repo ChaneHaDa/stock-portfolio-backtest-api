@@ -62,7 +62,7 @@ public class UsersService {
     }
 
     public Boolean isEmailAvailable(String email) {
-        return !usersRepository.existsByEmail(email) || !verificationQueue.containsEmail(email);
+        return !usersRepository.existsByEmail(email) && !verificationQueue.containsEmail(email);
     }
 
     public void requestEmailVerification(String email) {
