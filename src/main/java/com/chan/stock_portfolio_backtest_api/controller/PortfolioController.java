@@ -30,12 +30,12 @@ public class PortfolioController {
         this.portfolioService = portfolioService;
     }
 
-    @PostMapping("/backtest")
     @Operation(summary = "포트폴리오 백테스팅", description = "포트폴리오 백테스팅 결과를 반환합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "백테스팅 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 입력값")
     })
+    @PostMapping("/backtest")
     public ResponseEntity<ResponseDTO<PortfolioBacktestResponseDTO>> createBacktest(
             @RequestBody @Valid PortfolioBacktestRequestDTO portfolioBacktestRequestDTO
     ) {
@@ -48,13 +48,13 @@ public class PortfolioController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping
     @Operation(summary = "포트폴리오 저장", description = "사용자가 만든 포트폴리오를 저장하고 결과를 반환합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "포트폴리오 저장 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 입력값으로 저장 실패"),
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
+    @PostMapping
     public ResponseEntity<ResponseDTO<PortfolioResponseDTO>> savePortfolio(
             @RequestBody @Valid PortfolioRequestDTO portfolioRequestDTO
     ) {
@@ -67,7 +67,6 @@ public class PortfolioController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping
     @Operation(summary = "사용자 포트폴리오 리스트 조회", description = "로그인한 사용자가 저장한 모든 포트폴리오 리스트 반환")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "포트폴리오 조회 성공"),
@@ -76,6 +75,7 @@ public class PortfolioController {
             @ApiResponse(responseCode = "404", description = "포트폴리오가 존재하지 않음"),
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
+    @GetMapping
     public ResponseEntity<ResponseDTO<List<PortfolioResponseDTO>>> getPortfolioById() {
         List<PortfolioResponseDTO> portfolioResponseDTOList = portfolioService.findPortfolioByUser();
         ResponseDTO<List<PortfolioResponseDTO>> response = ResponseDTO.<List<PortfolioResponseDTO>>builder()
@@ -86,7 +86,6 @@ public class PortfolioController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{id}")
     @Operation(summary = "포트폴리오 상세 조회", description = "포트폴리오 및 구성요소 상세 조회")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "포트폴리오 조회 성공"),
@@ -95,6 +94,7 @@ public class PortfolioController {
             @ApiResponse(responseCode = "404", description = "포트폴리오가 존재하지 않음"),
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
+    @GetMapping("/{id}")
     public ResponseEntity<ResponseDTO<?>> getPortfolioDetails(@PathVariable Integer id) {
         PortfolioDetailResponseDTO portfolioDetailResponseDTO = portfolioService.findPortfolioById(id);
 

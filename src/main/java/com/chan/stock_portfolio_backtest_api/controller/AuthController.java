@@ -36,12 +36,12 @@ public class AuthController {
         this.authenticationManager = authenticationManager;
     }
 
-    @PostMapping("/register")
     @Operation(summary = "회원가입")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "회원 가입 성공"),
             @ApiResponse(responseCode = "401", description = "회원 가입 실패")
     })
+    @PostMapping("/register")
     public ResponseEntity<ResponseDTO<UsersResponseDTO>> registerUser(
             @RequestBody UsersRequestDTO usersRequestDTO
     ) {
@@ -62,13 +62,13 @@ public class AuthController {
                         .build());
     }
 
-    @PostMapping("/login")
     @Operation(summary = "로그인")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "로그인 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청"),
             @ApiResponse(responseCode = "401", description = "인증 실패")
     })
+    @PostMapping("/login")
     public ResponseEntity<ResponseDTO> loginUser(@RequestBody LoginRequestDTO loginRequestDTO) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(

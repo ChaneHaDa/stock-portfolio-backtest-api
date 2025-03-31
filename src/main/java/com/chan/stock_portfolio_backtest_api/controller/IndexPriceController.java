@@ -25,7 +25,6 @@ public class IndexPriceController {
         this.indexPriceService = indexPriceService;
     }
 
-    @GetMapping
     @Operation(
             summary = "지수 가격 조회",
             description = "특정 지수(Index)의 ID를 기반으로 해당 지수의 가격 정보를 조회합니다."
@@ -36,6 +35,7 @@ public class IndexPriceController {
             @ApiResponse(responseCode = "404", description = "해당 ID의 지수를 찾을 수 없음"),
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
+    @GetMapping
     public ResponseEntity<ResponseDTO<List<IndexPriceResponseDTO>>> getIndexPriceByIndexId(
             @PathVariable(name = "index_id")
             @NotNull(message = "index_id는 필수입니다.") Integer indexId,
