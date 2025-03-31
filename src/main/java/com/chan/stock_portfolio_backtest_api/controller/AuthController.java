@@ -143,4 +143,36 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "이메일 인증 요청", description = "사용자가 입력한 이메일로 인증 토큰을 발송합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "인증 이메일 발송 성공"),
+            @ApiResponse(responseCode = "409", description = "이메일이 이미 등록되었거나 인증 중임"),
+            @ApiResponse(responseCode = "400", description = "잘못된 입력값")
+    })
+    @GetMapping("/initiate-email")
+    public ResponseEntity<ResponseDTO<String>> initiateEmail(
+            @RequestParam("email") @NotBlank(message = "이메일은 필수 입력값입니다.") String email) {
+        try {
+            usersService.requestEmailVerification(email);
+            ResponseDTO<String> response = ResponseDTO.<String>builder()
+                    .status("success")
+                    .message("인증 이메일 발송이 완료되었습니다.")
+                    .data(email)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            ResponseDTO<String> errorResponse = ResponseDTO.<String>builder()
+                    .status("error")
+                    .message(e.getMessage())
+                    .build();
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+        } catch (Exception e) {
+            ResponseDTO<String> errorResponse = ResponseDTO.<String>builder()
+                    .status("error")
+                    .message("서버 내부 오류 발생")
+                    .build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
 }
