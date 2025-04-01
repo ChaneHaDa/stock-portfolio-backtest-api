@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 public class EmailVerificationToken {
     private String email;
     private String token;
+    @Builder.Default
+    private Boolean isVerified=false;
     private LocalDateTime expiresAt;
 
     public boolean isExpired() {

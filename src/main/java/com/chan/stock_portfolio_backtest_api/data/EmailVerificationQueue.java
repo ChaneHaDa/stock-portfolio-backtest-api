@@ -20,11 +20,13 @@ public class EmailVerificationQueue {
             EmailVerificationToken oldEntry = tokenMap.get(email);
             expiryQueue.remove(oldEntry);
         }
-        EmailVerificationToken entry = new EmailVerificationToken(
-                email,
-                token,
-                LocalDateTime.now().plusMinutes(ttlMinutes)
-        );
+        EmailVerificationToken entry = EmailVerificationToken.builder()
+                        .email(email)
+                        .token(token)
+                        .isVerified(false)
+                        .expiresAt(LocalDateTime.now().plusMinutes(ttlMinutes))
+                        .build();
+
         tokenMap.put(email, entry);
         expiryQueue.offer(entry);
     }
@@ -32,7 +34,17 @@ public class EmailVerificationQueue {
     public synchronized boolean verify(String email, String token) {
         cleanupExpired();
         EmailVerificationToken entry = tokenMap.get(email);
-        return entry != null && entry.getToken().equals(token);
+        if (entry != null && entry.getToken().equals(token)) {
+            entry.setIsVerified(true);
+            return true;
+        }
+        return false;
+    }
+
+    public synchronized boolean isVerify(String email) {
+        cleanupExpired();
+        EmailVerificationToken entry = tokenMap.get(email);
+        return entry != null && entry.getIsVerified();
     }
 
     private synchronized void cleanupExpired() {
