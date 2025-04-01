@@ -175,4 +175,30 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "이메일 인증 토큰 검증", description = "사용자가 입력한 이메일과 인증 토큰을 검증합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "인증 토큰 확인 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 입력값")
+    })
+    @GetMapping("/verify-email")
+    public ResponseEntity<ResponseDTO<String>> verifyEmail(
+            @RequestParam("email") @NotBlank(message = "이메일은 필수 입력값입니다.") String email,
+            @RequestParam("token") @NotBlank(message = "토큰은 필수 입력값입니다.") String token) {
+        usersService.emailValidation(email, token);
+        boolean isVaild = usersService.isEmailValid(email, token);
+        if (isVaild) {
+            ResponseDTO<String> response = ResponseDTO.<String>builder()
+                    .status("success")
+                    .message("The email is vailded.")
+                    .build();
+            return ResponseEntity.ok(response);
+        } else {
+            ResponseDTO<String> response = ResponseDTO.<String>builder()
+                    .status("fail")
+                    .message("The email is not vailded.")
+                    .build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
+
 }
