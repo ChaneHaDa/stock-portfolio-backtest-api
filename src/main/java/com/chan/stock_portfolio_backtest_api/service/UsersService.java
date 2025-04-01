@@ -5,6 +5,7 @@ import com.chan.stock_portfolio_backtest_api.data.EmailVerificationQueue;
 import com.chan.stock_portfolio_backtest_api.domain.Users;
 import com.chan.stock_portfolio_backtest_api.dto.request.UsersRequestDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.UsersResponseDTO;
+import com.chan.stock_portfolio_backtest_api.exception.BadRequestException;
 import com.chan.stock_portfolio_backtest_api.exception.UserAlreadyExistsException;
 import com.chan.stock_portfolio_backtest_api.repository.UsersRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,6 +34,9 @@ public class UsersService {
         }
         if (usersRepository.existsByEmail(dto.getEmail())) {
             throw new UserAlreadyExistsException("이미 등록된 이메일입니다.");
+        }
+        if (!verificationQueue.isVerify(dto.getEmail())) {
+            throw new BadRequestException("이메일 인증 이전 입니다.");
         }
 
         String encodedPassword = passwordEncoder.encode(dto.getPassword());
