@@ -5,6 +5,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,6 +16,7 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
+    @Async("mailExecutor")
     public void sendVerificationEmail(String toEmail, String token) {
         String subject = "이메일 인증 - 인증 토큰 안내";
 
