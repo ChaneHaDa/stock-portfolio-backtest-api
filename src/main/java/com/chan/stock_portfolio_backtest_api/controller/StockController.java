@@ -9,9 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -47,13 +45,13 @@ public class StockController {
         }
 
         ResponseDTO<List<?>> response;
-        if(q != null) {
+        if (q != null) {
             List<StockSearchResponseDTO> stockSearchResponseDTOList = stockService.findStocksByQuery(q.trim());
             response = ResponseDTO.<List<?>>builder()
                     .status("success")
                     .data(stockSearchResponseDTOList)
                     .build();
-        }else{
+        } else {
             List<StockResponseDTO> stockResponseDTOList = stockService.findStocksByParams(name, shortCode, isinCode);
             response = ResponseDTO.<List<?>>builder()
                     .status("success")

@@ -99,4 +99,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         return ResponseEntity.internalServerError().body(response);
     }
+
+    // 6. 인증 오류 (400)
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ResponseDTO<Void>> handleBadRequestException(Exception ex) {
+        logger.error("인증 오류 발생: ", ex);
+
+        ResponseDTO<Void> response = ResponseDTO.<Void>builder()
+                .status("error")
+                .code("BAD_REQUEST")
+                .message(ex.getMessage())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
 }
