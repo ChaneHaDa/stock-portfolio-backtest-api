@@ -36,12 +36,12 @@ public class AuthController {
         this.authenticationManager = authenticationManager;
     }
 
-    @PostMapping("/register")
     @Operation(summary = "회원가입")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "회원 가입 성공"),
             @ApiResponse(responseCode = "401", description = "회원 가입 실패")
     })
+    @PostMapping("/register")
     public ResponseEntity<ResponseDTO<UsersResponseDTO>> registerUser(
             @RequestBody UsersRequestDTO usersRequestDTO
     ) {
@@ -62,13 +62,13 @@ public class AuthController {
                         .build());
     }
 
-    @PostMapping("/login")
     @Operation(summary = "로그인")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "로그인 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청"),
             @ApiResponse(responseCode = "401", description = "인증 실패")
     })
+    @PostMapping("/login")
     public ResponseEntity<ResponseDTO> loginUser(@RequestBody LoginRequestDTO loginRequestDTO) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -95,9 +95,9 @@ public class AuthController {
             @ApiResponse(responseCode = "409", description = "아이디 중복됨"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터")
     })
-    @GetMapping("/check-username/{username}")
+    @GetMapping("/check-username")
     public ResponseEntity<ResponseDTO<String>> checkUsername(
-            @PathVariable("username")
+            @RequestParam("username")
             @NotBlank(message = "아이디는 필수 입력값입니다.") String username
     ) {
         boolean isAvailable = usersService.isUsernameAvailable(username);
@@ -114,6 +114,90 @@ public class AuthController {
                     .message("The username is already taken.")
                     .build();
             return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        }
+    }
+
+    @Operation(summary = "이메일 중복 체크", description = "사용 가능한 이메일인지 확인합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "이메일 사용 가능"),
+            @ApiResponse(responseCode = "409", description = "이메일 중복됨"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터")
+    })
+    @GetMapping("/check-email")
+    public ResponseEntity<ResponseDTO<String>> checkEmail(
+            @RequestParam("email")
+            @NotBlank(message = "이메일는 필수 입력값입니다.") String email) {
+        boolean isAvailable = usersService.isEmailAvailable(email);
+        if (isAvailable) {
+            ResponseDTO<String> response = ResponseDTO.<String>builder()
+                    .status("success")
+                    .message("The email is available.")
+                    .build();
+            return ResponseEntity.ok(response);
+        } else {
+            ResponseDTO<String> response = ResponseDTO.<String>builder()
+                    .status("fail")
+                    .message("The email is already taken.")
+                    .build();
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        }
+    }
+
+    @Operation(summary = "이메일 인증 요청", description = "사용자가 입력한 이메일로 인증 토큰을 발송합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "인증 이메일 발송 성공"),
+            @ApiResponse(responseCode = "409", description = "이메일이 이미 등록되었거나 인증 중임"),
+            @ApiResponse(responseCode = "400", description = "잘못된 입력값")
+    })
+    @GetMapping("/initiate-email")
+    public ResponseEntity<ResponseDTO<String>> initiateEmail(
+            @RequestParam("email") @NotBlank(message = "이메일은 필수 입력값입니다.") String email) {
+        try {
+            usersService.requestEmailVerification(email);
+            ResponseDTO<String> response = ResponseDTO.<String>builder()
+                    .status("success")
+                    .message("인증 이메일 발송이 완료되었습니다.")
+                    .data(email)
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            ResponseDTO<String> errorResponse = ResponseDTO.<String>builder()
+                    .status("error")
+                    .message(e.getMessage())
+                    .build();
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+        } catch (Exception e) {
+            ResponseDTO<String> errorResponse = ResponseDTO.<String>builder()
+                    .status("error")
+                    .message("서버 내부 오류 발생")
+                    .build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    @Operation(summary = "이메일 인증 토큰 검증", description = "사용자가 입력한 이메일과 인증 토큰을 검증합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "인증 토큰 확인 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 입력값")
+    })
+    @GetMapping("/verify-email")
+    public ResponseEntity<ResponseDTO<String>> verifyEmail(
+            @RequestParam("email") @NotBlank(message = "이메일은 필수 입력값입니다.") String email,
+            @RequestParam("token") @NotBlank(message = "토큰은 필수 입력값입니다.") String token) {
+        usersService.emailValidation(email, token);
+        boolean isValid = usersService.isEmailValid(email);
+        if (isValid) {
+            ResponseDTO<String> response = ResponseDTO.<String>builder()
+                    .status("success")
+                    .message("The email is vailded.")
+                    .build();
+            return ResponseEntity.ok(response);
+        } else {
+            ResponseDTO<String> response = ResponseDTO.<String>builder()
+                    .status("fail")
+                    .message("The email is not vailded.")
+                    .build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
 
