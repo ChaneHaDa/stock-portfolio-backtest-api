@@ -185,8 +185,8 @@ public class AuthController {
             @RequestParam("email") @NotBlank(message = "이메일은 필수 입력값입니다.") String email,
             @RequestParam("token") @NotBlank(message = "토큰은 필수 입력값입니다.") String token) {
         usersService.emailValidation(email, token);
-        boolean isVaild = usersService.isEmailValid(email, token);
-        if (isVaild) {
+        boolean isValid = usersService.isEmailValid(email);
+        if (isValid) {
             ResponseDTO<String> response = ResponseDTO.<String>builder()
                     .status("success")
                     .message("The email is vailded.")

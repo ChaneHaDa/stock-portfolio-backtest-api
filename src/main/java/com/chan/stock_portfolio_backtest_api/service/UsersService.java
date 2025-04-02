@@ -80,8 +80,8 @@ public class UsersService {
         emailService.sendVerificationEmail(email, token);
     }
 
-    public boolean isEmailValid(String email, String token) {
-        return !verificationQueue.isVerify(email);
+    public boolean isEmailValid(String email) {
+        return verificationQueue.isVerify(email);
     }
 
     public void emailValidation(String email, String token) {
