@@ -75,6 +75,11 @@ public class PortfolioService {
     // delete
     public void deletePortfolio(Integer id) {
         Portfolio portfolio = portfolioRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        Users user = authService.getCurrentUser();
+        if (!portfolio.getUser().getId().equals(user.getId())) {
+            // 포트폴리오 소유자와 현재 로그인한 유저가 다를 경우 -> 리소스의 존재를 알리지 않기 위해서 EntityNotFoundException 발생
+            throw new EntityNotFoundException("Portfolio Not Found");
+        }
         portfolioRepository.delete(portfolio);
     }
 }
