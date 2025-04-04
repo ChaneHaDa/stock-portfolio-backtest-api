@@ -106,4 +106,23 @@ public class PortfolioController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "포트폴리오 삭제", description = "포트폴리오 삭제")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "포트폴리오 삭제 성공"),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자"),
+            @ApiResponse(responseCode = "403", description = "접근 권한 없음"),
+            @ApiResponse(responseCode = "404", description = "포트폴리오가 존재하지 않음"),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ResponseDTO<String>> deletePortfolio(@PathVariable Integer id) {
+        portfolioService.deletePortfolio(id);
+        ResponseDTO<String> response = ResponseDTO.<String>builder()
+                .status("success")
+                .data("포트폴리오 삭제 성공")
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
 }

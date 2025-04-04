@@ -71,4 +71,10 @@ public class PortfolioService {
 
         return PortfolioDetailResponseDTO.entityToDTO(portfolio);
     }
+
+    // delete
+    public void deletePortfolio(Integer id) {
+        Portfolio portfolio = portfolioRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        portfolioRepository.delete(portfolio);
+    }
 }
