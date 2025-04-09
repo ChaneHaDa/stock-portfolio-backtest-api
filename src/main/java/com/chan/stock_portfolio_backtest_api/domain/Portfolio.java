@@ -45,4 +45,16 @@ public class Portfolio {
         item.setPortfolio(this);
     }
 
+    public void updatePortfolio(String name, String description, Long amount, LocalDate startDate,
+                                LocalDate endDate, Float ror, Float volatility, Float price) {
+        this.name = name;
+        this.description = description;
+        this.amount = amount;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.ror = ror;
+        this.volatility = volatility;
+        this.price = price;
+    }
+
 }

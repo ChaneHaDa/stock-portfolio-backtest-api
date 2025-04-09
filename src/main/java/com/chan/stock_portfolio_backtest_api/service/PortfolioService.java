@@ -1,6 +1,7 @@
 package com.chan.stock_portfolio_backtest_api.service;
 
 import com.chan.stock_portfolio_backtest_api.domain.Portfolio;
+import com.chan.stock_portfolio_backtest_api.domain.PortfolioItem;
 import com.chan.stock_portfolio_backtest_api.domain.Stock;
 import com.chan.stock_portfolio_backtest_api.domain.Users;
 import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioItemRequestDTO;
@@ -11,6 +12,7 @@ import com.chan.stock_portfolio_backtest_api.exception.EntityNotFoundException;
 import com.chan.stock_portfolio_backtest_api.repository.PortfolioRepository;
 import com.chan.stock_portfolio_backtest_api.repository.StockRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -81,5 +83,37 @@ public class PortfolioService {
             throw new EntityNotFoundException("Portfolio Not Found");
         }
         portfolioRepository.delete(portfolio);
+    }
+
+    @Transactional
+    public PortfolioResponseDTO updatePortfolio(Integer portfolioId, PortfolioRequestDTO portfolioRequestDTO) {
+        Portfolio portfolio = portfolioRepository.findById(portfolioId)
+                .orElseThrow(() -> new RuntimeException("Portfolio not found with id: " + portfolioId));
+
+        portfolio.updatePortfolio(
+                portfolioRequestDTO.getName(),
+                portfolioRequestDTO.getDescription(),
+                portfolioRequestDTO.getAmount(),
+                portfolioRequestDTO.getStartDate(),
+                portfolioRequestDTO.getEndDate(),
+                portfolioRequestDTO.getRor(),
+                portfolioRequestDTO.getVolatility(),
+                portfolioRequestDTO.getPrice()
+        );
+
+        portfolio.getPortfolioItemList().clear();
+
+        if (portfolioRequestDTO.getPortfolioItemRequestDTOList() != null) {
+            for (PortfolioItemRequestDTO itemDTO : portfolioRequestDTO.getPortfolioItemRequestDTOList()) {
+                Stock stock = stockRepository.findById(itemDTO.getStockId())
+                        .orElseThrow(() -> new RuntimeException("Stock not found with id: " + itemDTO.getStockId()));
+                PortfolioItem newItem = PortfolioItemRequestDTO.DTOToEntity(itemDTO, stock);
+                portfolio.addPortfolioItem(newItem);
+            }
+        }
+
+        Portfolio updatedPortfolio = portfolioRepository.save(portfolio);
+
+        return PortfolioResponseDTO.entityToDTO(updatedPortfolio);
     }
 }
