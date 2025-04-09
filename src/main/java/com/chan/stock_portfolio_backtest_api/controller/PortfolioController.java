@@ -125,4 +125,25 @@ public class PortfolioController {
         return ResponseEntity.ok(response);
     }
 
+
+    @Operation(summary = "포트폴리오 업데이트", description = "포트폴리오 내용을 업데이트합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "포트폴리오 업데이트 성공"),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자"),
+            @ApiResponse(responseCode = "403", description = "접근 권한 없음"),
+            @ApiResponse(responseCode = "404", description = "포트폴리오가 존재하지 않음"),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+    })
+    @PutMapping("/{id}")
+    public ResponseEntity<ResponseDTO<PortfolioResponseDTO>> updatePortfolio(@PathVariable Integer id, @RequestBody PortfolioRequestDTO portfolioRequestDTO) {
+        PortfolioResponseDTO portfolioResponseDTO = portfolioService.updatePortfolio(id, portfolioRequestDTO);
+
+        ResponseDTO<PortfolioResponseDTO> response = ResponseDTO.<PortfolioResponseDTO>builder()
+                .status("success")
+                .data(portfolioResponseDTO)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
 }
