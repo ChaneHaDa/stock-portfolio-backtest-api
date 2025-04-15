@@ -57,4 +57,12 @@ public class Portfolio {
         this.price = price;
     }
 
+    public void updatePortfolioItems(List<PortfolioItem> newItems) {
+        portfolioItemList.clear();
+        for (PortfolioItem item : newItems) {
+            portfolioItemList.add(item);
+            item.setPortfolio(this);
+        }
+    }
+
 }

@@ -14,6 +14,7 @@ import com.chan.stock_portfolio_backtest_api.repository.StockRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -101,19 +102,17 @@ public class PortfolioService {
                 portfolioRequestDTO.getPrice()
         );
 
-        portfolio.getPortfolioItemList().clear();
-
         if (portfolioRequestDTO.getPortfolioItemRequestDTOList() != null) {
+            List<PortfolioItem> newItems = new ArrayList<>();
             for (PortfolioItemRequestDTO itemDTO : portfolioRequestDTO.getPortfolioItemRequestDTOList()) {
                 Stock stock = stockRepository.findById(itemDTO.getStockId())
                         .orElseThrow(() -> new RuntimeException("Stock not found with id: " + itemDTO.getStockId()));
                 PortfolioItem newItem = PortfolioItemRequestDTO.DTOToEntity(itemDTO, stock);
-                portfolio.addPortfolioItem(newItem);
+                newItems.add(newItem);
             }
+            portfolio.updatePortfolioItems(newItems);
         }
 
-        Portfolio updatedPortfolio = portfolioRepository.save(portfolio);
-
-        return PortfolioResponseDTO.entityToDTO(updatedPortfolio);
+        return PortfolioResponseDTO.entityToDTO(portfolio);
     }
 }
