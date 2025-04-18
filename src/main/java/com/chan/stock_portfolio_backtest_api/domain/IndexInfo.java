@@ -14,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "name", "category" }) })
 public class IndexInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
