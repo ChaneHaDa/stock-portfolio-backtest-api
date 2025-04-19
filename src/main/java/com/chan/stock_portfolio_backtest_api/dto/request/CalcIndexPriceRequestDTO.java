@@ -14,8 +14,8 @@ import java.time.LocalDate;
 @Builder
 public class CalcIndexPriceRequestDTO {
     private Integer id;
-    private Integer price;
-    private float monthlyRor;
+    private Float price;
+    private Float monthlyRor;
     private LocalDate baseDate;
 
     public static CalcIndexPriceRequestDTO entityToDTO(CalcIndexPrice calcIndexPrice) {
