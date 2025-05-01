@@ -7,23 +7,29 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Entity
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "name", "category" }) })
-public class IndexInfo {
+public class StockNameHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String name;
-    private String category;
     private LocalDate startAt;
     private LocalDate endAt;
 
-    @OneToMany(mappedBy = "indexInfo")
-    private List<IndexPrice> indexPriceList;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "stock_id", nullable = false)
+    private Stock stock;
+
+    public void setStock(Stock stock) {
+        this.stock = stock;
+        if (!stock.getNameHistoryList().contains(this)) {
+            stock.getNameHistoryList().add(this);
+        }
+    }
+
 }
