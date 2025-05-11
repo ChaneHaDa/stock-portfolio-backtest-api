@@ -12,6 +12,7 @@ Spring Boot 기반의 RESTful API로, 사용자가 주식 포트폴리오를 구
 4. [실행 방법](#실행-방법)
 5. [프로젝트 구조](#프로젝트-구조)
 6. [ERD](#erd)
+7. [환경변수 설정](#환경변수-설정)
 
 ---
 
@@ -134,5 +135,48 @@ Spring Boot 기반의 RESTful API로, 사용자가 주식 포트폴리오를 구
 +----------------+       | result         |       +----------------+
                          +----------------+
 ```
+
+---
+
+## 📌 환경변수 설정
+
+프로젝트를 실행하기 전에 다음 환경변수들을 설정해야 합니다. `.env` 파일을 프로젝트 루트에 생성하고 아래 내용을 참고하여 설정하세요.
+
+```bash
+# Application
+SPRING_PROFILES_ACTIVE=dev
+
+# Email
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your-email@gmail.com
+MAIL_PASSWORD=your-app-password
+
+# Database - Development
+DEV_DATASOURCE_URL=jdbc:h2:~/db/portfolio-backtest-api
+DEV_DATASOURCE_USERNAME=sa
+DEV_DATASOURCE_PASSWORD=
+DEV_JPA_DDL_AUTO=update
+
+# Database - Production
+PROD_DATASOURCE_URL=jdbc:mysql://localhost:3306/test1?createDatabaseIfNotExist=TRUE
+PROD_DATASOURCE_USERNAME=root
+PROD_DATASOURCE_PASSWORD=your-db-password
+PROD_JPA_DDL_AUTO=update
+PROD_HIBERNATE_FORMAT_SQL=true
+PROD_HIBERNATE_SHOW_SQL=true
+```
+
+### 환경변수 설정 방법
+
+1. 프로젝트 루트에 `.env` 파일 생성
+2. 위의 환경변수들을 복사하여 붙여넣기
+3. 각 환경변수의 값을 실제 환경에 맞게 수정
+
+### 주의사항
+
+- `.env` 파일은 절대로 Git에 커밋하지 마세요
+- `.gitignore`에 `.env` 파일이 포함되어 있는지 확인하세요
+- 실제 운영 환경에서는 환경변수를 서버의 환경변수나 시크릿 관리 시스템을 통해 관리하세요
 
 ---
