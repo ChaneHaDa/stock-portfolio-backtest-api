@@ -9,23 +9,44 @@ import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioBacktestRespo
 import com.chan.stock_portfolio_backtest_api.exception.EntityNotFoundException;
 import com.chan.stock_portfolio_backtest_api.repository.CalcStockPriceRepository;
 import com.chan.stock_portfolio_backtest_api.repository.StockRepository;
+import com.chan.stock_portfolio_backtest_api.strategy.DataInterpolationStrategy;
 import com.chan.stock_portfolio_backtest_api.util.PortfolioCalculator;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.*;
 
+/**
+ * 포트폴리오 백테스트 서비스
+ * 주어진 기간 동안의 포트폴리오 성과를 계산하고 분석하는 서비스입니다.
+ */
 @Service
 public class PortfolioBacktestService {
 
+    private static final float PERCENTAGE_CONVERSION_FACTOR = 100.0f;
+    private static final float DEFAULT_MONTHLY_ROR = 0.0f;
+
     private final StockRepository stockRepository;
     private final CalcStockPriceRepository calcStockPriceRepository;
+    private final DataInterpolationStrategy interpolationStrategy;
 
-    public PortfolioBacktestService(StockRepository stockRepository, CalcStockPriceRepository calcStockPriceRepository) {
+    public PortfolioBacktestService(
+            StockRepository stockRepository,
+            CalcStockPriceRepository calcStockPriceRepository,
+            DataInterpolationStrategy interpolationStrategy) {
         this.stockRepository = stockRepository;
         this.calcStockPriceRepository = calcStockPriceRepository;
+        this.interpolationStrategy = interpolationStrategy;
     }
 
+    /**
+     * 포트폴리오 백테스트를 수행하여 성과를 계산합니다.
+     *
+     * @param request 포트폴리오 백테스트 요청 DTO
+     * @return 포트폴리오 백테스트 결과 DTO
+     * @throws IllegalArgumentException 시작일이 종료일보다 늦은 경우
+     * @throws EntityNotFoundException  요청된 주식이 존재하지 않는 경우
+     */
     public PortfolioBacktestResponseDTO calculatePortfolio(PortfolioBacktestRequestDTO request) {
         LocalDate startDate = request.getStartDate();
         LocalDate endDate = request.getEndDate();
@@ -79,7 +100,7 @@ public class PortfolioBacktestService {
         return PortfolioBacktestResponseDTO.builder()
                 .portfolioInput(request)
                 .totalRor(totalRor)
-                .totalAmount((long) (request.getAmount() * (totalRor / 100 + 1)))
+                .totalAmount((long) (request.getAmount() * (totalRor / PERCENTAGE_CONVERSION_FACTOR + 1)))
                 .monthlyRor(new TreeMap<>(portfolioMonthlyRor))
                 .monthlyAmount(monthlyAmount)
                 .volatility(volatility)
@@ -88,21 +109,34 @@ public class PortfolioBacktestService {
     }
 
     /**
-     * 주어진 주식(stock)의 CalcStockPrice 데이터를 조회하여,
-     * 시작 날짜(startDate)와 종료 날짜(endDate) 사이에 해당하는 월별 수익률을 계산합니다.
+     * 주어진 주식의 월별 수익률을 계산합니다.
+     *
+     * @param stock     계산할 주식 엔티티
+     * @param startDate 시작 날짜
+     * @param endDate   종료 날짜
+     * @return 월별 수익률을 담은 Map (날짜: 수익률)
      */
     private Map<LocalDate, Float> calculateStockMonthlyRor(Stock stock, LocalDate startDate, LocalDate endDate) {
         List<CalcStockPrice> calcPrices = calcStockPriceRepository.findByStockAndBaseDateBetween(stock, startDate, endDate);
         Map<LocalDate, Float> stockMonthlyRor = new TreeMap<>();
+
+        // 실제 데이터 포인트 저장
         for (CalcStockPrice csp : calcPrices) {
             stockMonthlyRor.put(csp.getBaseDate(), csp.getMonthlyRor());
         }
-        return stockMonthlyRor;
+
+        // 데이터가 없는 날짜에 대한 보간 처리
+        return interpolationStrategy.interpolate(stockMonthlyRor, startDate, endDate);
     }
 
     /**
-     * 포트폴리오의 월별 수익률을 기반으로 누적 자산 금액을 계산합니다.
-     * 초기 자산에서 시작하여 매월 해당 월의 수익률을 적용한 후, 누적 금액을 계산합니다.
+     * 포트폴리오의 월별 누적 자산 금액을 계산합니다.
+     *
+     * @param monthlyRorMap 월별 수익률 Map
+     * @param startMonth    시작 월
+     * @param endMonth      종료 월
+     * @param initialAmount 초기 투자 금액
+     * @return 월별 누적 자산 금액을 담은 Map (날짜: 금액)
      */
     private Map<LocalDate, Long> calculateMonthlyAmounts(Map<LocalDate, Float> monthlyRorMap,
                                                          LocalDate startMonth,
@@ -113,12 +147,11 @@ public class PortfolioBacktestService {
         LocalDate current = startMonth;
         while (!current.isAfter(endMonth)) {
             // 월별 수익률을 가져와서 누적 계산 (월별 수익률은 백분율임)
-            float monthlyRor = monthlyRorMap.getOrDefault(current, 0f);
-            currentAmount = currentAmount * (1 + monthlyRor / 100.0);
+            float monthlyRor = monthlyRorMap.getOrDefault(current, DEFAULT_MONTHLY_ROR);
+            currentAmount = currentAmount * (1 + monthlyRor / PERCENTAGE_CONVERSION_FACTOR);
             monthlyAmounts.put(current, (long) currentAmount);
             current = current.plusMonths(1);
         }
         return monthlyAmounts;
     }
-
 }
