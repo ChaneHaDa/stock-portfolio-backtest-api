@@ -32,16 +32,20 @@ public class PortfolioInputValidator implements ConstraintValidator<ValidPortfol
 			}
 		}
 
-		//weight sum == 1 valid
-		List<PortfolioBacktestRequestItemDTO> portfolioBacktestRequestItemDTOList = portfolioBacktestRequestDTO.getPortfolioBacktestRequestItemDTOList();
+		// weight sum == 1 valid (allowing a small epsilon for floating point summation)
+		List<PortfolioBacktestRequestItemDTO> portfolioBacktestRequestItemDTOList =
+			portfolioBacktestRequestDTO.getPortfolioBacktestRequestItemDTOList();
 		float weightSum = 0;
-		for (PortfolioBacktestRequestItemDTO i : portfolioBacktestRequestItemDTOList) {
-			weightSum += i.getWeight();
+		if (portfolioBacktestRequestItemDTOList != null) {
+			for (PortfolioBacktestRequestItemDTO i : portfolioBacktestRequestItemDTOList) {
+				weightSum += i.getWeight();
+			}
 		}
 
-		if (weightSum != 1) {
+		final float EPSILON = 1e-6f;
+		if (Math.abs(weightSum - 1f) > EPSILON) {
 			constraintValidatorContext
-				.buildConstraintViolationWithTemplate("weight sum is might be 1")
+				.buildConstraintViolationWithTemplate("weight sum must be 1")
 				.addPropertyNode("portfolioBacktestRequestItemDTOList")
 				.addConstraintViolation();
 			return false;
