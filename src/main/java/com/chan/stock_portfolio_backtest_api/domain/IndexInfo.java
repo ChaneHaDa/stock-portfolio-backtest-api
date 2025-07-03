@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -33,7 +34,7 @@ public class IndexInfo {
 	private LocalDate startAt;
 	private LocalDate endAt;
 
-	@OneToMany(mappedBy = "indexInfo")
+	@OneToMany(mappedBy = "indexInfo", cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
 	@JsonManagedReference
 	private List<IndexPrice> indexPriceList = new ArrayList<>();
