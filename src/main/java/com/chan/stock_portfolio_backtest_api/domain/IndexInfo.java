@@ -1,6 +1,7 @@
 package com.chan.stock_portfolio_backtest_api.domain;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -33,6 +34,7 @@ public class IndexInfo {
 	private LocalDate endAt;
 
 	@OneToMany(mappedBy = "indexInfo")
+	@Builder.Default
 	@JsonManagedReference
-	private List<IndexPrice> indexPriceList;
+	private List<IndexPrice> indexPriceList = new ArrayList<>();
 }
