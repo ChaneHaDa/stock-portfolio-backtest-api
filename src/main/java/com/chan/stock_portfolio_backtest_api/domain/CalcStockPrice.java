@@ -1,13 +1,19 @@
 package com.chan.stock_portfolio_backtest_api.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import java.time.LocalDate;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -15,17 +21,17 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class CalcStockPrice {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Integer id;
 
-    private Float price;
-    private Float monthlyRor;
-    private LocalDate baseDate;
+	private Float price;
+	private Float monthlyRor;
+	private LocalDate baseDate;
 
-    @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name = "stock_id")
-    private Stock stock;
+	@ManyToOne
+	@JoinColumn(name = "stock_id")
+	@JsonBackReference
+	private Stock stock;
 }
 
