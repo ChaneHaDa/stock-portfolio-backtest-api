@@ -2,106 +2,78 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Development Commands
+## Project Overview
 
-### Build and Run
-- Build the project: `./gradlew build`
-- Run the application: `./gradlew bootRun`
-- Run with specific profile: `./gradlew bootRun --args='--spring.profiles.active=dev'`
-- Build JAR and run: `java -jar build/libs/stock-portfolio-backtest-api-*.jar`
+This is a Spring Boot REST API for stock portfolio backtesting written in Java 17. It allows users to create portfolios and simulate their performance using historical stock data. The application uses JWT authentication, JPA for data persistence, and provides comprehensive backtesting functionality with various financial calculations.
 
-### Testing
-- Run all tests: `./gradlew test`
-- Run tests with JUnit platform: `./gradlew test --info`
+## Build and Development Commands
 
-### Database
-- H2 Console (dev profile): http://localhost:8080/h2-console
-- Default H2 connection: `jdbc:h2:~/db/portfolio-backtest-api` with username `sa`
+- **Build the project**: `./gradlew build`
+- **Run the application**: `./gradlew bootRun` or `java -jar build/libs/stock-portfolio-backtest-api-*.jar`
+- **Run tests**: `./gradlew test`
+- **Clean build**: `./gradlew clean build`
+- **Generate API documentation**: Built-in Swagger UI available at `/swagger-ui/index.html` when running
 
-### API Documentation
-- Swagger UI: http://localhost:8080/api-docs
-- OpenAPI JSON: http://localhost:8080/api/v3
+## Architecture and Key Components
 
-## Architecture Overview
-
-This is a Spring Boot REST API for stock portfolio backtesting with the following key architectural patterns:
+### Layer Architecture
+- **Controller Layer**: REST endpoints in `controller/` package
+- **Service Layer**: Business logic in `service/` package  
+- **Repository Layer**: JPA repositories in `repository/` package
+- **Domain Layer**: JPA entities in `domain/` package
+- **DTO Layer**: Request/response objects in `dto/request/` and `dto/response/`
 
 ### Core Business Logic
-- **Backtesting Engine**: `PortfolioBacktestService` orchestrates the main backtesting calculations
-- **Portfolio Calculator**: `PortfolioCalculator` contains pure functions for financial calculations (compound returns, volatility, portfolio merging)
-- **Data Interpolation**: Strategy pattern implementation in `strategy/` package for handling missing data points
+- **Portfolio Management**: `PortfolioService` handles CRUD operations for portfolios and portfolio items
+- **Backtesting Engine**: `PortfolioBacktestService` calculates portfolio performance metrics using historical data
+- **Index Backtesting**: `IndexBacktestService` provides market index comparison functionality
+- **Data Interpolation**: `DataInterpolationStrategy` with `LinearInterpolationStrategy` implementation for missing data points
+- **Portfolio Calculations**: `PortfolioCalculator` utility for financial calculations
 
-### Authentication & Security
-- JWT-based authentication with custom filter `JWTTokenValidatorFilter`
-- BCrypt password encoding
-- CORS configured for localhost:3000 (frontend development)
-- Most endpoints require authentication except auth, public stock data, and API docs
+### Security
+- JWT-based authentication with `JWTTokenValidatorFilter` and `CustomUserDetailsService`
+- Email verification system using Redis (`RedisEmailVerificationService`)
+- Spring Security configuration in `SecurityConfig`
 
-### Data Layer
-- JPA entities in `domain/` package with proper cascade relationships
-- Repositories follow Spring Data JPA naming conventions
-- Price data stored in separate calculation tables (`CalcStockPrice`, `CalcIndexPrice`)
-- Redis integration for email verification caching
+### Data Management
+- Supports both H2 (dev) and MySQL (prod) databases
+- Redis integration for email verification and caching
+- Environment-specific configurations in `application-dev.properties` and `application-prod.properties`
 
-### Request/Response Pattern
-- DTOs organized in `dto/request/` and `dto/response/` packages
-- Custom validation annotations in `valid/` package
-- Global exception handling in `GlobalExceptionHandler`
+## Configuration
 
-### Key Domain Models
-- `Portfolio` -> `PortfolioItem` (one-to-many with cascade)
-- `Stock` -> `StockPrice` and `CalcStockPrice` for historical data
-- `Users` -> `Portfolio` (one-to-many relationship)
+### Environment Variables Required
+- Database: `DEV_DATASOURCE_URL`, `PROD_DATASOURCE_URL`, etc.
+- Email: `MAIL_HOST`, `MAIL_USERNAME`, `MAIL_PASSWORD`  
+- Redis: `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`
+- Profile: `SPRING_PROFILES_ACTIVE` (dev/prod)
 
-## Environment Configuration
+### Key Configuration Classes
+- `SecurityConfig`: JWT and CORS configuration
+- `SwaggerConfig`: API documentation setup
+- `RedisConfig`: Redis connection and serialization
+- `AsyncConfig`: Async processing configuration
 
-### Required Environment Variables
-```bash
-# Database (Development)
-DEV_DATASOURCE_URL=jdbc:h2:~/db/portfolio-backtest-api
-DEV_DATASOURCE_USERNAME=sa
-DEV_DATASOURCE_PASSWORD=
+## Database Schema
 
-# Database (Production)  
-PROD_DATASOURCE_URL=jdbc:mysql://localhost:3306/test1?createDatabaseIfNotExist=TRUE
-PROD_DATASOURCE_USERNAME=root
-PROD_DATASOURCE_PASSWORD=your-password
+Main entities and relationships:
+- `Users` → `Portfolio` (one-to-many)
+- `Portfolio` → `PortfolioItem` (one-to-many)
+- `Stock` ← `PortfolioItem` (many-to-one)
+- `Stock` → `StockPrice` (one-to-many)
+- `IndexInfo` → `IndexPrice` (one-to-many)
 
-# Email Service
-MAIL_HOST=smtp.gmail.com
-MAIL_PORT=587
-MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=your-app-password
+## Testing Notes
 
-# Redis
-REDIS_HOST=localhost
-REDIS_PORT=6379
-REDIS_PASSWORD=your-redis-password
+- Tests should use the `@SpringBootTest` annotation for integration tests
+- Use `@WebMvcTest` for controller layer testing
+- Mock external dependencies using `@MockBean`
+- Test data can be initialized via `data.sql` in resources
 
-# Profile
-SPRING_PROFILES_ACTIVE=dev
-```
+## Development Guidelines
 
-### Profile-Specific Configurations
-- `dev` profile: Uses H2 in-memory database, shows SQL logs
-- `prod` profile: Uses MySQL, optimized for production
-- Configuration files: `application-dev.properties`, `application-prod.properties`
-
-## Important Financial Calculation Logic
-
-### Backtesting Process
-1. **Monthly Returns Calculation**: Individual stocks calculated first using `CalcStockPrice` data
-2. **Portfolio Aggregation**: Stock returns weighted by portfolio allocation using `mergeStockIntoPortfolioRor`  
-3. **Compound Returns**: Uses `calculateCompoundRor` for accurate multi-period performance
-4. **Volatility**: Standard deviation of monthly returns via `calculateVolatility`
-5. **Missing Data Handling**: Linear interpolation strategy for gaps in price data
-
-### Key Classes for Financial Logic
-- `PortfolioBacktestService`: Main orchestration and business logic
-- `PortfolioCalculator`: Pure calculation functions (compound returns, volatility, portfolio merging)
-- `DataInterpolationStrategy` / `LinearInterpolationStrategy`: Handles missing price data
-
-### Performance Considerations
-- Monthly calculations stored in `CalcStockPrice` and `CalcIndexPrice` tables for efficiency
-- Async configuration available in `AsyncConfig` for background processing
-- Redis caching for email verification to reduce database load
+- Follow existing package structure and naming conventions
+- Use Lombok annotations (`@Data`, `@Entity`, etc.) consistently
+- Implement proper exception handling using custom exceptions in `exception/` package
+- Use validation annotations and custom validators in `valid/` package
+- Follow the existing DTO pattern for request/response objects
