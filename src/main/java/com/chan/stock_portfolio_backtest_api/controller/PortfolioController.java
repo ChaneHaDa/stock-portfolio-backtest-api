@@ -8,6 +8,7 @@ import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioResponseDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.ResponseDTO;
 import com.chan.stock_portfolio_backtest_api.service.PortfolioBacktestService;
 import com.chan.stock_portfolio_backtest_api.service.PortfolioService;
+import com.chan.stock_portfolio_backtest_api.util.ResponseUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -40,12 +41,7 @@ public class PortfolioController {
             @RequestBody @Valid PortfolioBacktestRequestDTO portfolioBacktestRequestDTO
     ) {
         PortfolioBacktestResponseDTO result = portfolioBacktestService.calculatePortfolio(portfolioBacktestRequestDTO);
-        ResponseDTO<PortfolioBacktestResponseDTO> response = ResponseDTO.<PortfolioBacktestResponseDTO>builder()
-                .status("success")
-                .data(result)
-                .build();
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ResponseUtil.success(result));
     }
 
     @Operation(summary = "포트폴리오 저장", description = "사용자가 만든 포트폴리오를 저장하고 결과를 반환합니다.")
@@ -59,12 +55,7 @@ public class PortfolioController {
             @RequestBody @Valid PortfolioRequestDTO portfolioRequestDTO
     ) {
         PortfolioResponseDTO savedPortfolio = portfolioService.createPortfolio(portfolioRequestDTO);
-        ResponseDTO<PortfolioResponseDTO> response = ResponseDTO.<PortfolioResponseDTO>builder()
-                .status("success")
-                .data(savedPortfolio)
-                .build();
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ResponseUtil.success(savedPortfolio));
     }
 
     @Operation(summary = "사용자 포트폴리오 리스트 조회", description = "로그인한 사용자가 저장한 모든 포트폴리오 리스트 반환")
@@ -78,12 +69,7 @@ public class PortfolioController {
     @GetMapping
     public ResponseEntity<ResponseDTO<List<PortfolioResponseDTO>>> getPortfolioById() {
         List<PortfolioResponseDTO> portfolioResponseDTOList = portfolioService.findPortfolioByUser();
-        ResponseDTO<List<PortfolioResponseDTO>> response = ResponseDTO.<List<PortfolioResponseDTO>>builder()
-                .status("success")
-                .data(portfolioResponseDTOList)
-                .build();
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ResponseUtil.success(portfolioResponseDTOList));
     }
 
     @Operation(summary = "포트폴리오 상세 조회", description = "포트폴리오 및 구성요소 상세 조회")
@@ -97,13 +83,7 @@ public class PortfolioController {
     @GetMapping("/{id}")
     public ResponseEntity<ResponseDTO<?>> getPortfolioDetails(@PathVariable Integer id) {
         PortfolioDetailResponseDTO portfolioDetailResponseDTO = portfolioService.findPortfolioById(id);
-
-        ResponseDTO<PortfolioDetailResponseDTO> response = ResponseDTO.<PortfolioDetailResponseDTO>builder()
-                .status("success")
-                .data(portfolioDetailResponseDTO)
-                .build();
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ResponseUtil.success(portfolioDetailResponseDTO));
     }
 
     @Operation(summary = "포트폴리오 삭제", description = "포트폴리오 삭제")
@@ -117,12 +97,7 @@ public class PortfolioController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ResponseDTO<String>> deletePortfolio(@PathVariable Integer id) {
         portfolioService.deletePortfolio(id);
-        ResponseDTO<String> response = ResponseDTO.<String>builder()
-                .status("success")
-                .data("포트폴리오 삭제 성공")
-                .build();
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ResponseUtil.success("포트폴리오 삭제 성공"));
     }
 
 
@@ -135,15 +110,9 @@ public class PortfolioController {
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<ResponseDTO<PortfolioResponseDTO>> updatePortfolio(@PathVariable Integer id, @RequestBody PortfolioRequestDTO portfolioRequestDTO) {
+    public ResponseEntity<ResponseDTO<PortfolioResponseDTO>> updatePortfolio(@PathVariable Integer id, @RequestBody @Valid PortfolioRequestDTO portfolioRequestDTO) {
         PortfolioResponseDTO portfolioResponseDTO = portfolioService.updatePortfolio(id, portfolioRequestDTO);
-
-        ResponseDTO<PortfolioResponseDTO> response = ResponseDTO.<PortfolioResponseDTO>builder()
-                .status("success")
-                .data(portfolioResponseDTO)
-                .build();
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ResponseUtil.success(portfolioResponseDTO));
     }
 
 }

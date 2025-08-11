@@ -2,6 +2,7 @@ package com.chan.stock_portfolio_backtest_api.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,8 +48,22 @@ public class PortfolioService {
 			.user(user)
 			.build();
 
+		// N+1 쿼리 문제 해결을 위한 배치 조회
+		List<Integer> stockIds = portfolioRequestDTO.getPortfolioItemRequestDTOList().stream()
+				.map(PortfolioItemRequestDTO::getStockId)
+				.toList();
+		
+		List<Stock> stocks = stockRepository.findAllById(stockIds);
+		
+		if (stocks.size() != stockIds.size()) {
+			throw new EntityNotFoundException("Some stocks not found");
+		}
+		
+		Map<Integer, Stock> stockMap = stocks.stream()
+				.collect(java.util.stream.Collectors.toMap(Stock::getId, stock -> stock));
+		
 		portfolioRequestDTO.getPortfolioItemRequestDTOList().forEach(item -> {
-			Stock stock = stockRepository.findById(item.getStockId()).orElseThrow(EntityNotFoundException::new);
+			Stock stock = stockMap.get(item.getStockId());
 			portfolio.addPortfolioItem(PortfolioItemRequestDTO.DTOToEntity(item, stock));
 		});
 
@@ -70,9 +85,15 @@ public class PortfolioService {
 		return portfolioResponseDTOList;
 	}
 
-	// find: By Id, Id로 포트폴리오 상세 반환
+	// find: By Id, Id로 포트폴리오 상세 반환 (소유권 검증 포함)
 	public PortfolioDetailResponseDTO findPortfolioById(Integer id) {
 		Portfolio portfolio = portfolioRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+		
+		// 소유권 검증
+		Users currentUser = authService.getCurrentUser();
+		if (!portfolio.getUser().getId().equals(currentUser.getId())) {
+			throw new EntityNotFoundException("Portfolio not found");
+		}
 
 		return PortfolioDetailResponseDTO.entityToDTO(portfolio);
 	}
@@ -91,7 +112,13 @@ public class PortfolioService {
 	@Transactional
 	public PortfolioResponseDTO updatePortfolio(Integer portfolioId, PortfolioRequestDTO portfolioRequestDTO) {
 		Portfolio portfolio = portfolioRepository.findById(portfolioId)
-			.orElseThrow(() -> new RuntimeException("Portfolio not found with id: " + portfolioId));
+			.orElseThrow(EntityNotFoundException::new);
+		
+		// 소유권 검증
+		Users currentUser = authService.getCurrentUser();
+		if (!portfolio.getUser().getId().equals(currentUser.getId())) {
+			throw new EntityNotFoundException("Portfolio not found");
+		}
 
 		portfolio.updatePortfolio(
 			portfolioRequestDTO.getName(),
@@ -106,9 +133,22 @@ public class PortfolioService {
 
 		if (portfolioRequestDTO.getPortfolioItemRequestDTOList() != null) {
 			List<PortfolioItem> newItems = new ArrayList<>();
+			// N+1 쿼리 문제 해결을 위한 배치 조회
+			List<Integer> stockIds = portfolioRequestDTO.getPortfolioItemRequestDTOList().stream()
+					.map(PortfolioItemRequestDTO::getStockId)
+					.toList();
+			
+			List<Stock> stocks = stockRepository.findAllById(stockIds);
+			
+			if (stocks.size() != stockIds.size()) {
+				throw new EntityNotFoundException("Some stocks not found");
+			}
+			
+			Map<Integer, Stock> stockMap = stocks.stream()
+					.collect(java.util.stream.Collectors.toMap(Stock::getId, stock -> stock));
+			
 			for (PortfolioItemRequestDTO itemDTO : portfolioRequestDTO.getPortfolioItemRequestDTOList()) {
-				Stock stock = stockRepository.findById(itemDTO.getStockId())
-					.orElseThrow(() -> new RuntimeException("Stock not found with id: " + itemDTO.getStockId()));
+				Stock stock = stockMap.get(itemDTO.getStockId());
 				PortfolioItem newItem = PortfolioItemRequestDTO.DTOToEntity(itemDTO, stock);
 				newItems.add(newItem);
 			}

@@ -46,7 +46,7 @@ public class SecurityConfig {
                         "/api/v1/auth/**",
                         "/api/v1/indexs/**",
                         "/api/v1/stocks/**",
-                        "/api/v1/portfolios/**"
+                        "/api/v1/portfolios/backtest"  // 백테스트 API만 허용
                 ).permitAll()
                 
                 .anyRequest().authenticated()
@@ -71,9 +71,17 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
+        // 환경변수로 관리 가능하도록 개선 권장
         config.setAllowedOrigins(List.of("http://localhost:3000"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
-        config.setAllowedHeaders(List.of("*"));
+        config.setAllowedHeaders(List.of(
+                "Authorization",
+                "Content-Type",
+                "X-Requested-With",
+                "Accept",
+                "Origin",
+                "Cache-Control"
+        ));
         config.setAllowCredentials(true);
         config.setExposedHeaders(List.of("Authorization"));
 
