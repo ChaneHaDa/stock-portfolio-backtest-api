@@ -16,6 +16,7 @@ import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioRequestDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioDetailResponseDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioResponseDTO;
 import com.chan.stock_portfolio_backtest_api.exception.EntityNotFoundException;
+import com.chan.stock_portfolio_backtest_api.exception.UnauthorizedException;
 import com.chan.stock_portfolio_backtest_api.repository.PortfolioRepository;
 import com.chan.stock_portfolio_backtest_api.repository.StockRepository;
 
@@ -118,6 +119,11 @@ public class PortfolioService {
 		Users currentUser = authService.getCurrentUser();
 		if (!portfolio.getUser().getId().equals(currentUser.getId())) {
 			throw new EntityNotFoundException("Portfolio not found");
+		}
+
+		Users currentUser = authService.getCurrentUser();
+		if (!portfolio.getUser().getId().equals(currentUser.getId())) {
+			throw new UnauthorizedException("You are not authorized to update this portfolio.");
 		}
 
 		portfolio.updatePortfolio(
