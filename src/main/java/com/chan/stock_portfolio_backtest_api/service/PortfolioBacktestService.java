@@ -7,6 +7,8 @@ import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioBacktestReques
 import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioBacktestResponseDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioBacktestResponseItemDTO;
 import com.chan.stock_portfolio_backtest_api.exception.EntityNotFoundException;
+import com.chan.stock_portfolio_backtest_api.exception.InvalidDateRangeException;
+import com.chan.stock_portfolio_backtest_api.constants.AppConstants;
 import com.chan.stock_portfolio_backtest_api.repository.CalcStockPriceRepository;
 import com.chan.stock_portfolio_backtest_api.repository.StockRepository;
 import com.chan.stock_portfolio_backtest_api.strategy.DataInterpolationStrategy;
@@ -23,8 +25,6 @@ import java.util.*;
 @Service
 public class PortfolioBacktestService {
 
-    private static final float PERCENTAGE_CONVERSION_FACTOR = 100.0f;
-    private static final float DEFAULT_MONTHLY_ROR = 0.0f;
 
     private final StockRepository stockRepository;
     private final CalcStockPriceRepository calcStockPriceRepository;
@@ -44,7 +44,7 @@ public class PortfolioBacktestService {
      *
      * @param request 포트폴리오 백테스트 요청 DTO
      * @return 포트폴리오 백테스트 결과 DTO
-     * @throws IllegalArgumentException 시작일이 종료일보다 늦은 경우
+     * @throws InvalidDateRangeException 시작일이 종료일보다 늦은 경우
      * @throws EntityNotFoundException  요청된 주식이 존재하지 않는 경우
      */
     public PortfolioBacktestResponseDTO calculatePortfolio(PortfolioBacktestRequestDTO request) {
@@ -52,7 +52,7 @@ public class PortfolioBacktestService {
         LocalDate endDate = request.getEndDate();
 
         if (startDate.isAfter(endDate)) {
-            throw new IllegalArgumentException("Start date must not be after end date.");
+            throw new InvalidDateRangeException(AppConstants.DATE_VALIDATION_ERROR);
         }
 
         List<PortfolioBacktestRequestItemDTO> requestItems = request.getPortfolioBacktestRequestItemDTOList();
@@ -114,7 +114,7 @@ public class PortfolioBacktestService {
         return PortfolioBacktestResponseDTO.builder()
                 .portfolioInput(request)
                 .totalRor(totalRor)
-                .totalAmount((long) (request.getAmount() * (totalRor / PERCENTAGE_CONVERSION_FACTOR + 1)))
+                .totalAmount((long) (request.getAmount() * (totalRor / AppConstants.PERCENTAGE_CONVERSION_FACTOR + 1)))
                 .monthlyRor(new TreeMap<>(portfolioMonthlyRor))
                 .monthlyAmount(monthlyAmount)
                 .volatility(volatility)
@@ -161,8 +161,8 @@ public class PortfolioBacktestService {
         LocalDate current = startMonth;
         while (!current.isAfter(endMonth)) {
             // 월별 수익률을 가져와서 누적 계산 (월별 수익률은 백분율임)
-            float monthlyRor = monthlyRorMap.getOrDefault(current, DEFAULT_MONTHLY_ROR);
-            currentAmount = currentAmount * (1 + monthlyRor / PERCENTAGE_CONVERSION_FACTOR);
+            float monthlyRor = monthlyRorMap.getOrDefault(current, AppConstants.DEFAULT_MONTHLY_ROR);
+            currentAmount = currentAmount * (1 + monthlyRor / AppConstants.PERCENTAGE_CONVERSION_FACTOR);
             monthlyAmounts.put(current, (long) currentAmount);
             current = current.plusMonths(1);
         }
