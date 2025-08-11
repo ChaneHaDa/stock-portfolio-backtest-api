@@ -66,9 +66,23 @@ public class PortfolioBacktestService {
         LocalDate startMonth = startDate.withDayOfMonth(1);
         LocalDate endMonth = endDate.withDayOfMonth(1);
 
+        // 1. 모든 주식 ID를 한 번에 조회하여 N+1 쿼리 문제 해결
+        List<Integer> stockIds = requestItems.stream()
+                .map(PortfolioBacktestRequestItemDTO::getStockId)
+                .toList();
+        
+        List<Stock> stocks = stockRepository.findAllById(stockIds);
+        
+        if (stocks.size() != stockIds.size()) {
+            throw new EntityNotFoundException("Some stocks not found");
+        }
+        
+        Map<Integer, Stock> stockMap = stocks.stream()
+                .collect(java.util.stream.Collectors.toMap(Stock::getId, stock -> stock));
+
         for (PortfolioBacktestRequestItemDTO item : requestItems) {
-            // 1. 주식 엔티티 조회
-            Stock stock = stockRepository.findById(item.getStockId()).orElseThrow(EntityNotFoundException::new);
+            // 주식 엔티티를 Map에서 조회
+            Stock stock = stockMap.get(item.getStockId());
 
             // 2. 해당 주식의 월별 수익률 계산
             Map<LocalDate, Float> stockMonthlyRor = calculateStockMonthlyRor(stock, startDate, endDate);
