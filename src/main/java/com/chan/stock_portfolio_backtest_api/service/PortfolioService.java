@@ -15,6 +15,9 @@ import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioRequestDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioDetailResponseDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioResponseDTO;
 import com.chan.stock_portfolio_backtest_api.exception.EntityNotFoundException;
+import com.chan.stock_portfolio_backtest_api.exception.PortfolioNotFoundException;
+import com.chan.stock_portfolio_backtest_api.exception.StockNotFoundException;
+import com.chan.stock_portfolio_backtest_api.constants.AppConstants;
 import com.chan.stock_portfolio_backtest_api.repository.PortfolioRepository;
 import com.chan.stock_portfolio_backtest_api.repository.StockRepository;
 
@@ -24,12 +27,14 @@ public class PortfolioService {
 	private final PortfolioRepository portfolioRepository;
 	private final AuthService authService;
 	private final StockRepository stockRepository;
+	private final SecurityService securityService;
 
 	public PortfolioService(PortfolioRepository portfolioRepository, AuthService authService,
-		StockRepository stockRepository) {
+		StockRepository stockRepository, SecurityService securityService) {
 		this.portfolioRepository = portfolioRepository;
 		this.authService = authService;
 		this.stockRepository = stockRepository;
+		this.securityService = securityService;
 	}
 
 	// save
@@ -64,7 +69,7 @@ public class PortfolioService {
 			.toList();
 
 		if (portfolioResponseDTOList.isEmpty()) {
-			throw new EntityNotFoundException("Portfolio Not Found");
+			throw new EntityNotFoundException(AppConstants.ENTITY_NOT_FOUND_ERROR);
 		}
 
 		return portfolioResponseDTOList;
@@ -81,17 +86,14 @@ public class PortfolioService {
 	public void deletePortfolio(Integer id) {
 		Portfolio portfolio = portfolioRepository.findById(id).orElseThrow(EntityNotFoundException::new);
 		Users user = authService.getCurrentUser();
-		if (!portfolio.getUser().getId().equals(user.getId())) {
-			// 포트폴리오 소유자와 현재 로그인한 유저가 다를 경우 -> 리소스의 존재를 알리지 않기 위해서 EntityNotFoundException 발생
-			throw new EntityNotFoundException("Portfolio Not Found");
-		}
+		securityService.validatePortfolioOwnership(portfolio, user);
 		portfolioRepository.delete(portfolio);
 	}
 
 	@Transactional
 	public PortfolioResponseDTO updatePortfolio(Integer portfolioId, PortfolioRequestDTO portfolioRequestDTO) {
 		Portfolio portfolio = portfolioRepository.findById(portfolioId)
-			.orElseThrow(() -> new RuntimeException("Portfolio not found with id: " + portfolioId));
+			.orElseThrow(() -> new PortfolioNotFoundException(portfolioId));
 
 		portfolio.updatePortfolio(
 			portfolioRequestDTO.getName(),
@@ -108,7 +110,7 @@ public class PortfolioService {
 			List<PortfolioItem> newItems = new ArrayList<>();
 			for (PortfolioItemRequestDTO itemDTO : portfolioRequestDTO.getPortfolioItemRequestDTOList()) {
 				Stock stock = stockRepository.findById(itemDTO.getStockId())
-					.orElseThrow(() -> new RuntimeException("Stock not found with id: " + itemDTO.getStockId()));
+					.orElseThrow(() -> new StockNotFoundException(itemDTO.getStockId()));
 				PortfolioItem newItem = PortfolioItemRequestDTO.DTOToEntity(itemDTO, stock);
 				newItems.add(newItem);
 			}

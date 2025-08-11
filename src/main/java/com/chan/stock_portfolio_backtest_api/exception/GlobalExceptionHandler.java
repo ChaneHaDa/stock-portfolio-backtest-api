@@ -113,4 +113,40 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
+    
+    // 7. 포트폴리오 없음 (404)
+    @ExceptionHandler(PortfolioNotFoundException.class)
+    public ResponseEntity<ResponseDTO<Void>> handlePortfolioNotFound(PortfolioNotFoundException ex) {
+        ResponseDTO<Void> response = ResponseDTO.<Void>builder()
+                .status("error")
+                .code("PORTFOLIO_NOT_FOUND")
+                .message(ex.getMessage())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+    
+    // 8. 주식 정보 없음 (404)
+    @ExceptionHandler(StockNotFoundException.class)
+    public ResponseEntity<ResponseDTO<Void>> handleStockNotFound(StockNotFoundException ex) {
+        ResponseDTO<Void> response = ResponseDTO.<Void>builder()
+                .status("error")
+                .code("STOCK_NOT_FOUND")
+                .message(ex.getMessage())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+    
+    // 9. 잘못된 날짜 범위 (400)
+    @ExceptionHandler(InvalidDateRangeException.class)
+    public ResponseEntity<ResponseDTO<Void>> handleInvalidDateRange(InvalidDateRangeException ex) {
+        ResponseDTO<Void> response = ResponseDTO.<Void>builder()
+                .status("error")
+                .code("INVALID_DATE_RANGE")
+                .message(ex.getMessage())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
 }
