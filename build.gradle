@@ -46,8 +46,8 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
     //email
     implementation 'org.springframework.boot:spring-boot-starter-mail'
-    //DB-MYSQL, H2
-    runtimeOnly 'com.mysql:mysql-connector-j'
+    //DB-POSTGRESQL, H2
+    runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly 'com.h2database:h2'
     //Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
