@@ -3,6 +3,7 @@ package com.chan.stock_portfolio_backtest_api.controller;
 import com.chan.stock_portfolio_backtest_api.dto.request.StockPriceRequestDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.ResponseDTO;
 import com.chan.stock_portfolio_backtest_api.service.StockPriceService;
+import com.chan.stock_portfolio_backtest_api.util.ResponseUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -45,12 +46,7 @@ public class StockPriceController {
             stockPriceRequestDTOList = stockPriceService.findStockPricesByStockId(stockId);
         }
 
-        ResponseDTO<List<StockPriceRequestDTO>> response = ResponseDTO.<List<StockPriceRequestDTO>>builder()
-                .status("success")
-                .data(stockPriceRequestDTOList)
-                .build();
-
-        return ResponseEntity.ok().body(response);
+        return ResponseEntity.ok(ResponseUtil.success(stockPriceRequestDTOList));
     }
 
 }
