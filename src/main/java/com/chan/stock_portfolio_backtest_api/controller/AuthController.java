@@ -51,7 +51,7 @@ public class AuthController {
                     content = @Content(
                             schema = @Schema(implementation = ResponseDTO.class),
                             examples = @ExampleObject(
-                                    value = "{\"status\":\"success\",\"message\":\"회원가입 성공\",\"data\":{\"id\":1,\"username\":\"testuser\",\"email\":\"test@example.com\"}}"
+                                    value = "{\"status\":\"success\",\"message\":\"회원가입 성공\",\"data\":{\"id\":1,\"username\":\"testuser\",\"email\":\"test@example.com\",\"name\":\"한기찬\",\"phoneNumber\":\"010-1234-5678\"}}"
                             )
                     )
             ),
@@ -104,7 +104,7 @@ public class AuthController {
                     content = @Content(
                             schema = @Schema(implementation = ResponseDTO.class),
                             examples = @ExampleObject(
-                                    value = "{\"status\":\"success\",\"message\":\"로그인 성공\",\"data\":{\"accessToken\":\"eyJhbGciOiJIUzI1NiJ9...\"}}"
+                                    value = "{\"status\":\"success\",\"message\":\"로그인 성공\",\"data\":{\"accessToken\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImF1dGgiOiJVU0VSIiwiaWF0IjoxNzM0MDE2ODAwfQ.abcdefghijklmnopqrstuvwxyz\"}}"
                             )
                     )
             ),
@@ -120,7 +120,7 @@ public class AuthController {
             )
     })
     @PostMapping("/login")
-    public ResponseEntity<ResponseDTO> loginUser(@RequestBody LoginRequestDTO loginRequestDTO) {
+    public ResponseEntity<ResponseDTO<Map<String, String>>> loginUser(@RequestBody LoginRequestDTO loginRequestDTO) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequestDTO.getId(),
@@ -143,18 +143,21 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터")
     })
     @GetMapping("/check-username")
-    public ResponseEntity<ResponseDTO<String>> checkUsername(
+    public ResponseEntity<ResponseDTO<Map<String, Object>>> checkUsername(
             @RequestParam("username")
             @NotBlank(message = "아이디는 필수 입력값입니다.") String username
     ) {
         boolean isAvailable = usersService.isUsernameAvailable(username);
 
         if (isAvailable) {
-            return ResponseEntity.ok(ResponseUtil.success(null, "The username is available."));
+            return ResponseEntity.ok(ResponseUtil.success(
+                    Map.of("username", username, "available", true), 
+                    "The username is available."));
         } else {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(ResponseDTO.<String>builder()
-                            .status("fail")
+                    .body(ResponseDTO.<Map<String, Object>>builder()
+                            .status("error")
+                            .code("USERNAME_TAKEN")
                             .message("The username is already taken.")
                             .build());
         }
@@ -167,16 +170,19 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터")
     })
     @GetMapping("/check-email")
-    public ResponseEntity<ResponseDTO<String>> checkEmail(
+    public ResponseEntity<ResponseDTO<Map<String, Object>>> checkEmail(
             @RequestParam("email")
             @NotBlank(message = "이메일는 필수 입력값입니다.") String email) {
         boolean isAvailable = usersService.isEmailAvailable(email);
         if (isAvailable) {
-            return ResponseEntity.ok(ResponseUtil.success(null, "The email is available."));
+            return ResponseEntity.ok(ResponseUtil.success(
+                    Map.of("email", email, "available", true), 
+                    "The email is available."));
         } else {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(ResponseDTO.<String>builder()
-                            .status("fail")
+                    .body(ResponseDTO.<Map<String, Object>>builder()
+                            .status("error")
+                            .code("EMAIL_TAKEN")
                             .message("The email is already taken.")
                             .build());
         }
@@ -201,11 +207,13 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "잘못된 입력값")
     })
     @GetMapping("/verify-email")
-    public ResponseEntity<ResponseDTO<String>> verifyEmail(
+    public ResponseEntity<ResponseDTO<Map<String, Object>>> verifyEmail(
             @RequestParam("email") @NotBlank(message = "이메일은 필수 입력값입니다.") String email,
             @RequestParam("token") @NotBlank(message = "토큰은 필수 입력값입니다.") String token) {
         usersService.emailValidation(email, token);
-        return ResponseEntity.ok(ResponseUtil.success(null, "The email is validated."));
+        return ResponseEntity.ok(ResponseUtil.success(
+                Map.of("email", email, "verified", true), 
+                "The email is validated."));
     }
 
 }

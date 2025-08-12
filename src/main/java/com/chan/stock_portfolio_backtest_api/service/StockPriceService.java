@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.chan.stock_portfolio_backtest_api.dto.request.StockPriceRequestDTO;
+import com.chan.stock_portfolio_backtest_api.dto.response.StockPriceResponseDTO;
 import com.chan.stock_portfolio_backtest_api.exception.EntityNotFoundException;
 import com.chan.stock_portfolio_backtest_api.repository.StockPriceRepository;
 
@@ -17,35 +18,35 @@ public class StockPriceService {
 		this.stockPriceRepository = stockPriceRepository;
 	}
 
-	public List<StockPriceRequestDTO> findStockPricesByStockId(Integer id) {
-		List<StockPriceRequestDTO> stockPriceRequestDTOList = stockPriceRepository.findByStockId(id)
+	public List<StockPriceResponseDTO> findStockPricesByStockId(Integer id) {
+		List<StockPriceResponseDTO> stockPriceResponseDTOList = stockPriceRepository.findByStockId(id)
 			.stream()
-			.map(StockPriceRequestDTO::entityToDTO)
+			.map(StockPriceResponseDTO::entityToDTO)
 			.toList();
 
-		if (stockPriceRequestDTOList.isEmpty()) {
+		if (stockPriceResponseDTOList.isEmpty()) {
 			throw new EntityNotFoundException(String.format("%s not found", id));
 		}
 
-		return stockPriceRequestDTOList;
+		return stockPriceResponseDTOList;
 	}
 
-	public List<StockPriceRequestDTO> findStockPricesByStockIdAndDateRange(Integer id, LocalDate startDate,
+	public List<StockPriceResponseDTO> findStockPricesByStockIdAndDateRange(Integer id, LocalDate startDate,
 		LocalDate endDate) {
 		if (startDate.isAfter(endDate)) {
 			throw new IllegalArgumentException("Start date must not be after end date.");
 		}
 
-		List<StockPriceRequestDTO> stockPriceRequestDTOList = stockPriceRepository.findByStockIdAndDateRange(id,
+		List<StockPriceResponseDTO> stockPriceResponseDTOList = stockPriceRepository.findByStockIdAndDateRange(id,
 				startDate, endDate)
 			.stream()
-			.map(StockPriceRequestDTO::entityToDTO)
+			.map(StockPriceResponseDTO::entityToDTO)
 			.toList();
 
-		if (stockPriceRequestDTOList.isEmpty()) {
+		if (stockPriceResponseDTOList.isEmpty()) {
 			throw new EntityNotFoundException(String.format("id: %s not found", id));
 		}
 
-		return stockPriceRequestDTOList;
+		return stockPriceResponseDTOList;
 	}
 }

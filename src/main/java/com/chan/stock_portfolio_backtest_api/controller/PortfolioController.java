@@ -116,7 +116,7 @@ public class PortfolioController {
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<ResponseDTO<?>> getPortfolioDetails(@PathVariable Integer id) {
+    public ResponseEntity<ResponseDTO<PortfolioDetailResponseDTO>> getPortfolioDetails(@PathVariable Integer id) {
         PortfolioDetailResponseDTO portfolioDetailResponseDTO = portfolioService.findPortfolioById(id);
         return ResponseEntity.ok(ResponseUtil.success(portfolioDetailResponseDTO));
     }
