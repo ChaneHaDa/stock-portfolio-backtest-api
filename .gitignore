@@ -40,3 +40,8 @@ out/
 .env
 .env.*
 !.env.example
+
+### Log Files ###
+*.log
+logs/
+log/
