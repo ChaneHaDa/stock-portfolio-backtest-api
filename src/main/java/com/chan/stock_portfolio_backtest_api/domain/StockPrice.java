@@ -37,4 +37,11 @@ public class StockPrice {
 	@JoinColumn(name = "stock_id")
 	@JsonBackReference
 	private Stock stock;
+
+	public void setStock(Stock stock) {
+		this.stock = stock;
+		if (stock != null && !stock.getStockPriceList().contains(this)) {
+			stock.getStockPriceList().add(this);
+		}
+	}
 }

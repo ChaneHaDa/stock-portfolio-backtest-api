@@ -36,5 +36,8 @@ public class PortfolioItem {
 
 	public void setPortfolio(Portfolio portfolio) {
 		this.portfolio = portfolio;
+		if (portfolio != null && !portfolio.getPortfolioItemList().contains(this)) {
+			portfolio.getPortfolioItemList().add(this);
+		}
 	}
 }
