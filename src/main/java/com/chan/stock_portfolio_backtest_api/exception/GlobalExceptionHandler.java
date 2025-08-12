@@ -149,4 +149,28 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
+    
+    // 10. 사용자 중복 (409)
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<ResponseDTO<Void>> handleUserAlreadyExists(UserAlreadyExistsException ex) {
+        ResponseDTO<Void> response = ResponseDTO.<Void>builder()
+                .status("error")
+                .code("USER_ALREADY_EXISTS")
+                .message(ex.getMessage())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+    
+    // 11. 인가 오류 (401)
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ResponseDTO<Void>> handleUnauthorized(UnauthorizedException ex) {
+        ResponseDTO<Void> response = ResponseDTO.<Void>builder()
+                .status("error")
+                .code("UNAUTHORIZED")
+                .message(ex.getMessage())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
 }
