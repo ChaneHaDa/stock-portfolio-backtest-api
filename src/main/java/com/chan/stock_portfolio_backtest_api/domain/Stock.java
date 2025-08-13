@@ -29,11 +29,15 @@ public class Stock {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
+	@Column(nullable = false, length = 100)
 	private String name;
+	@Column(nullable = false, length = 20)
 	private String shortCode;
-	@Column(unique = true)
+	@Column(unique = true, nullable = false, length = 12)
 	private String isinCode;
+	@Column(length = 50)
 	private String marketCategory;
+	@Column(nullable = false)
 	private LocalDate startAt;
 	private LocalDate endAt;
 
