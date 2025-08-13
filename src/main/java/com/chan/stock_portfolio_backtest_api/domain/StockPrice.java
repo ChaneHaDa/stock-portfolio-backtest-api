@@ -4,7 +4,10 @@ import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -16,6 +19,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Table(indexes = {
+	@Index(name = "idx_stock_basedate", columnList = "stock_id, baseDate")
+})
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
@@ -24,13 +30,18 @@ public class StockPrice {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
-	private Integer closePrice;
-	private Integer openPrice;
-	private Integer lowPrice;
-	private Integer highPrice;
+	@Column(nullable = false)
+	private Float closePrice;
+	@Column(nullable = false)
+	private Float openPrice;
+	@Column(nullable = false)
+	private Float lowPrice;
+	@Column(nullable = false)
+	private Float highPrice;
 	private Integer tradeQuantity;
 	private Long tradeAmount;
 	private Long issuedCount;
+	@Column(nullable = false)
 	private LocalDate baseDate;
 
 	@ManyToOne
@@ -39,9 +50,11 @@ public class StockPrice {
 	private Stock stock;
 
 	public void setStock(Stock stock) {
-		this.stock = stock;
-		if (stock != null && !stock.getStockPriceList().contains(this)) {
-			stock.getStockPriceList().add(this);
+		if (this.stock != stock) {
+			this.stock = stock;
+			if (stock != null && !stock.getStockPriceList().contains(this)) {
+				stock.getStockPriceList().add(this);
+			}
 		}
 	}
 }

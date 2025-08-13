@@ -14,10 +14,10 @@ import java.time.LocalDate;
 @Builder
 public class StockPriceResponseDTO {
     private Integer id;
-    private Integer closePrice;
-    private Integer openPrice;
-    private Integer lowPrice;
-    private Integer highPrice;
+    private Float closePrice;
+    private Float openPrice;
+    private Float lowPrice;
+    private Float highPrice;
     private Integer tradeQuantity;
     private Long tradeAmount;
     private Long issuedCount;
