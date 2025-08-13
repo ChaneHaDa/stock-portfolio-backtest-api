@@ -35,9 +35,11 @@ public class CalcStockPrice {
 	private Stock stock;
 
 	public void setStock(Stock stock) {
-		this.stock = stock;
-		if (stock != null && !stock.getCalcStockPriceList().contains(this)) {
-			stock.getCalcStockPriceList().add(this);
+		if (this.stock != stock) {
+			this.stock = stock;
+			if (stock != null && !stock.getCalcStockPriceList().contains(this)) {
+				stock.getCalcStockPriceList().add(this);
+			}
 		}
 	}
 }

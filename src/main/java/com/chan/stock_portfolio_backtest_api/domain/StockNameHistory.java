@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -25,7 +26,9 @@ public class StockNameHistory {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
+	@Column(nullable = false, length = 100)
 	private String name;
+	@Column(nullable = false)
 	private LocalDate startAt;
 	private LocalDate endAt;
 
@@ -35,9 +38,11 @@ public class StockNameHistory {
 	private Stock stock;
 
 	public void setStock(Stock stock) {
-		this.stock = stock;
-		if (!stock.getNameHistoryList().contains(this)) {
-			stock.getNameHistoryList().add(this);
+		if (this.stock != stock) {
+			this.stock = stock;
+			if (stock != null && !stock.getNameHistoryList().contains(this)) {
+				stock.getNameHistoryList().add(this);
+			}
 		}
 	}
 

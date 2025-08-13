@@ -35,9 +35,11 @@ public class CalcIndexPrice {
 	private IndexInfo indexInfo;
 
 	public void setIndexInfo(IndexInfo indexInfo) {
-		this.indexInfo = indexInfo;
-		if (indexInfo != null && !indexInfo.getCalcIndexPriceList().contains(this)) {
-			indexInfo.getCalcIndexPriceList().add(this);
+		if (this.indexInfo != indexInfo) {
+			this.indexInfo = indexInfo;
+			if (indexInfo != null && !indexInfo.getCalcIndexPriceList().contains(this)) {
+				indexInfo.getCalcIndexPriceList().add(this);
+			}
 		}
 	}
 }

@@ -37,9 +37,11 @@ public class IndexPrice {
 	private IndexInfo indexInfo;
 
 	public void setIndexInfo(IndexInfo indexInfo) {
-		this.indexInfo = indexInfo;
-		if (indexInfo != null && !indexInfo.getIndexPriceList().contains(this)) {
-			indexInfo.getIndexPriceList().add(this);
+		if (this.indexInfo != indexInfo) {
+			this.indexInfo = indexInfo;
+			if (indexInfo != null && !indexInfo.getIndexPriceList().contains(this)) {
+				indexInfo.getIndexPriceList().add(this);
+			}
 		}
 	}
 }
