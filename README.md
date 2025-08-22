@@ -48,7 +48,8 @@ Spring Boot 기반의 RESTful API로, 사용자가 주식 포트폴리오를 구
 - **빌드 도구**: Gradle
 - **인증**: JWT (JSON Web Tokens)
 - **API 문서화**: Swagger / OpenAPI
-- **데이터베이스**: H2, MySQL 등 관계형 DB
+- **데이터베이스**: H2 (개발), PostgreSQL (운영)
+- **캐시**: Redis
 
 ---
 
@@ -146,23 +147,28 @@ Spring Boot 기반의 RESTful API로, 사용자가 주식 포트폴리오를 구
 # Application
 SPRING_PROFILES_ACTIVE=dev
 
-# Email
+# Redis (필수)
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=your-redis-password
+
+# Email (선택적)
 MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
 MAIL_USERNAME=your-email@gmail.com
 MAIL_PASSWORD=your-app-password
 
-# Database - Development
+# Database - Development (선택적, 기본값 사용 가능)
 DEV_DATASOURCE_URL=jdbc:h2:~/db/portfolio-backtest-api
 DEV_DATASOURCE_USERNAME=sa
 DEV_DATASOURCE_PASSWORD=
 DEV_JPA_DDL_AUTO=update
 
-# Database - Production
-PROD_DATASOURCE_URL=jdbc:mysql://localhost:3306/test1?createDatabaseIfNotExist=TRUE
-PROD_DATASOURCE_USERNAME=root
+# Database - Production (선택적, 기본값 사용 가능)
+PROD_DATASOURCE_URL=jdbc:postgresql://localhost:5432/test1
+PROD_DATASOURCE_USERNAME=postgres
 PROD_DATASOURCE_PASSWORD=your-db-password
-PROD_JPA_DDL_AUTO=update
+PROD_JPA_DDL_AUTO=validate
 PROD_HIBERNATE_FORMAT_SQL=true
 PROD_HIBERNATE_SHOW_SQL=true
 ```
@@ -173,10 +179,16 @@ PROD_HIBERNATE_SHOW_SQL=true
 2. 위의 환경변수들을 복사하여 붙여넣기
 3. 각 환경변수의 값을 실제 환경에 맞게 수정
 
+### 필수 환경변수
+
+- **Redis**: 이메일 인증 및 캐시용으로 필수입니다
+- **SPRING_PROFILES_ACTIVE**: 실행 환경 설정 (dev/prod)
+
 ### 주의사항
 
 - `.env` 파일은 절대로 Git에 커밋하지 마세요
 - `.gitignore`에 `.env` 파일이 포함되어 있는지 확인하세요
 - 실제 운영 환경에서는 환경변수를 서버의 환경변수나 시크릿 관리 시스템을 통해 관리하세요
+- dev 환경에서는 H2 인메모리 DB를 사용하므로 별도 DB 설치가 불필요합니다
 
 ---
