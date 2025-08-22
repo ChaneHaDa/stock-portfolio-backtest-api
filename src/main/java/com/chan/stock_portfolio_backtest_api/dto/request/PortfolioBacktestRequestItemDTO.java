@@ -1,5 +1,6 @@
 package com.chan.stock_portfolio_backtest_api.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -33,6 +34,7 @@ public class PortfolioBacktestRequestItemDTO {
     /**
      * 사용자 정의 종목인지 확인
      */
+    @JsonIgnore
     public boolean isCustomStock() {
         return stockId == null && customStockName != null && annualReturnRate != null;
     }
@@ -40,6 +42,7 @@ public class PortfolioBacktestRequestItemDTO {
     /**
      * 유효성 검증 - stockId 또는 (customStockName + annualReturnRate) 중 하나는 반드시 있어야 함
      */
+    @JsonIgnore
     public boolean isValid() {
         return (stockId != null) || (customStockName != null && annualReturnRate != null);
     }
