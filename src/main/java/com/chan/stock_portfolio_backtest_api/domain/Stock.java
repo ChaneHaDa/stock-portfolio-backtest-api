@@ -43,9 +43,6 @@ public class Stock {
 	private String isinCode;
 	@Column(length = 50)
 	private String marketCategory;
-	@Column(nullable = false)
-	private LocalDate startAt;
-	private LocalDate endAt;
 
 	@OneToMany(mappedBy = "stock", cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
