@@ -3,6 +3,7 @@ package com.chan.stock_portfolio_backtest_api.util;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class PortfolioCalculator {
 
@@ -76,5 +77,36 @@ public class PortfolioCalculator {
 
         // 결과는 월별 변동성이며, 필요한 경우 연율화: stdDev * Math.sqrt(12)
         return (float) stdDev;
+    }
+
+    /**
+     * 연평균 수익률을 기반으로 지정된 기간의 월별 수익률을 생성합니다.
+     * 
+     * @param annualReturnRate 연평균 수익률 (백분율, 예: 10.5 = 10.5%)
+     * @param startDate 시작 날짜
+     * @param endDate 종료 날짜
+     * @return 월별 수익률을 담은 Map (키: 월 시작일, 값: 월별 수익률(%))
+     */
+    public static Map<LocalDate, Float> generateMonthlyRorFromAnnual(float annualReturnRate, 
+                                                                    LocalDate startDate, 
+                                                                    LocalDate endDate) {
+        Map<LocalDate, Float> monthlyRorMap = new TreeMap<>();
+        
+        // 연평균 수익률을 월평균 수익률로 변환
+        // 공식: monthlyRate = (1 + annualRate/100)^(1/12) - 1
+        double annualRateDecimal = annualReturnRate / 100.0;
+        double monthlyRateDecimal = Math.pow(1 + annualRateDecimal, 1.0/12.0) - 1;
+        float monthlyRatePercent = (float) (monthlyRateDecimal * 100);
+        
+        // 시작월부터 종료월까지 모든 월에 동일한 수익률 적용
+        LocalDate currentMonth = startDate.withDayOfMonth(1);
+        LocalDate endMonth = endDate.withDayOfMonth(1);
+        
+        while (!currentMonth.isAfter(endMonth)) {
+            monthlyRorMap.put(currentMonth, monthlyRatePercent);
+            currentMonth = currentMonth.plusMonths(1);
+        }
+        
+        return monthlyRorMap;
     }
 }

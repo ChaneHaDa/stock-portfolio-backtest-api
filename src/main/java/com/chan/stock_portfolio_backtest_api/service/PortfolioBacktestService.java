@@ -57,6 +57,14 @@ public class PortfolioBacktestService {
 
         List<PortfolioBacktestRequestItemDTO> requestItems = request.getPortfolioBacktestRequestItemDTOList();
 
+        // 요청 항목 유효성 검증
+        for (PortfolioBacktestRequestItemDTO item : requestItems) {
+            if (!item.isValid()) {
+                throw new EntityNotFoundException(
+                    "Invalid portfolio item: must have either stockId or (customStockName + annualReturnRate)");
+            }
+        }
+
         // 전체 포트폴리오 월별 수익률을 누적할 Map
         Map<LocalDate, Float> portfolioMonthlyRor = new HashMap<>();
 
@@ -66,8 +74,9 @@ public class PortfolioBacktestService {
         LocalDate startMonth = startDate.withDayOfMonth(1);
         LocalDate endMonth = endDate.withDayOfMonth(1);
 
-        // 1. 모든 주식 ID를 한 번에 조회하여 N+1 쿼리 문제 해결
+        // 1. 기존 주식 ID 조회 (사용자 정의 종목이 아닌 것들만)
         List<Integer> stockIds = requestItems.stream()
+                .filter(item -> !item.isCustomStock())
                 .map(PortfolioBacktestRequestItemDTO::getStockId)
                 .toList();
         
@@ -81,18 +90,30 @@ public class PortfolioBacktestService {
                 .collect(java.util.stream.Collectors.toMap(Stock::getId, stock -> stock));
 
         for (PortfolioBacktestRequestItemDTO item : requestItems) {
-            // 주식 엔티티를 Map에서 조회
-            Stock stock = stockMap.get(item.getStockId());
-
-            // 2. 해당 주식의 월별 수익률 계산
-            Map<LocalDate, Float> stockMonthlyRor = calculateStockMonthlyRor(stock, startDate, endDate);
+            Map<LocalDate, Float> stockMonthlyRor;
+            String stockName;
+            
+            if (item.isCustomStock()) {
+                // 2-1. 사용자 정의 종목: 연평균 수익률로부터 월별 수익률 생성
+                stockMonthlyRor = PortfolioCalculator.generateMonthlyRorFromAnnual(
+                    item.getAnnualReturnRate(), startDate, endDate);
+                stockName = item.getCustomStockName();
+            } else {
+                // 2-2. 기존 종목: DB에서 조회
+                Stock stock = stockMap.get(item.getStockId());
+                if (stock == null) {
+                    throw new EntityNotFoundException("Stock not found for ID: " + item.getStockId());
+                }
+                stockMonthlyRor = calculateStockMonthlyRor(stock, startDate, endDate);
+                stockName = stock.getName();
+            }
 
             // 3. 주식별 누적(복리) 수익률 계산
             float stockTotalRor = PortfolioCalculator.calculateCompoundRor(stockMonthlyRor, startMonth, endMonth);
 
             // 4. 개별 주식 결과 DTO 생성
             PortfolioBacktestResponseItemDTO responseItem = PortfolioBacktestResponseItemDTO.builder()
-                    .name(stock.getName())
+                    .name(stockName)
                     .totalRor(stockTotalRor)
                     .monthlyRor(stockMonthlyRor)
                     .build();
