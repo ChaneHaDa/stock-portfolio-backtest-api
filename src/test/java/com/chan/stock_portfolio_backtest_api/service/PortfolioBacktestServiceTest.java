@@ -6,6 +6,7 @@ import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioBacktestReques
 import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioBacktestRequestItemDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioBacktestResponseDTO;
 import com.chan.stock_portfolio_backtest_api.exception.EntityNotFoundException;
+import com.chan.stock_portfolio_backtest_api.exception.InvalidDateRangeException;
 import com.chan.stock_portfolio_backtest_api.repository.CalcStockPriceRepository;
 import com.chan.stock_portfolio_backtest_api.repository.StockRepository;
 import com.chan.stock_portfolio_backtest_api.strategy.DataInterpolationStrategy;
@@ -101,11 +102,8 @@ class PortfolioBacktestServiceTest {
         when(stockRepository.findAllById(anyList()))
                 .thenReturn(Arrays.asList(testStock1, testStock2));
 
-        when(calcStockPriceRepository.findByStockAndBaseDateBetween(eq(testStock1), any(), any()))
-                .thenReturn(Arrays.asList(calcPrice1, calcPrice2));
-
-        when(calcStockPriceRepository.findByStockAndBaseDateBetween(eq(testStock2), any(), any()))
-                .thenReturn(Arrays.asList(calcPrice1, calcPrice2));
+        when(calcStockPriceRepository.findByStockInAndBaseDateBetween(anyList(), any(), any()))
+                .thenReturn(Arrays.asList(calcPrice1, calcPrice2, calcPrice1, calcPrice2));
 
         Map<LocalDate, Float> interpolatedData = new TreeMap<>();
         interpolatedData.put(LocalDate.of(2023, 1, 1), 5.0f);
@@ -128,7 +126,7 @@ class PortfolioBacktestServiceTest {
 
         // Verify interactions
         verify(stockRepository).findAllById(Arrays.asList(1, 2));
-        verify(calcStockPriceRepository, times(2)).findByStockAndBaseDateBetween(any(), any(), any());
+        verify(calcStockPriceRepository).findByStockInAndBaseDateBetween(anyList(), any(), any());
         verify(interpolationStrategy, times(2)).interpolate(any(), any(), any());
     }
 
@@ -143,8 +141,8 @@ class PortfolioBacktestServiceTest {
                 .build();
 
         // When & Then
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        InvalidDateRangeException exception = assertThrows(
+                InvalidDateRangeException.class,
                 () -> portfolioBacktestService.calculatePortfolio(requestDTO)
         );
 
@@ -152,7 +150,7 @@ class PortfolioBacktestServiceTest {
 
         // Verify no repository calls were made
         verify(stockRepository, never()).findAllById(any());
-        verify(calcStockPriceRepository, never()).findByStockAndBaseDateBetween(any(), any(), any());
+        verify(calcStockPriceRepository, never()).findByStockInAndBaseDateBetween(anyList(), any(), any());
     }
 
     @Test
@@ -171,7 +169,7 @@ class PortfolioBacktestServiceTest {
 
         // Verify repository call was made
         verify(stockRepository).findAllById(Arrays.asList(1, 2));
-        verify(calcStockPriceRepository, never()).findByStockAndBaseDateBetween(any(), any(), any());
+        verify(calcStockPriceRepository, never()).findByStockInAndBaseDateBetween(anyList(), any(), any());
     }
 
     @Test
@@ -198,7 +196,7 @@ class PortfolioBacktestServiceTest {
 
         // Verify interactions
         verify(stockRepository).findAllById(Collections.emptyList());
-        verify(calcStockPriceRepository, never()).findByStockAndBaseDateBetween(any(), any(), any());
+        verify(calcStockPriceRepository, never()).findByStockInAndBaseDateBetween(anyList(), any(), any());
     }
 
     @Test
@@ -219,7 +217,7 @@ class PortfolioBacktestServiceTest {
         when(stockRepository.findAllById(Arrays.asList(1)))
                 .thenReturn(Arrays.asList(testStock1));
 
-        when(calcStockPriceRepository.findByStockAndBaseDateBetween(eq(testStock1), any(), any()))
+        when(calcStockPriceRepository.findByStockInAndBaseDateBetween(anyList(), any(), any()))
                 .thenReturn(Arrays.asList(calcPrice1, calcPrice2));
 
         Map<LocalDate, Float> interpolatedData = new TreeMap<>();
@@ -239,7 +237,7 @@ class PortfolioBacktestServiceTest {
 
         // Verify interactions
         verify(stockRepository).findAllById(Arrays.asList(1));
-        verify(calcStockPriceRepository).findByStockAndBaseDateBetween(eq(testStock1), 
+        verify(calcStockPriceRepository).findByStockInAndBaseDateBetween(anyList(), 
                 eq(LocalDate.of(2023, 1, 1)), eq(LocalDate.of(2023, 2, 1)));
         verify(interpolationStrategy).interpolate(any(), 
                 eq(LocalDate.of(2023, 1, 1)), eq(LocalDate.of(2023, 2, 1)));
