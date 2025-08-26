@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  ngrinder-controller:
+    image: ngrinder/controller:3.5.8
+    container_name: ngrinder-controller
+    ports:
+      - "8080:80"        # Web UI
+      - "16001:16001"    # Controller port
+      - "12000-12009:12000-12009"  # Agent connection ports
+    volumes:
+      - ngrinder-controller:/opt/ngrinder-controller
+    environment:
+      - JAVA_OPTS=-Xms1g -Xmx2g
+    networks:
+      - ngrinder-network
+
+  ngrinder-agent:
+    image: ngrinder/agent:3.5.8
+    container_name: ngrinder-agent
+    volumes:
+      - ngrinder-agent:/opt/ngrinder-agent
+    environment:
+      - JAVA_OPTS=-Xms1g -Xmx1g
+      - CONTROLLER_IP=ngrinder-controller
+    depends_on:
+      - ngrinder-controller
+    networks:
+      - ngrinder-network
+
+  # 테스트 대상 API (개발용)
+  portfolio-api:
+    build: .
+    container_name: portfolio-api-test
+    ports:
+      - "8081:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - DEV_DATASOURCE_URL=jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    networks:
+      - ngrinder-network
+
+volumes:
+  ngrinder-controller:
+  ngrinder-agent:
+
+networks:
+  ngrinder-network:
+    driver: bridge
