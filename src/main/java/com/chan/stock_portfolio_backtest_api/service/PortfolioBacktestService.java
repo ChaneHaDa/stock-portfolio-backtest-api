@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 포트폴리오 백테스트 서비스
@@ -57,6 +58,14 @@ public class PortfolioBacktestService {
 
         List<PortfolioBacktestRequestItemDTO> requestItems = request.getPortfolioBacktestRequestItemDTOList();
 
+        // 요청 항목 유효성 검증
+        for (PortfolioBacktestRequestItemDTO item : requestItems) {
+            if (!item.isValid()) {
+                throw new EntityNotFoundException(
+                    "Invalid portfolio item: must have either stockId or (customStockName + annualReturnRate)");
+            }
+        }
+
         // 전체 포트폴리오 월별 수익률을 누적할 Map
         Map<LocalDate, Float> portfolioMonthlyRor = new HashMap<>();
 
@@ -66,8 +75,9 @@ public class PortfolioBacktestService {
         LocalDate startMonth = startDate.withDayOfMonth(1);
         LocalDate endMonth = endDate.withDayOfMonth(1);
 
-        // 1. 모든 주식 ID를 한 번에 조회하여 N+1 쿼리 문제 해결
+        // 1. 기존 주식 ID 조회 (사용자 정의 종목이 아닌 것들만)
         List<Integer> stockIds = requestItems.stream()
+                .filter(item -> !item.isCustomStock())
                 .map(PortfolioBacktestRequestItemDTO::getStockId)
                 .toList();
         
@@ -80,19 +90,41 @@ public class PortfolioBacktestService {
         Map<Integer, Stock> stockMap = stocks.stream()
                 .collect(java.util.stream.Collectors.toMap(Stock::getId, stock -> stock));
 
-        for (PortfolioBacktestRequestItemDTO item : requestItems) {
-            // 주식 엔티티를 Map에서 조회
-            Stock stock = stockMap.get(item.getStockId());
+        // 2. 배치로 모든 주식 데이터 조회 (N+1 Query 방지)
+        List<Stock> stocksToQuery = requestItems.stream()
+                .filter(item -> !item.isCustomStock())
+                .map(item -> stockMap.get(item.getStockId()))
+                .filter(stock -> stock != null)
+                .collect(Collectors.toList());
+        
+        Map<Stock, Map<LocalDate, Float>> stockMonthlyRorCache = 
+                calculateAllStockMonthlyRor(stocksToQuery, startDate, endDate);
 
-            // 2. 해당 주식의 월별 수익률 계산
-            Map<LocalDate, Float> stockMonthlyRor = calculateStockMonthlyRor(stock, startDate, endDate);
+        for (PortfolioBacktestRequestItemDTO item : requestItems) {
+            Map<LocalDate, Float> stockMonthlyRor;
+            String stockName;
+            
+            if (item.isCustomStock()) {
+                // 2-1. 사용자 정의 종목: 연평균 수익률로부터 월별 수익률 생성
+                stockMonthlyRor = PortfolioCalculator.generateMonthlyRorFromAnnual(
+                    item.getAnnualReturnRate(), startDate, endDate);
+                stockName = item.getCustomStockName();
+            } else {
+                // 2-2. 기존 종목: 캐시된 데이터 사용
+                Stock stock = stockMap.get(item.getStockId());
+                if (stock == null) {
+                    throw new EntityNotFoundException("Stock not found for ID: " + item.getStockId());
+                }
+                stockMonthlyRor = stockMonthlyRorCache.get(stock);
+                stockName = stock.getName();
+            }
 
             // 3. 주식별 누적(복리) 수익률 계산
             float stockTotalRor = PortfolioCalculator.calculateCompoundRor(stockMonthlyRor, startMonth, endMonth);
 
             // 4. 개별 주식 결과 DTO 생성
             PortfolioBacktestResponseItemDTO responseItem = PortfolioBacktestResponseItemDTO.builder()
-                    .name(stock.getName())
+                    .name(stockName)
                     .totalRor(stockTotalRor)
                     .monthlyRor(stockMonthlyRor)
                     .build();
@@ -120,6 +152,49 @@ public class PortfolioBacktestService {
                 .volatility(volatility)
                 .portfolioBacktestResponseItemDTOList(responseItemDTOs)
                 .build();
+    }
+
+    /**
+     * 여러 주식의 월별 수익률을 배치로 계산합니다 (N+1 Query 방지).
+     *
+     * @param stocks    계산할 주식 엔티티 목록
+     * @param startDate 시작 날짜
+     * @param endDate   종료 날짜
+     * @return 주식별 월별 수익률을 담은 Map (주식: 날짜별 수익률)
+     */
+    private Map<Stock, Map<LocalDate, Float>> calculateAllStockMonthlyRor(
+            List<Stock> stocks, LocalDate startDate, LocalDate endDate) {
+        
+        if (stocks.isEmpty()) {
+            return new HashMap<>();
+        }
+        
+        // 한 번의 쿼리로 모든 주식의 데이터 조회
+        List<CalcStockPrice> allCalcPrices = calcStockPriceRepository
+                .findByStockInAndBaseDateBetween(stocks, startDate, endDate);
+        
+        // 주식별로 데이터 그룹화
+        Map<Stock, List<CalcStockPrice>> stockPriceGroups = allCalcPrices.stream()
+                .collect(Collectors.groupingBy(CalcStockPrice::getStock));
+        
+        // 각 주식별로 월별 수익률 계산
+        Map<Stock, Map<LocalDate, Float>> result = new HashMap<>();
+        for (Stock stock : stocks) {
+            Map<LocalDate, Float> stockMonthlyRor = new TreeMap<>();
+            
+            // 해당 주식의 데이터 처리
+            List<CalcStockPrice> stockPrices = stockPriceGroups.getOrDefault(stock, Collections.emptyList());
+            for (CalcStockPrice csp : stockPrices) {
+                stockMonthlyRor.put(csp.getBaseDate(), csp.getMonthlyRor());
+            }
+            
+            // 데이터가 없는 날짜에 대한 보간 처리
+            Map<LocalDate, Float> interpolatedData = interpolationStrategy
+                    .interpolate(stockMonthlyRor, startDate, endDate);
+            result.put(stock, interpolatedData);
+        }
+        
+        return result;
     }
 
     /**
