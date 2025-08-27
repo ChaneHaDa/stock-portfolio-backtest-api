@@ -1,4 +1,4 @@
-package com.chan.stock_portfolio_backtest_api.dto.request;
+package com.chan.stock_portfolio_backtest_api.dto.response;
 
 import com.chan.stock_portfolio_backtest_api.domain.StockPrice;
 import lombok.AllArgsConstructor;
@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class StockPriceRequestDTO {
+public class StockPriceResponseDTO {
     private Integer id;
     private Float closePrice;
     private Float openPrice;
@@ -23,8 +23,8 @@ public class StockPriceRequestDTO {
     private Long issuedCount;
     private LocalDate baseDate;
 
-    public static StockPriceRequestDTO entityToDTO(StockPrice stockPrice) {
-        return StockPriceRequestDTO.builder()
+    public static StockPriceResponseDTO entityToDTO(StockPrice stockPrice) {
+        return StockPriceResponseDTO.builder()
                 .id(stockPrice.getId())
                 .closePrice(stockPrice.getClosePrice())
                 .openPrice(stockPrice.getOpenPrice())

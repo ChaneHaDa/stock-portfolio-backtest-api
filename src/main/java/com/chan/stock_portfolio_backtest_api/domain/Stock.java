@@ -13,14 +13,20 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Table(indexes = {
+	@Index(name = "idx_stock_name", columnList = "name"),
+	@Index(name = "idx_stock_shortcode", columnList = "shortCode")
+})
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
@@ -29,13 +35,14 @@ public class Stock {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
+	@Column(nullable = false, length = 100)
 	private String name;
+	@Column(nullable = false, length = 20)
 	private String shortCode;
-	@Column(unique = true)
+	@Column(unique = true, nullable = false, length = 12)
 	private String isinCode;
+	@Column(length = 50)
 	private String marketCategory;
-	private LocalDate startAt;
-	private LocalDate endAt;
 
 	@OneToMany(mappedBy = "stock", cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default

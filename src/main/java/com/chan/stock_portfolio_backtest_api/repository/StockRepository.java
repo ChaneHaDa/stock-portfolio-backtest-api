@@ -1,6 +1,8 @@
 package com.chan.stock_portfolio_backtest_api.repository;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,4 +22,13 @@ public interface StockRepository extends JpaRepository<Stock, Integer> {
 	List<Stock> findAllByShortCode(String shortCode);
 
 	List<Stock> findAllByIsinCode(String isinCode);
+
+	@Query("SELECT MIN(sp.baseDate) FROM StockPrice sp WHERE sp.stock.id = :stockId")
+	Optional<LocalDate> findFirstTradingDate(@Param("stockId") Integer stockId);
+
+	@Query("SELECT MAX(sp.baseDate) FROM StockPrice sp WHERE sp.stock.id = :stockId")
+	Optional<LocalDate> findLastTradingDate(@Param("stockId") Integer stockId);
+
+	@Query("SELECT MIN(sp.baseDate), MAX(sp.baseDate) FROM StockPrice sp WHERE sp.stock.id = :stockId")
+	Object[] findTradingDateRange(@Param("stockId") Integer stockId);
 }

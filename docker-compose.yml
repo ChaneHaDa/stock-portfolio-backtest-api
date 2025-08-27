@@ -1,13 +1,14 @@
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: mysql
+  postgresql:
+    image: postgres:15
+    container_name: postgresql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: 1234
-      MYSQL_DATABASE: test1
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: test1
     ports:
-      - "3306:3306"
+      - "5432:5432"
 
   redis:
     image: redis:7.2

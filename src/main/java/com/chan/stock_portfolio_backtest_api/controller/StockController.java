@@ -5,6 +5,7 @@ import com.chan.stock_portfolio_backtest_api.dto.response.StockResponseDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.StockSearchResponseDTO;
 import com.chan.stock_portfolio_backtest_api.exception.EntityNotFoundException;
 import com.chan.stock_portfolio_backtest_api.service.StockService;
+import com.chan.stock_portfolio_backtest_api.util.ResponseUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -44,22 +45,13 @@ public class StockController {
             throw new EntityNotFoundException("Stock을 찾을 수 없습니다.");
         }
 
-        ResponseDTO<List<?>> response;
         if (q != null) {
             List<StockSearchResponseDTO> stockSearchResponseDTOList = stockService.findStocksByQuery(q.trim());
-            response = ResponseDTO.<List<?>>builder()
-                    .status("success")
-                    .data(stockSearchResponseDTOList)
-                    .build();
+            return ResponseEntity.ok(ResponseUtil.success(stockSearchResponseDTOList));
         } else {
             List<StockResponseDTO> stockResponseDTOList = stockService.findStocksByParams(name, shortCode, isinCode);
-            response = ResponseDTO.<List<?>>builder()
-                    .status("success")
-                    .data(stockResponseDTOList)
-                    .build();
+            return ResponseEntity.ok(ResponseUtil.success(stockResponseDTOList));
         }
-
-        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "특정 주식 검색", description = "id로 주식 상세 조회")
@@ -74,11 +66,6 @@ public class StockController {
             @NotNull(message = "id는 필수입니다.") Integer id
     ) {
         StockResponseDTO stockResponseDTO = stockService.findStockById(id);
-        ResponseDTO<StockResponseDTO> response = ResponseDTO.<StockResponseDTO>builder()
-                .status("success")
-                .data(stockResponseDTO)
-                .build();
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ResponseUtil.success(stockResponseDTO));
     }
 }

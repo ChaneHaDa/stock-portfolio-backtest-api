@@ -10,10 +10,14 @@ import com.chan.stock_portfolio_backtest_api.service.PortfolioBacktestService;
 import com.chan.stock_portfolio_backtest_api.service.PortfolioService;
 import com.chan.stock_portfolio_backtest_api.util.ResponseUtil;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,10 +35,41 @@ public class PortfolioController {
         this.portfolioService = portfolioService;
     }
 
-    @Operation(summary = "포트폴리오 백테스팅", description = "포트폴리오 백테스팅 결과를 반환합니다.")
+    @Operation(
+            summary = "포트폴리오 백테스팅", 
+            description = "포트폴리오 구성과 기간을 입력받아 백테스팅 결과를 계산합니다. 주식 가격 데이터를 기반으로 수익률, 최대 손실 등의 지표를 제공합니다."
+    )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "백테스팅 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 입력값")
+            @ApiResponse(
+                    responseCode = "200", 
+                    description = "백테스팅 성공",
+                    content = @Content(
+                            schema = @Schema(implementation = ResponseDTO.class),
+                            examples = @ExampleObject(
+                                    value = "{\"status\":\"success\",\"data\":{\"totalReturn\":15.5,\"totalReturnRate\":0.155,\"maxDrawdown\":-8.2}}"
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400", 
+                    description = "잘못된 입력값",
+                    content = @Content(
+                            schema = @Schema(implementation = ResponseDTO.class),
+                            examples = @ExampleObject(
+                                    value = "{\"status\":\"error\",\"code\":\"VALIDATION_FAILED\",\"message\":\"입력값 검증 실패\",\"data\":{\"startDate\":\"시작일은 필수입니다.\"}}"
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404", 
+                    description = "주식 정보를 찾을 수 없음",
+                    content = @Content(
+                            schema = @Schema(implementation = ResponseDTO.class),
+                            examples = @ExampleObject(
+                                    value = "{\"status\":\"error\",\"code\":\"STOCK_NOT_FOUND\",\"message\":\"요청된 주식을 찾을 수 없습니다.\"}"
+                            )
+                    )
+            )
     })
     @PostMapping("/backtest")
     public ResponseEntity<ResponseDTO<PortfolioBacktestResponseDTO>> createBacktest(
@@ -55,7 +90,7 @@ public class PortfolioController {
             @RequestBody @Valid PortfolioRequestDTO portfolioRequestDTO
     ) {
         PortfolioResponseDTO savedPortfolio = portfolioService.createPortfolio(portfolioRequestDTO);
-        return ResponseEntity.ok(ResponseUtil.success(savedPortfolio));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseUtil.success(savedPortfolio));
     }
 
     @Operation(summary = "사용자 포트폴리오 리스트 조회", description = "로그인한 사용자가 저장한 모든 포트폴리오 리스트 반환")
@@ -81,7 +116,7 @@ public class PortfolioController {
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<ResponseDTO<?>> getPortfolioDetails(@PathVariable Integer id) {
+    public ResponseEntity<ResponseDTO<PortfolioDetailResponseDTO>> getPortfolioDetails(@PathVariable Integer id) {
         PortfolioDetailResponseDTO portfolioDetailResponseDTO = portfolioService.findPortfolioById(id);
         return ResponseEntity.ok(ResponseUtil.success(portfolioDetailResponseDTO));
     }

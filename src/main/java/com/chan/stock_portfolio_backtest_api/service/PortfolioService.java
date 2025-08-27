@@ -39,6 +39,7 @@ public class PortfolioService {
 	}
 
 	// save
+	@Transactional
 	public PortfolioResponseDTO createPortfolio(PortfolioRequestDTO portfolioRequestDTO) {
 		Users user = authService.getCurrentUser();
 		Portfolio portfolio = Portfolio.builder()
@@ -104,6 +105,7 @@ public class PortfolioService {
 	}
 
 	// delete
+	@Transactional
 	public void deletePortfolio(Integer id) {
 		Portfolio portfolio = portfolioRepository.findById(id).orElseThrow(EntityNotFoundException::new);
 		Users user = authService.getCurrentUser();

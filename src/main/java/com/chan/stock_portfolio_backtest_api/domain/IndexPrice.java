@@ -8,14 +8,19 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Table(indexes = {
+	@Index(name = "idx_indexinfo_basedate", columnList = "index_info_id, baseDate")
+})
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
@@ -36,4 +41,12 @@ public class IndexPrice {
 	@JsonBackReference
 	private IndexInfo indexInfo;
 
+	public void setIndexInfo(IndexInfo indexInfo) {
+		if (this.indexInfo != indexInfo) {
+			this.indexInfo = indexInfo;
+			if (indexInfo != null && !indexInfo.getIndexPriceList().contains(this)) {
+				indexInfo.getIndexPriceList().add(this);
+			}
+		}
+	}
 }

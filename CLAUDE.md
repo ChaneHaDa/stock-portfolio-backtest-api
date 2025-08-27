@@ -13,6 +13,9 @@ This is a Spring Boot REST API for stock portfolio backtesting written in Java 1
 - **Run tests**: `./gradlew test`
 - **Clean build**: `./gradlew clean build`
 - **Generate API documentation**: Built-in Swagger UI available at `/swagger-ui/index.html` when running
+- **Run Flyway migrations**: Automatically executed on startup when `spring.flyway.enabled=true`
+- **Validate migrations**: `./gradlew flywayValidate`
+- **Show migration info**: `./gradlew flywayInfo`
 
 ## Architecture and Key Components
 
@@ -36,9 +39,13 @@ This is a Spring Boot REST API for stock portfolio backtesting written in Java 1
 - Spring Security configuration in `SecurityConfig`
 
 ### Data Management
-- Supports both H2 (dev) and MySQL (prod) databases
+- Supports both H2 (dev) and PostgreSQL (prod) databases
 - Redis integration for email verification and caching
 - Environment-specific configurations in `application-dev.properties` and `application-prod.properties`
+- **Database Migration**: Flyway for version-controlled database schema management
+  - Migration scripts in `src/main/resources/db/migration/`
+  - Naming convention: `V{version}__{description}.sql` (e.g., `V1__Create_initial_schema.sql`)
+  - Enabled in production by default, disabled in development (using JPA DDL auto-update)
 
 ## Configuration
 

@@ -3,6 +3,7 @@ package com.chan.stock_portfolio_backtest_api.controller;
 import com.chan.stock_portfolio_backtest_api.dto.response.IndexPriceResponseDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.ResponseDTO;
 import com.chan.stock_portfolio_backtest_api.service.IndexPriceService;
+import com.chan.stock_portfolio_backtest_api.util.ResponseUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -57,11 +58,6 @@ public class IndexPriceController {
             indexPriceResponseDTOList = List.of(indexPriceResponseDTOList.get(indexPriceResponseDTOList.size() - 1));
         }
 
-        ResponseDTO<List<IndexPriceResponseDTO>> response = ResponseDTO.<List<IndexPriceResponseDTO>>builder()
-                .status("success")
-                .data(indexPriceResponseDTOList)
-                .build();
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ResponseUtil.success(indexPriceResponseDTOList));
     }
 }

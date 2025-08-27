@@ -8,14 +8,19 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Table(indexes = {
+	@Index(name = "idx_calcstock_basedate", columnList = "stock_id, baseDate")
+})
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -33,5 +38,14 @@ public class CalcStockPrice {
 	@JoinColumn(name = "stock_id")
 	@JsonBackReference
 	private Stock stock;
+
+	public void setStock(Stock stock) {
+		if (this.stock != stock) {
+			this.stock = stock;
+			if (stock != null && !stock.getCalcStockPriceList().contains(this)) {
+				stock.getCalcStockPriceList().add(this);
+			}
+		}
+	}
 }
 

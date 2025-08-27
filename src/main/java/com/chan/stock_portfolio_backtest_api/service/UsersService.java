@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.chan.stock_portfolio_backtest_api.constants.Role;
 import com.chan.stock_portfolio_backtest_api.domain.Users;
@@ -29,6 +30,7 @@ public class UsersService {
 		this.verificationService = verificationService;
 	}
 
+	@Transactional
 	public UsersResponseDTO createUser(UsersRequestDTO dto) {
 		if (usersRepository.existsByUsername(dto.getUsername())) {
 			throw new UserAlreadyExistsException("이미 사용 중인 아이디입니다.");
@@ -72,7 +74,7 @@ public class UsersService {
 
 	public void requestEmailVerification(String email) {
 		if (!isEmailAvailable(email)) {
-			throw new IllegalArgumentException("이미 등록되었거나 인증 중인 이메일입니다.");
+			throw new UserAlreadyExistsException("이미 등록되었거나 인증 중인 이메일입니다.");
 		}
 
 		String token = UUID.randomUUID().toString();

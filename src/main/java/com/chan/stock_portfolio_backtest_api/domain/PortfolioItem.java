@@ -2,6 +2,7 @@ package com.chan.stock_portfolio_backtest_api.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,6 +24,7 @@ public class PortfolioItem {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
+	@Column(nullable = false)
 	private Float weight;
 
 	@ManyToOne
@@ -35,6 +37,11 @@ public class PortfolioItem {
 	private Portfolio portfolio;
 
 	public void setPortfolio(Portfolio portfolio) {
-		this.portfolio = portfolio;
+		if (this.portfolio != portfolio) {
+			this.portfolio = portfolio;
+			if (portfolio != null && !portfolio.getPortfolioItemList().contains(this)) {
+				portfolio.getPortfolioItemList().add(this);
+			}
+		}
 	}
 }

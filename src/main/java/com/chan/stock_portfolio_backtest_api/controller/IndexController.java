@@ -6,6 +6,7 @@ import com.chan.stock_portfolio_backtest_api.dto.response.IndexInfoResponseDTO;
 import com.chan.stock_portfolio_backtest_api.dto.response.ResponseDTO;
 import com.chan.stock_portfolio_backtest_api.service.IndexBacktestService;
 import com.chan.stock_portfolio_backtest_api.service.IndexInfoService;
+import com.chan.stock_portfolio_backtest_api.util.ResponseUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -39,11 +40,7 @@ public class IndexController {
             @NotNull(message = "id는 필수 입력값입니다.") Integer id
     ) {
         IndexInfoResponseDTO indexInfoResponseDTO = indexInfoService.findIndexInfoById(id);
-        ResponseDTO<IndexInfoResponseDTO> response = ResponseDTO.<IndexInfoResponseDTO>builder()
-                .status("success")
-                .data(indexInfoResponseDTO)
-                .build();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ResponseUtil.success(indexInfoResponseDTO));
     }
 
     @Operation(summary = "지수 기반 백테스트")
@@ -59,13 +56,7 @@ public class IndexController {
             @ModelAttribute @Valid IndexBacktestRequestDTO indexBacktestRequestDTO
     ) {
         IndexBacktestResponseDTO backtestResult = indexBacktestService.calculateIndexBacktest(indexBacktestRequestDTO, id);
-
-        ResponseDTO<IndexBacktestResponseDTO> response = ResponseDTO.<IndexBacktestResponseDTO>builder()
-                .status("success")
-                .data(backtestResult)
-                .build();
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ResponseUtil.success(backtestResult));
     }
 
 }
