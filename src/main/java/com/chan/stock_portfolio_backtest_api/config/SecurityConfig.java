@@ -42,6 +42,9 @@ public class SecurityConfig {
                         "/swagger-resources/**",
                         "/h2-console/**",
 
+                        // actuator endpoints
+                        "/actuator/**",
+
                         //api
                         "/api/v1/auth/**",
                         "/api/v1/indexs/**",
