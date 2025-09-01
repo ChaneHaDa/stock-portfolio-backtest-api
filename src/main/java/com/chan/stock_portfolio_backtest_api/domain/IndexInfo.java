@@ -1,6 +1,5 @@
 package com.chan.stock_portfolio_backtest_api.domain;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,8 +30,6 @@ public class IndexInfo {
 	private Integer id;
 	private String name;
 	private String category;
-	private LocalDate startAt;
-	private LocalDate endAt;
 
 	@OneToMany(mappedBy = "indexInfo", cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
