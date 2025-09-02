@@ -147,8 +147,10 @@ public class PortfolioService {
 			
 			for (PortfolioItemRequestDTO itemDTO : portfolioRequestDTO.getPortfolioItemRequestDTOList()) {
 
-				Stock stock = stockRepository.findById(itemDTO.getStockId())
-					.orElseThrow(() -> new StockNotFoundException(itemDTO.getStockId()));
+				Stock stock = stockMap.get(itemDTO.getStockId());
+				if (stock == null) {
+					throw new StockNotFoundException(itemDTO.getStockId());
+				}
 				PortfolioItem newItem = PortfolioItemRequestDTO.DTOToEntity(itemDTO, stock);
 				newItems.add(newItem);
 			}
