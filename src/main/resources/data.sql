@@ -1,3 +1,42 @@
+-- Index Info 테스트 데이터
+INSERT INTO index_info (id, name, category) VALUES (1, 'KOSPI', 'DOMESTIC');
+INSERT INTO index_info (id, name, category) VALUES (2, 'KOSDAQ', 'DOMESTIC');
+INSERT INTO index_info (id, name, category) VALUES (3, 'S&P 500', 'FOREIGN');
+
+-- Index Price 테스트 데이터 (2020년 1월 데이터)
+INSERT INTO index_price (base_date, close_price, open_price, low_price, high_price, yearly_diff, index_info_id)
+VALUES ('20200102', 2175.17, 2176.68, 2168.65, 2180.89, 8.46, 1);
+INSERT INTO index_price (base_date, close_price, open_price, low_price, high_price, yearly_diff, index_info_id)
+VALUES ('20200103', 2176.54, 2175.17, 2174.36, 2187.93, 0.06, 1);
+INSERT INTO index_price (base_date, close_price, open_price, low_price, high_price, yearly_diff, index_info_id)
+VALUES ('20200106', 2155.07, 2165.67, 2151.20, 2170.37, -0.99, 1);
+INSERT INTO index_price (base_date, close_price, open_price, low_price, high_price, yearly_diff, index_info_id)
+VALUES ('20200107', 2151.31, 2155.07, 2140.34, 2159.50, -0.17, 1);
+INSERT INTO index_price (base_date, close_price, open_price, low_price, high_price, yearly_diff, index_info_id)
+VALUES ('20200108', 2145.19, 2147.72, 2133.82, 2153.27, -0.28, 1);
+
+INSERT INTO index_price (base_date, close_price, open_price, low_price, high_price, yearly_diff, index_info_id)
+VALUES ('20200102', 675.26, 675.65, 673.12, 678.54, 3.89, 2);
+INSERT INTO index_price (base_date, close_price, open_price, low_price, high_price, yearly_diff, index_info_id)
+VALUES ('20200103', 678.25, 675.26, 674.89, 681.43, 0.44, 2);
+INSERT INTO index_price (base_date, close_price, open_price, low_price, high_price, yearly_diff, index_info_id)
+VALUES ('20200106', 672.15, 676.54, 670.23, 678.76, -0.90, 2);
+INSERT INTO index_price (base_date, close_price, open_price, low_price, high_price, yearly_diff, index_info_id)
+VALUES ('20200107', 668.91, 672.15, 665.47, 674.32, -0.48, 2);
+INSERT INTO index_price (base_date, close_price, open_price, low_price, high_price, yearly_diff, index_info_id)
+VALUES ('20200108', 665.43, 667.89, 662.11, 670.25, -0.52, 2);
+
+INSERT INTO index_price (base_date, close_price, open_price, low_price, high_price, yearly_diff, index_info_id)
+VALUES ('20200102', 3257.85, 3244.67, 3235.53, 3258.14, 1.35, 3);
+INSERT INTO index_price (base_date, close_price, open_price, low_price, high_price, yearly_diff, index_info_id)
+VALUES ('20200103', 3234.85, 3226.36, 3214.67, 3246.15, -0.71, 3);
+INSERT INTO index_price (base_date, close_price, open_price, low_price, high_price, yearly_diff, index_info_id)
+VALUES ('20200106', 3246.28, 3217.55, 3205.43, 3246.84, 0.35, 3);
+INSERT INTO index_price (base_date, close_price, open_price, low_price, high_price, yearly_diff, index_info_id)
+VALUES ('20200107', 3237.18, 3241.86, 3232.80, 3244.67, -0.28, 3);
+INSERT INTO index_price (base_date, close_price, open_price, low_price, high_price, yearly_diff, index_info_id)
+VALUES ('20200108', 3253.05, 3238.59, 3236.67, 3259.63, 0.49, 3);
+
 INSERT INTO stock (id, name, short_code, isin_code, market_category)
 VALUES (4, 'LG전자', '066570', 'KR7066570003', 'KOSPI');
 INSERT INTO stock (id, name, short_code, isin_code, market_category)

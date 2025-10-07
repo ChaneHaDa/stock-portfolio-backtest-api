@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.micrometer.core.annotation.Timed;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -71,6 +72,7 @@ public class PortfolioController {
                     )
             )
     })
+    @Timed(value = "portfolio.backtest.execution", description = "Portfolio backtest execution time")
     @PostMapping("/backtest")
     public ResponseEntity<ResponseDTO<PortfolioBacktestResponseDTO>> createBacktest(
             @RequestBody @Valid PortfolioBacktestRequestDTO portfolioBacktestRequestDTO
@@ -85,6 +87,7 @@ public class PortfolioController {
             @ApiResponse(responseCode = "400", description = "잘못된 입력값으로 저장 실패"),
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
+    @Timed(value = "portfolio.save", description = "Portfolio save operation time")
     @PostMapping
     public ResponseEntity<ResponseDTO<PortfolioResponseDTO>> savePortfolio(
             @RequestBody @Valid PortfolioRequestDTO portfolioRequestDTO

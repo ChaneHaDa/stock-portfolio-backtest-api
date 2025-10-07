@@ -11,9 +11,9 @@ services:
       - "5432:5432"
 
   redis:
-    image: redis:7.2
+    image: redis:7.0
     container_name: redis
     restart: unless-stopped
     ports:
       - "6379:6379"
-    command: ["redis-server", "--requirepass", ""] 
+    command: [ "redis-server", "--requirepass", "" ]

@@ -15,6 +15,8 @@ import com.chan.stock_portfolio_backtest_api.strategy.DataInterpolationStrategy;
 import com.chan.stock_portfolio_backtest_api.util.PortfolioCalculator;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,14 +32,17 @@ public class PortfolioBacktestService {
     private final StockRepository stockRepository;
     private final CalcStockPriceRepository calcStockPriceRepository;
     private final DataInterpolationStrategy interpolationStrategy;
+    private final MetricsService metricsService;
 
     public PortfolioBacktestService(
             StockRepository stockRepository,
             CalcStockPriceRepository calcStockPriceRepository,
-            DataInterpolationStrategy interpolationStrategy) {
+            DataInterpolationStrategy interpolationStrategy,
+            MetricsService metricsService) {
         this.stockRepository = stockRepository;
         this.calcStockPriceRepository = calcStockPriceRepository;
         this.interpolationStrategy = interpolationStrategy;
+        this.metricsService = metricsService;
     }
 
     /**
@@ -49,12 +54,17 @@ public class PortfolioBacktestService {
      * @throws EntityNotFoundException  요청된 주식이 존재하지 않는 경우
      */
     public PortfolioBacktestResponseDTO calculatePortfolio(PortfolioBacktestRequestDTO request) {
-        LocalDate startDate = request.getStartDate();
-        LocalDate endDate = request.getEndDate();
+        Instant start = Instant.now();
+        metricsService.incrementActiveBacktests();
+        
+        try {
+            LocalDate startDate = request.getStartDate();
+            LocalDate endDate = request.getEndDate();
 
-        if (startDate.isAfter(endDate)) {
-            throw new InvalidDateRangeException(AppConstants.DATE_VALIDATION_ERROR);
-        }
+            if (startDate.isAfter(endDate)) {
+                metricsService.recordBacktestExecuted("failed");
+                throw new InvalidDateRangeException(AppConstants.DATE_VALIDATION_ERROR);
+            }
 
         List<PortfolioBacktestRequestItemDTO> requestItems = request.getPortfolioBacktestRequestItemDTOList();
 
@@ -143,15 +153,24 @@ public class PortfolioBacktestService {
         // 8. 변동성 계산 (전체 포트폴리오 월별 수익률 기반)
         float volatility = PortfolioCalculator.calculateVolatility(portfolioMonthlyRor);
 
-        return PortfolioBacktestResponseDTO.builder()
-                .portfolioInput(request)
-                .totalRor(totalRor)
-                .totalAmount((long) (request.getAmount() * (totalRor / AppConstants.PERCENTAGE_CONVERSION_FACTOR + 1)))
+            metricsService.recordBacktestExecuted("success");
+            return PortfolioBacktestResponseDTO.builder()
+                    .portfolioInput(request)
+                    .totalRor(totalRor)
+                    .totalAmount((long) (request.getAmount() * (totalRor / AppConstants.PERCENTAGE_CONVERSION_FACTOR + 1)))
                 .monthlyRor(new TreeMap<>(portfolioMonthlyRor))
                 .monthlyAmount(monthlyAmount)
                 .volatility(volatility)
                 .portfolioBacktestResponseItemDTOList(responseItemDTOs)
                 .build();
+        } catch (Exception e) {
+            metricsService.recordBacktestExecuted("failed");
+            throw e;
+        } finally {
+            metricsService.decrementActiveBacktests();
+            Duration duration = Duration.between(start, Instant.now());
+            metricsService.recordBacktestDuration(duration);
+        }
     }
 
     /**
