@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(indexes = {
-	@Index(name = "idx_calcstock_basedate", columnList = "stock_id, baseDate")
+	@Index(name = "idx_calcstock_basedate", columnList = "stock_id, base_date")
 })
 @Getter
 @NoArgsConstructor
@@ -48,4 +48,3 @@ public class CalcStockPrice {
 		}
 	}
 }
-

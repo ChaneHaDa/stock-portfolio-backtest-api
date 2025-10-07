@@ -1,6 +1,5 @@
 package com.chan.stock_portfolio_backtest_api.domain;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +24,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(indexes = {
 	@Index(name = "idx_stock_name", columnList = "name"),
-	@Index(name = "idx_stock_shortcode", columnList = "shortCode")
+	@Index(name = "idx_stock_shortcode", columnList = "short_code")
 })
 @Getter
 @AllArgsConstructor
