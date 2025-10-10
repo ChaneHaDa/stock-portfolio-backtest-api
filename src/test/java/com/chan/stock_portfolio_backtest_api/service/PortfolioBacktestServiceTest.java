@@ -9,7 +9,6 @@ import com.chan.stock_portfolio_backtest_api.exception.EntityNotFoundException;
 import com.chan.stock_portfolio_backtest_api.exception.InvalidDateRangeException;
 import com.chan.stock_portfolio_backtest_api.repository.CalcStockPriceRepository;
 import com.chan.stock_portfolio_backtest_api.repository.StockRepository;
-import com.chan.stock_portfolio_backtest_api.strategy.DataInterpolationStrategy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,7 +34,7 @@ class PortfolioBacktestServiceTest {
     private CalcStockPriceRepository calcStockPriceRepository;
 
     @Mock
-    private DataInterpolationStrategy interpolationStrategy;
+    private MetricsService metricsService;
 
     @InjectMocks
     private PortfolioBacktestService portfolioBacktestService;
@@ -105,13 +104,6 @@ class PortfolioBacktestServiceTest {
         when(calcStockPriceRepository.findByStockInAndBaseDateBetween(anyList(), any(), any()))
                 .thenReturn(Arrays.asList(calcPrice1, calcPrice2, calcPrice1, calcPrice2));
 
-        Map<LocalDate, Float> interpolatedData = new TreeMap<>();
-        interpolatedData.put(LocalDate.of(2023, 1, 1), 5.0f);
-        interpolatedData.put(LocalDate.of(2023, 2, 1), 3.0f);
-
-        when(interpolationStrategy.interpolate(any(), any(), any()))
-                .thenReturn(interpolatedData);
-
         // When
         PortfolioBacktestResponseDTO result = portfolioBacktestService.calculatePortfolio(requestDTO);
 
@@ -127,7 +119,6 @@ class PortfolioBacktestServiceTest {
         // Verify interactions
         verify(stockRepository).findAllById(Arrays.asList(1, 2));
         verify(calcStockPriceRepository).findByStockInAndBaseDateBetween(anyList(), any(), any());
-        verify(interpolationStrategy, times(2)).interpolate(any(), any(), any());
     }
 
     @Test
@@ -220,13 +211,6 @@ class PortfolioBacktestServiceTest {
         when(calcStockPriceRepository.findByStockInAndBaseDateBetween(anyList(), any(), any()))
                 .thenReturn(Arrays.asList(calcPrice1, calcPrice2));
 
-        Map<LocalDate, Float> interpolatedData = new TreeMap<>();
-        interpolatedData.put(LocalDate.of(2023, 1, 1), 5.0f);
-        interpolatedData.put(LocalDate.of(2023, 2, 1), 3.0f);
-
-        when(interpolationStrategy.interpolate(any(), any(), any()))
-                .thenReturn(interpolatedData);
-
         // When
         PortfolioBacktestResponseDTO result = portfolioBacktestService.calculatePortfolio(requestDTO);
 
@@ -237,9 +221,58 @@ class PortfolioBacktestServiceTest {
 
         // Verify interactions
         verify(stockRepository).findAllById(Arrays.asList(1));
-        verify(calcStockPriceRepository).findByStockInAndBaseDateBetween(anyList(), 
+        verify(calcStockPriceRepository).findByStockInAndBaseDateBetween(anyList(),
                 eq(LocalDate.of(2023, 1, 1)), eq(LocalDate.of(2023, 2, 1)));
-        verify(interpolationStrategy).interpolate(any(), 
-                eq(LocalDate.of(2023, 1, 1)), eq(LocalDate.of(2023, 2, 1)));
+    }
+
+    @Test
+    void calculatePortfolio_MissingData_ReallocatedToOtherStocks() {
+        // Given
+        PortfolioBacktestRequestItemDTO item1 = PortfolioBacktestRequestItemDTO.builder()
+                .stockId(1)
+                .weight(0.5f)
+                .build();
+        PortfolioBacktestRequestItemDTO item2 = PortfolioBacktestRequestItemDTO.builder()
+                .stockId(2)
+                .weight(0.5f)
+                .build();
+
+        PortfolioBacktestRequestDTO request = PortfolioBacktestRequestDTO.builder()
+                .amount(1_000_000L)
+                .startDate(LocalDate.of(2023, 1, 1))
+                .endDate(LocalDate.of(2023, 2, 1))
+                .portfolioBacktestRequestItemDTOList(Arrays.asList(item1, item2))
+                .build();
+
+        when(stockRepository.findAllById(Arrays.asList(1, 2)))
+                .thenReturn(Arrays.asList(testStock1, testStock2));
+
+        CalcStockPrice s1Jan = CalcStockPrice.builder()
+                .stock(testStock1)
+                .baseDate(LocalDate.of(2023, 1, 1))
+                .monthlyRor(2.0f)
+                .build();
+        CalcStockPrice s1Feb = CalcStockPrice.builder()
+                .stock(testStock1)
+                .baseDate(LocalDate.of(2023, 2, 1))
+                .monthlyRor(4.0f)
+                .build();
+        CalcStockPrice s2Jan = CalcStockPrice.builder()
+                .stock(testStock2)
+                .baseDate(LocalDate.of(2023, 1, 1))
+                .monthlyRor(6.0f)
+                .build();
+
+        when(calcStockPriceRepository.findByStockInAndBaseDateBetween(anyList(), any(), any()))
+                .thenReturn(Arrays.asList(s1Jan, s1Feb, s2Jan));
+
+        // When
+        PortfolioBacktestResponseDTO result = portfolioBacktestService.calculatePortfolio(request);
+
+        // Then
+        Map<LocalDate, Float> portfolioMonthlyRor = result.getMonthlyRor();
+        assertEquals(4.0f, portfolioMonthlyRor.get(LocalDate.of(2023, 1, 1)), 0.0001f);
+        assertEquals(4.0f, portfolioMonthlyRor.get(LocalDate.of(2023, 2, 1)), 0.0001f);
+        assertEquals(8.16f, result.getTotalRor(), 0.05f);
     }
 }

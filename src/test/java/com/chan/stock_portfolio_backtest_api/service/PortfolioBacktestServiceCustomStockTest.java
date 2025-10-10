@@ -5,7 +5,6 @@ import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioBacktestReques
 import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioBacktestResponseDTO;
 import com.chan.stock_portfolio_backtest_api.repository.CalcStockPriceRepository;
 import com.chan.stock_portfolio_backtest_api.repository.StockRepository;
-import com.chan.stock_portfolio_backtest_api.strategy.DataInterpolationStrategy;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,7 +26,7 @@ class PortfolioBacktestServiceCustomStockTest {
     private CalcStockPriceRepository calcStockPriceRepository;
     
     @Mock
-    private DataInterpolationStrategy interpolationStrategy;
+    private MetricsService metricsService;
     
     @InjectMocks
     private PortfolioBacktestService portfolioBacktestService;

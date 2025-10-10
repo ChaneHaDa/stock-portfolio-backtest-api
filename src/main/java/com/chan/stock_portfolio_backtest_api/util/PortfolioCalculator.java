@@ -28,29 +28,6 @@ public class PortfolioCalculator {
     }
 
     /**
-     * 각 주식의 월별 수익률(가중치 적용)을 포트폴리오의 월별 수익률에 합산합니다.
-     *
-     * @param portfolioRor 포트폴리오 전체 월별 수익률을 저장할 Map (key: 월 시작일, value: 수익률(%))
-     * @param stockRor     개별 주식의 월별 수익률 Map
-     * @param weight       해당 주식의 포트폴리오 내 투자 비중
-     * @param startMonth   계산 시작 월 (해당 월의 1일)
-     * @param endMonth     계산 종료 월 (해당 월의 1일)
-     */
-    public static void mergeStockIntoPortfolioRor(Map<LocalDate, Float> portfolioRor,
-                                                  Map<LocalDate, Float> stockRor,
-                                                  float weight,
-                                                  LocalDate startMonth,
-                                                  LocalDate endMonth) {
-        LocalDate current = startMonth;
-        while (!current.isAfter(endMonth)) {
-            float monthlyRor = stockRor.getOrDefault(current, 0f);
-            portfolioRor.merge(current, weight * monthlyRor, Float::sum);
-            current = current.plusMonths(1);
-        }
-    }
-
-
-    /**
      * 주어진 월별 수익률 데이터를 이용해 표준편차(변동성)를 계산합니다.
      * 월별 수익률은 백분율로 저장되어 있다고 가정합니다.
      *
