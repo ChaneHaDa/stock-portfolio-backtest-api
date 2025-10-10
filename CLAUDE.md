@@ -30,7 +30,7 @@ This is a Spring Boot REST API for stock portfolio backtesting written in Java 1
 - **Portfolio Management**: `PortfolioService` handles CRUD operations for portfolios and portfolio items
 - **Backtesting Engine**: `PortfolioBacktestService` calculates portfolio performance metrics using historical data
 - **Index Backtesting**: `IndexBacktestService` provides market index comparison functionality
-- **Data Interpolation**: `DataInterpolationStrategy` with `LinearInterpolationStrategy` implementation for missing data points
+- **Missing Data Handling**: Portfolio aggregation reassigns weights to available holdings each month (no interpolation layer)
 - **Portfolio Calculations**: `PortfolioCalculator` utility for financial calculations
 
 ### Security
