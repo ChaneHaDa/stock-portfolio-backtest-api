@@ -1,6 +1,7 @@
 package com.chan.stock_portfolio_backtest_api.util;
 
-import com.chan.stock_portfolio_backtest_api.dto.response.ResponseDTO;
+import com.chan.stock_portfolio_backtest_api.common.dto.ResponseDTO;
+import com.chan.stock_portfolio_backtest_api.common.util.ResponseUtil;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

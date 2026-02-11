@@ -1,7 +1,8 @@
 package com.chan.stock_portfolio_backtest_api.repository;
 
-import com.chan.stock_portfolio_backtest_api.domain.CalcStockPrice;
-import com.chan.stock_portfolio_backtest_api.domain.Stock;
+import com.chan.stock_portfolio_backtest_api.stock.domain.CalcStockPrice;
+import com.chan.stock_portfolio_backtest_api.stock.domain.Stock;
+import com.chan.stock_portfolio_backtest_api.stock.repository.CalcStockPriceRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;

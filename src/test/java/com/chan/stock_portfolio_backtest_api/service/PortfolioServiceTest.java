@@ -1,16 +1,19 @@
 package com.chan.stock_portfolio_backtest_api.service;
 
-import com.chan.stock_portfolio_backtest_api.domain.Portfolio;
-import com.chan.stock_portfolio_backtest_api.domain.PortfolioItem;
-import com.chan.stock_portfolio_backtest_api.domain.Stock;
-import com.chan.stock_portfolio_backtest_api.domain.Users;
-import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioItemRequestDTO;
-import com.chan.stock_portfolio_backtest_api.dto.request.PortfolioRequestDTO;
-import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioDetailResponseDTO;
-import com.chan.stock_portfolio_backtest_api.dto.response.PortfolioResponseDTO;
-import com.chan.stock_portfolio_backtest_api.exception.EntityNotFoundException;
-import com.chan.stock_portfolio_backtest_api.repository.PortfolioRepository;
-import com.chan.stock_portfolio_backtest_api.repository.StockRepository;
+import com.chan.stock_portfolio_backtest_api.portfolio.domain.Portfolio;
+import com.chan.stock_portfolio_backtest_api.portfolio.domain.PortfolioItem;
+import com.chan.stock_portfolio_backtest_api.stock.domain.Stock;
+import com.chan.stock_portfolio_backtest_api.user.domain.Users;
+import com.chan.stock_portfolio_backtest_api.portfolio.dto.PortfolioItemRequestDTO;
+import com.chan.stock_portfolio_backtest_api.portfolio.dto.PortfolioRequestDTO;
+import com.chan.stock_portfolio_backtest_api.portfolio.dto.PortfolioDetailResponseDTO;
+import com.chan.stock_portfolio_backtest_api.portfolio.dto.PortfolioResponseDTO;
+import com.chan.stock_portfolio_backtest_api.common.exception.EntityNotFoundException;
+import com.chan.stock_portfolio_backtest_api.portfolio.repository.PortfolioRepository;
+import com.chan.stock_portfolio_backtest_api.stock.repository.StockRepository;
+import com.chan.stock_portfolio_backtest_api.user.service.AuthService;
+import com.chan.stock_portfolio_backtest_api.user.service.SecurityService;
+import com.chan.stock_portfolio_backtest_api.portfolio.service.PortfolioService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +40,9 @@ class PortfolioServiceTest {
 
     @Mock
     private StockRepository stockRepository;
+
+    @Mock
+    private SecurityService securityService;
 
     @InjectMocks
     private PortfolioService portfolioService;
