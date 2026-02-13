@@ -6,10 +6,6 @@ import com.chan.stock_portfolio_backtest_api.stock.dto.StockSearchResponseDTO;
 import com.chan.stock_portfolio_backtest_api.common.exception.EntityNotFoundException;
 import com.chan.stock_portfolio_backtest_api.stock.service.StockService;
 import com.chan.stock_portfolio_backtest_api.common.util.ResponseUtil;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -19,7 +15,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("api/v1/stocks")
-@Tag(name = "Stock API", description = "주식 정보 및 가격 조회 API")
 @Validated
 public class StockController {
     private final StockService stockService;
@@ -28,12 +23,6 @@ public class StockController {
         this.stockService = stockService;
     }
 
-    @Operation(summary = "주식 id 조회", description = "쿼리로 주식 id 목록 조회")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "조회 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 입력값"),
-            @ApiResponse(responseCode = "404", description = "주식 정보 없음")
-    })
     @GetMapping
     public ResponseEntity<ResponseDTO<?>> getStocksByParams(
             @RequestParam(value = "name", required = false) String name,
@@ -54,12 +43,6 @@ public class StockController {
         }
     }
 
-    @Operation(summary = "특정 주식 검색", description = "id로 주식 상세 조회")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "조회 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청값"),
-            @ApiResponse(responseCode = "404", description = "주식 정보 없음")
-    })
     @GetMapping("/{id}")
     public ResponseEntity<ResponseDTO<StockResponseDTO>> getStocksById(
             @PathVariable("id")

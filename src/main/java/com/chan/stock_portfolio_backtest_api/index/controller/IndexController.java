@@ -21,16 +21,11 @@ import com.chan.stock_portfolio_backtest_api.index.service.IndexBacktestService;
 import com.chan.stock_portfolio_backtest_api.index.service.IndexInfoService;
 import com.chan.stock_portfolio_backtest_api.common.util.ResponseUtil;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 @RestController
 @RequestMapping("api/v1/indexs")
-@Tag(name = "Index API", description = "지수 정보 조회 API")
 @Validated
 public class IndexController {
 	private final IndexInfoService indexInfoService;
@@ -41,12 +36,6 @@ public class IndexController {
 		this.indexBacktestService = indexBacktestService;
 	}
 
-	@Operation(summary = "지수 목록 조회", description = "쿼리로 지수 목록 조회")
-	@ApiResponses({
-		@ApiResponse(responseCode = "200", description = "조회 성공"),
-		@ApiResponse(responseCode = "400", description = "잘못된 입력값"),
-		@ApiResponse(responseCode = "404", description = "지수 정보 없음")
-	})
 	@GetMapping
 	public ResponseEntity<ResponseDTO<?>> getIndexesByParams(
 		@RequestParam(value = "name", required = false) String name,
@@ -66,12 +55,6 @@ public class IndexController {
 		}
 	}
 
-	@Operation(summary = "특정 지수 기본 정보 조회", description = "id로 지수 상세 조회")
-	@ApiResponses({
-		@ApiResponse(responseCode = "200", description = "조회 성공"),
-		@ApiResponse(responseCode = "404", description = "지수 정보 없음"),
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터")
-	})
 	@GetMapping("/{id}")
 	public ResponseEntity<ResponseDTO<IndexInfoResponseDTO>> getIndex(
 		@PathVariable("id")
@@ -81,12 +64,6 @@ public class IndexController {
 		return ResponseEntity.ok(ResponseUtil.success(indexInfoResponseDTO));
 	}
 
-	@Operation(summary = "지수 기반 백테스트")
-	@ApiResponses({
-		@ApiResponse(responseCode = "200", description = "백테스트 성공"),
-		@ApiResponse(responseCode = "400", description = "잘못된 요청"),
-		@ApiResponse(responseCode = "404", description = "지수 정보 없음")
-	})
 	@GetMapping("/{id}/portfolios")
 	public ResponseEntity<ResponseDTO<IndexBacktestResponseDTO>> getIndexPortfolio(
 		@PathVariable("id")
