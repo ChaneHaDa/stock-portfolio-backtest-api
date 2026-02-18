@@ -38,6 +38,7 @@ public class SecurityConfig {
                         // swagger-page
                         "/api-docs/**",
                         "/api/v3/**",
+                        "/openapi.yaml",
                         "/swagger-ui/**",
                         "/swagger-resources/**",
                         "/h2-console/**",
