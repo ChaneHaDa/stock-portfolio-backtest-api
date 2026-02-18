@@ -61,7 +61,7 @@ CREATE TABLE stock_price (
     open_price INTEGER,
     low_price INTEGER,
     high_price INTEGER,
-    trade_quantity INTEGER,
+    trade_quantity BIGINT,
     trade_amount BIGINT,
     issued_count BIGINT,
     base_date DATE,

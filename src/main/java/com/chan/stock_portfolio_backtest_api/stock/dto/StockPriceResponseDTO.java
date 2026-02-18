@@ -18,7 +18,7 @@ public class StockPriceResponseDTO {
     private Float openPrice;
     private Float lowPrice;
     private Float highPrice;
-    private Integer tradeQuantity;
+    private Long tradeQuantity;
     private Long tradeAmount;
     private Long issuedCount;
     private LocalDate baseDate;

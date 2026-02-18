@@ -38,7 +38,7 @@ public class StockPrice {
 	private Float lowPrice;
 	@Column(nullable = false)
 	private Float highPrice;
-	private Integer tradeQuantity;
+	private Long tradeQuantity;
 	private Long tradeAmount;
 	private Long issuedCount;
 	@Column(nullable = false)
