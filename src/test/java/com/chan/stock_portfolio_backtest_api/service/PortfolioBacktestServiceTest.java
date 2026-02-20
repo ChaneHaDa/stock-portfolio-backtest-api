@@ -1,15 +1,14 @@
 package com.chan.stock_portfolio_backtest_api.service;
 
-import com.chan.stock_portfolio_backtest_api.stock.domain.CalcStockPrice;
 import com.chan.stock_portfolio_backtest_api.stock.domain.Stock;
+import com.chan.stock_portfolio_backtest_api.stock.domain.StockPrice;
 import com.chan.stock_portfolio_backtest_api.portfolio.dto.PortfolioBacktestRequestDTO;
 import com.chan.stock_portfolio_backtest_api.portfolio.dto.PortfolioBacktestRequestItemDTO;
 import com.chan.stock_portfolio_backtest_api.portfolio.dto.PortfolioBacktestResponseDTO;
 import com.chan.stock_portfolio_backtest_api.common.exception.EntityNotFoundException;
 import com.chan.stock_portfolio_backtest_api.common.exception.InvalidDateRangeException;
-import com.chan.stock_portfolio_backtest_api.stock.repository.CalcStockPriceRepository;
+import com.chan.stock_portfolio_backtest_api.stock.repository.StockPriceRepository;
 import com.chan.stock_portfolio_backtest_api.stock.repository.StockRepository;
-import com.chan.stock_portfolio_backtest_api.common.strategy.DataInterpolationStrategy;
 import com.chan.stock_portfolio_backtest_api.portfolio.service.PortfolioBacktestService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,10 +32,7 @@ class PortfolioBacktestServiceTest {
     private StockRepository stockRepository;
 
     @Mock
-    private CalcStockPriceRepository calcStockPriceRepository;
-
-    @Mock
-    private DataInterpolationStrategy interpolationStrategy;
+    private StockPriceRepository stockPriceRepository;
 
     @InjectMocks
     private PortfolioBacktestService portfolioBacktestService;
@@ -44,12 +40,10 @@ class PortfolioBacktestServiceTest {
     private PortfolioBacktestRequestDTO requestDTO;
     private Stock testStock1;
     private Stock testStock2;
-    private CalcStockPrice calcPrice1;
-    private CalcStockPrice calcPrice2;
+    private List<StockPrice> testStockPrices;
 
     @BeforeEach
     void setUp() {
-        // Test stocks 설정
         testStock1 = Stock.builder()
                 .id(1)
                 .name("삼성전자")
@@ -62,23 +56,30 @@ class PortfolioBacktestServiceTest {
                 .shortCode("000660")
                 .build();
 
-        // Test calc prices 설정
-        LocalDate testDate1 = LocalDate.of(2023, 1, 1);
-        LocalDate testDate2 = LocalDate.of(2023, 2, 1);
+        // 일별 StockPrice 데이터 생성 (2022-12-28 ~ 2023-02-03)
+        // startDate - 7일 부터 조회하므로, 2022-12-26 이후 데이터가 필요
+        testStockPrices = new ArrayList<>();
 
-        calcPrice1 = CalcStockPrice.builder()
-                .stock(testStock1)
-                .baseDate(testDate1)
-                .monthlyRor(5.0f)
-                .build();
+        // Stock1 일별 데이터 (종가 기반)
+        testStockPrices.add(StockPrice.builder().stock(testStock1).baseDate(LocalDate.of(2022, 12, 28)).closePrice(100.0f).openPrice(100.0f).lowPrice(99.0f).highPrice(101.0f).build());
+        testStockPrices.add(StockPrice.builder().stock(testStock1).baseDate(LocalDate.of(2022, 12, 29)).closePrice(101.0f).openPrice(100.0f).lowPrice(99.0f).highPrice(102.0f).build());
+        testStockPrices.add(StockPrice.builder().stock(testStock1).baseDate(LocalDate.of(2022, 12, 30)).closePrice(102.0f).openPrice(101.0f).lowPrice(100.0f).highPrice(103.0f).build());
+        testStockPrices.add(StockPrice.builder().stock(testStock1).baseDate(LocalDate.of(2023, 1, 2)).closePrice(103.0f).openPrice(102.0f).lowPrice(101.0f).highPrice(104.0f).build());
+        testStockPrices.add(StockPrice.builder().stock(testStock1).baseDate(LocalDate.of(2023, 1, 3)).closePrice(105.0f).openPrice(103.0f).lowPrice(102.0f).highPrice(106.0f).build());
+        testStockPrices.add(StockPrice.builder().stock(testStock1).baseDate(LocalDate.of(2023, 1, 4)).closePrice(104.0f).openPrice(105.0f).lowPrice(103.0f).highPrice(106.0f).build());
+        testStockPrices.add(StockPrice.builder().stock(testStock1).baseDate(LocalDate.of(2023, 2, 1)).closePrice(108.0f).openPrice(106.0f).lowPrice(105.0f).highPrice(109.0f).build());
+        testStockPrices.add(StockPrice.builder().stock(testStock1).baseDate(LocalDate.of(2023, 2, 2)).closePrice(110.0f).openPrice(108.0f).lowPrice(107.0f).highPrice(111.0f).build());
 
-        calcPrice2 = CalcStockPrice.builder()
-                .stock(testStock1)
-                .baseDate(testDate2)
-                .monthlyRor(3.0f)
-                .build();
+        // Stock2 일별 데이터
+        testStockPrices.add(StockPrice.builder().stock(testStock2).baseDate(LocalDate.of(2022, 12, 28)).closePrice(200.0f).openPrice(200.0f).lowPrice(198.0f).highPrice(202.0f).build());
+        testStockPrices.add(StockPrice.builder().stock(testStock2).baseDate(LocalDate.of(2022, 12, 29)).closePrice(202.0f).openPrice(200.0f).lowPrice(199.0f).highPrice(203.0f).build());
+        testStockPrices.add(StockPrice.builder().stock(testStock2).baseDate(LocalDate.of(2022, 12, 30)).closePrice(204.0f).openPrice(202.0f).lowPrice(201.0f).highPrice(205.0f).build());
+        testStockPrices.add(StockPrice.builder().stock(testStock2).baseDate(LocalDate.of(2023, 1, 2)).closePrice(206.0f).openPrice(204.0f).lowPrice(203.0f).highPrice(207.0f).build());
+        testStockPrices.add(StockPrice.builder().stock(testStock2).baseDate(LocalDate.of(2023, 1, 3)).closePrice(208.0f).openPrice(206.0f).lowPrice(205.0f).highPrice(209.0f).build());
+        testStockPrices.add(StockPrice.builder().stock(testStock2).baseDate(LocalDate.of(2023, 1, 4)).closePrice(207.0f).openPrice(208.0f).lowPrice(206.0f).highPrice(209.0f).build());
+        testStockPrices.add(StockPrice.builder().stock(testStock2).baseDate(LocalDate.of(2023, 2, 1)).closePrice(212.0f).openPrice(210.0f).lowPrice(209.0f).highPrice(213.0f).build());
+        testStockPrices.add(StockPrice.builder().stock(testStock2).baseDate(LocalDate.of(2023, 2, 2)).closePrice(215.0f).openPrice(212.0f).lowPrice(211.0f).highPrice(216.0f).build());
 
-        // Test request DTO 설정
         PortfolioBacktestRequestItemDTO item1 = PortfolioBacktestRequestItemDTO.builder()
                 .stockId(1)
                 .weight(0.6f)
@@ -103,15 +104,8 @@ class PortfolioBacktestServiceTest {
         when(stockRepository.findAllById(anyList()))
                 .thenReturn(Arrays.asList(testStock1, testStock2));
 
-        when(calcStockPriceRepository.findByStockInAndBaseDateBetween(anyList(), any(), any()))
-                .thenReturn(Arrays.asList(calcPrice1, calcPrice2, calcPrice1, calcPrice2));
-
-        Map<LocalDate, Float> interpolatedData = new TreeMap<>();
-        interpolatedData.put(LocalDate.of(2023, 1, 1), 5.0f);
-        interpolatedData.put(LocalDate.of(2023, 2, 1), 3.0f);
-
-        when(interpolationStrategy.interpolate(any(), any(), any()))
-                .thenReturn(interpolatedData);
+        when(stockPriceRepository.findByStockInAndBaseDateBetween(anyList(), any(), any()))
+                .thenReturn(testStockPrices);
 
         // When
         PortfolioBacktestResponseDTO result = portfolioBacktestService.calculatePortfolio(requestDTO);
@@ -127,8 +121,7 @@ class PortfolioBacktestServiceTest {
 
         // Verify interactions
         verify(stockRepository).findAllById(Arrays.asList(1, 2));
-        verify(calcStockPriceRepository).findByStockInAndBaseDateBetween(anyList(), any(), any());
-        verify(interpolationStrategy, times(2)).interpolate(any(), any(), any());
+        verify(stockPriceRepository).findByStockInAndBaseDateBetween(anyList(), any(), any());
     }
 
     @Test
@@ -149,16 +142,15 @@ class PortfolioBacktestServiceTest {
 
         assertEquals("Start date must not be after end date.", exception.getMessage());
 
-        // Verify no repository calls were made
         verify(stockRepository, never()).findAllById(any());
-        verify(calcStockPriceRepository, never()).findByStockInAndBaseDateBetween(anyList(), any(), any());
+        verify(stockPriceRepository, never()).findByStockInAndBaseDateBetween(anyList(), any(), any());
     }
 
     @Test
     void calculatePortfolio_StocksNotFound_ShouldThrowEntityNotFoundException() {
         // Given
         when(stockRepository.findAllById(anyList()))
-                .thenReturn(Arrays.asList(testStock1)); // Only one stock returned, but two requested
+                .thenReturn(Arrays.asList(testStock1));
 
         // When & Then
         EntityNotFoundException exception = assertThrows(
@@ -168,9 +160,8 @@ class PortfolioBacktestServiceTest {
 
         assertEquals("Some stocks not found", exception.getMessage());
 
-        // Verify repository call was made
         verify(stockRepository).findAllById(Arrays.asList(1, 2));
-        verify(calcStockPriceRepository, never()).findByStockInAndBaseDateBetween(anyList(), any(), any());
+        verify(stockPriceRepository, never()).findByStockInAndBaseDateBetween(anyList(), any(), any());
     }
 
     @Test
@@ -195,9 +186,8 @@ class PortfolioBacktestServiceTest {
         assertNotNull(result.getPortfolioBacktestResponseItemDTOList());
         assertEquals(0, result.getPortfolioBacktestResponseItemDTOList().size());
 
-        // Verify interactions
         verify(stockRepository).findAllById(Collections.emptyList());
-        verify(calcStockPriceRepository, never()).findByStockInAndBaseDateBetween(anyList(), any(), any());
+        verify(stockPriceRepository, never()).findByStockInAndBaseDateBetween(anyList(), any(), any());
     }
 
     @Test
@@ -218,15 +208,13 @@ class PortfolioBacktestServiceTest {
         when(stockRepository.findAllById(Arrays.asList(1)))
                 .thenReturn(Arrays.asList(testStock1));
 
-        when(calcStockPriceRepository.findByStockInAndBaseDateBetween(anyList(), any(), any()))
-                .thenReturn(Arrays.asList(calcPrice1, calcPrice2));
+        // Stock1 데이터만 반환
+        List<StockPrice> stock1Prices = testStockPrices.stream()
+                .filter(sp -> sp.getStock().equals(testStock1))
+                .toList();
 
-        Map<LocalDate, Float> interpolatedData = new TreeMap<>();
-        interpolatedData.put(LocalDate.of(2023, 1, 1), 5.0f);
-        interpolatedData.put(LocalDate.of(2023, 2, 1), 3.0f);
-
-        when(interpolationStrategy.interpolate(any(), any(), any()))
-                .thenReturn(interpolatedData);
+        when(stockPriceRepository.findByStockInAndBaseDateBetween(anyList(), any(), any()))
+                .thenReturn(stock1Prices);
 
         // When
         PortfolioBacktestResponseDTO result = portfolioBacktestService.calculatePortfolio(requestDTO);
@@ -236,11 +224,7 @@ class PortfolioBacktestServiceTest {
         assertEquals(1, result.getPortfolioBacktestResponseItemDTOList().size());
         assertEquals("삼성전자", result.getPortfolioBacktestResponseItemDTOList().get(0).getName());
 
-        // Verify interactions
         verify(stockRepository).findAllById(Arrays.asList(1));
-        verify(calcStockPriceRepository).findByStockInAndBaseDateBetween(anyList(), 
-                eq(LocalDate.of(2023, 1, 1)), eq(LocalDate.of(2023, 2, 1)));
-        verify(interpolationStrategy).interpolate(any(), 
-                eq(LocalDate.of(2023, 1, 1)), eq(LocalDate.of(2023, 2, 1)));
+        verify(stockPriceRepository).findByStockInAndBaseDateBetween(anyList(), any(), any());
     }
 }

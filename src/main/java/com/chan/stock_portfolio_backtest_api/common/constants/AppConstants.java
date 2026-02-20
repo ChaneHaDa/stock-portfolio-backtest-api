@@ -9,6 +9,8 @@ public final class AppConstants {
     // 백테스팅 관련 상수
     public static final float PERCENTAGE_CONVERSION_FACTOR = 100.0f;
     public static final float DEFAULT_MONTHLY_ROR = 0.0f;
+    public static final int TRADING_DAYS_PER_YEAR = 252;
+    public static final float DEFAULT_DAILY_ROR = 0.0f;
     
     // 에러 메시지
     public static final String DATE_VALIDATION_ERROR = "Start date must not be after end date.";
