@@ -48,11 +48,6 @@ public class Stock {
 	@JsonManagedReference
 	private List<StockPrice> stockPriceList = new ArrayList<>();
 
-	@OneToMany(mappedBy = "stock", cascade = CascadeType.ALL, orphanRemoval = true)
-	@Builder.Default
-	@JsonManagedReference
-	private List<CalcStockPrice> calcStockPriceList = new ArrayList<>();
-
 	@OneToMany(mappedBy = "stock", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@OrderBy("startAt DESC")
 	@Builder.Default

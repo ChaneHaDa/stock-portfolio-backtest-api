@@ -25,8 +25,6 @@ if [ $? -eq 0 ]; then
     echo "- portfolio_item"
     echo "- stock_price"
     echo "- index_price"
-    echo "- calc_stock_price"
-    echo "- calc_index_price"
     echo "- stock_name_history"
 else
     echo "❌ 스키마 적용 중 오류가 발생했습니다."

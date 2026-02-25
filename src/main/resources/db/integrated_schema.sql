@@ -80,24 +80,6 @@ CREATE TABLE index_price (
     index_info_id INTEGER REFERENCES index_info(id)
 );
 
--- Create CalcStockPrice table
-CREATE TABLE calc_stock_price (
-    id SERIAL PRIMARY KEY,
-    price REAL,
-    monthly_ror REAL,
-    base_date DATE,
-    stock_id INTEGER REFERENCES stock(id)
-);
-
--- Create CalcIndexPrice table
-CREATE TABLE calc_index_price (
-    id SERIAL PRIMARY KEY,
-    price REAL,
-    monthly_ror REAL,
-    base_date DATE,
-    index_info_id INTEGER REFERENCES index_info(id)
-);
-
 -- Create StockNameHistory table
 CREATE TABLE stock_name_history (
     id SERIAL PRIMARY KEY,
@@ -123,14 +105,6 @@ CREATE INDEX idx_stock_name_history_stock_id ON stock_name_history(stock_id);
 
 -- Performance indexes from V3
 CREATE INDEX idx_indexinfo_basedate ON index_price(index_info_id, base_date);
-CREATE INDEX idx_calcstock_basedate ON calc_stock_price(stock_id, base_date);
-CREATE INDEX idx_calcindex_basedate ON calc_index_price(index_info_id, base_date);
 CREATE INDEX idx_stock_name ON stock(name);
 CREATE INDEX idx_stock_shortcode ON stock(short_code);
 CREATE INDEX idx_users_active ON users(is_active);
-
--- Note: Duplicate indexes from V1 that were removed in V5 are not included:
--- - idx_calc_stock_price_stock_id (replaced by composite index)
--- - idx_calc_stock_price_base_date (replaced by composite index)
--- - idx_calc_index_price_index_info_id (replaced by composite index)
--- - idx_calc_index_price_base_date (replaced by composite index)

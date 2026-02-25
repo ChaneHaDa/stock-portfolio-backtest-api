@@ -35,9 +35,4 @@ public class IndexInfo {
 	@Builder.Default
 	@JsonManagedReference
 	private List<IndexPrice> indexPriceList = new ArrayList<>();
-
-	@OneToMany(mappedBy = "indexInfo", cascade = CascadeType.ALL, orphanRemoval = true)
-	@Builder.Default
-	@JsonManagedReference
-	private List<CalcIndexPrice> calcIndexPriceList = new ArrayList<>();
 }
