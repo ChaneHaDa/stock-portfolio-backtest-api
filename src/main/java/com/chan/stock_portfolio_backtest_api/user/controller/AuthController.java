@@ -7,6 +7,7 @@ import com.chan.stock_portfolio_backtest_api.user.dto.UsersResponseDTO;
 import com.chan.stock_portfolio_backtest_api.user.service.UsersService;
 import com.chan.stock_portfolio_backtest_api.common.util.JWTUtil;
 import com.chan.stock_portfolio_backtest_api.common.util.ResponseUtil;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -23,6 +25,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/auth")
+@Validated
 public class AuthController {
     private final UsersService usersService;
     private final AuthenticationManager authenticationManager;
@@ -34,7 +37,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<ResponseDTO<UsersResponseDTO>> registerUser(
-            @RequestBody UsersRequestDTO usersRequestDTO
+            @RequestBody @Valid UsersRequestDTO usersRequestDTO
     ) {
         UsersResponseDTO createdUser = usersService.createUser(usersRequestDTO);
 
@@ -50,7 +53,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ResponseDTO<Map<String, String>>> loginUser(@RequestBody LoginRequestDTO loginRequestDTO) {
+    public ResponseEntity<ResponseDTO<Map<String, String>>> loginUser(@RequestBody @Valid LoginRequestDTO loginRequestDTO) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequestDTO.getId(),

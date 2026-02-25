@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -16,6 +17,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import java.util.HashMap;
 import java.util.Map;
+import jakarta.validation.ConstraintViolationException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
@@ -57,6 +59,23 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .status("error")
                 .code("INVALID_REQUEST")
                 .message("잘못된 요청 형식입니다.")
+                .build();
+
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    // 2-1. 누락된 요청 파라미터 (400)
+    @Override
+    protected ResponseEntity<Object> handleMissingServletRequestParameter(
+            org.springframework.web.bind.MissingServletRequestParameterException ex,
+            HttpHeaders headers,
+            HttpStatusCode status,
+            WebRequest request
+    ) {
+        ResponseDTO<Void> response = ResponseDTO.<Void>builder()
+                .status("error")
+                .code("BAD_REQUEST")
+                .message(ex.getMessage())
                 .build();
 
         return ResponseEntity.badRequest().body(response);
@@ -172,5 +191,21 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    // 12. 잘못된 파라미터/인자 (400)
+    @ExceptionHandler({
+            IllegalArgumentException.class,
+            MethodArgumentTypeMismatchException.class,
+            ConstraintViolationException.class
+    })
+    public ResponseEntity<ResponseDTO<Void>> handleInvalidArgument(Exception ex) {
+        ResponseDTO<Void> response = ResponseDTO.<Void>builder()
+                .status("error")
+                .code("BAD_REQUEST")
+                .message(ex.getMessage())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 }

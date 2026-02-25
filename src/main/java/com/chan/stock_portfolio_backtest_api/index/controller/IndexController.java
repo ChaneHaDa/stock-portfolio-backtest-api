@@ -1,11 +1,12 @@
 package com.chan.stock_portfolio_backtest_api.index.controller;
 
 import java.util.List;
+import java.time.LocalDate;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,7 +22,6 @@ import com.chan.stock_portfolio_backtest_api.index.service.IndexBacktestService;
 import com.chan.stock_portfolio_backtest_api.index.service.IndexInfoService;
 import com.chan.stock_portfolio_backtest_api.common.util.ResponseUtil;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 @RestController
@@ -68,8 +68,17 @@ public class IndexController {
 	public ResponseEntity<ResponseDTO<IndexBacktestResponseDTO>> getIndexPortfolio(
 		@PathVariable("id")
 		@NotNull(message = "id는 필수 입력값입니다.") Integer id,
-		@ModelAttribute @Valid IndexBacktestRequestDTO indexBacktestRequestDTO
+		@RequestParam("startDate")
+		@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+		@RequestParam("endDate")
+		@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
+		@RequestParam(value = "initialAmount", required = false, defaultValue = "10000000") Long initialAmount
 	) {
+		IndexBacktestRequestDTO indexBacktestRequestDTO = IndexBacktestRequestDTO.builder()
+			.startDate(startDate)
+			.endDate(endDate)
+			.initialAmount(initialAmount)
+			.build();
 		IndexBacktestResponseDTO backtestResult = indexBacktestService.calculateIndexBacktest(indexBacktestRequestDTO,
 			id);
 		return ResponseEntity.ok(ResponseUtil.success(backtestResult));

@@ -1,31 +1,34 @@
 package com.chan.stock_portfolio_backtest_api.index.service;
 
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import com.chan.stock_portfolio_backtest_api.index.domain.CalcIndexPrice;
 import com.chan.stock_portfolio_backtest_api.index.domain.IndexInfo;
+import com.chan.stock_portfolio_backtest_api.index.domain.IndexPrice;
 import com.chan.stock_portfolio_backtest_api.index.dto.IndexBacktestRequestDTO;
 import com.chan.stock_portfolio_backtest_api.index.dto.IndexBacktestResponseDTO;
 import com.chan.stock_portfolio_backtest_api.common.exception.EntityNotFoundException;
-import com.chan.stock_portfolio_backtest_api.index.repository.CalcIndexPriceRepository;
 import com.chan.stock_portfolio_backtest_api.index.repository.IndexInfoRepository;
+import com.chan.stock_portfolio_backtest_api.index.repository.IndexPriceRepository;
+import com.chan.stock_portfolio_backtest_api.common.constants.AppConstants;
 import com.chan.stock_portfolio_backtest_api.stock.util.PortfolioCalculator;
 
 @Service
 public class IndexBacktestService {
 
 	private final IndexInfoRepository indexInfoRepository;
-	private final CalcIndexPriceRepository calcIndexPriceRepository;
+	private final IndexPriceRepository indexPriceRepository;
 
 	public IndexBacktestService(IndexInfoRepository indexInfoRepository,
-		CalcIndexPriceRepository calcIndexPriceRepository) {
+		IndexPriceRepository indexPriceRepository) {
 		this.indexInfoRepository = indexInfoRepository;
-		this.calcIndexPriceRepository = calcIndexPriceRepository;
+		this.indexPriceRepository = indexPriceRepository;
 	}
 
 	public IndexBacktestResponseDTO calculateIndexBacktest(IndexBacktestRequestDTO requestDTO, Integer id) {
@@ -40,13 +43,9 @@ public class IndexBacktestService {
 		IndexInfo indexInfo = indexInfoRepository.findById(id)
 			.orElseThrow(() -> new EntityNotFoundException("IndexInfo not found with id: " + id));
 
-		// 2. 인덱스의 CalcIndexPrice 데이터를 조회하여, 월별 수익률 Map 구성 (TreeMap으로 날짜 정렬 보장)
-		List<CalcIndexPrice> calcPrices = calcIndexPriceRepository.findByIndexInfoAndBaseDateBetween(indexInfo,
-			startDate, endDate);
-		Map<LocalDate, Float> indexMonthlyRor = new TreeMap<>();
-		for (CalcIndexPrice cip : calcPrices) {
-			indexMonthlyRor.put(cip.getBaseDate(), cip.getMonthlyRor());
-		}
+		// 2. 인덱스 Price 데이터로 월별 수익률 계산
+		List<IndexPrice> indexPrices = indexPriceRepository.findByIndexInfoIdAndDateRange(indexInfo.getId(), startDate, endDate);
+		Map<LocalDate, Float> indexMonthlyRor = calculateMonthlyRor(indexPrices);
 
 		LocalDate startMonth = startDate.withDayOfMonth(1);
 		LocalDate endMonth = endDate.withDayOfMonth(1);
@@ -63,6 +62,40 @@ public class IndexBacktestService {
 			.volatility(volatility)
 			.monthlyRor(indexMonthlyRor)
 			.build();
+	}
+
+	private Map<LocalDate, Float> calculateMonthlyRor(List<IndexPrice> indexPrices) {
+		if (indexPrices == null || indexPrices.isEmpty() || indexPrices.size() < 2) {
+			return Collections.emptyMap();
+		}
+
+		Map<LocalDate, Double> monthlyCompoundFactor = new TreeMap<>();
+		List<IndexPrice> sorted = indexPrices.stream()
+			.filter(price -> price.getBaseDate() != null && price.getClosePrice() != null)
+			.sorted(Comparator.comparing(IndexPrice::getBaseDate))
+			.toList();
+
+		for (int i = 1; i < sorted.size(); i++) {
+			Float prevClose = sorted.get(i - 1).getClosePrice();
+			Float currClose = sorted.get(i).getClosePrice();
+			LocalDate currentDate = sorted.get(i).getBaseDate();
+
+			if (prevClose == null || prevClose == 0 || currClose == null) {
+				continue;
+			}
+
+			float dailyRor = (currClose / prevClose - 1) * AppConstants.PERCENTAGE_CONVERSION_FACTOR;
+			LocalDate monthKey = currentDate.withDayOfMonth(1);
+			double factor = monthlyCompoundFactor.getOrDefault(monthKey, 1.0);
+			monthlyCompoundFactor.put(monthKey, factor * (1 + dailyRor / AppConstants.PERCENTAGE_CONVERSION_FACTOR));
+		}
+
+		Map<LocalDate, Float> indexMonthlyRor = new TreeMap<>();
+		for (Map.Entry<LocalDate, Double> entry : monthlyCompoundFactor.entrySet()) {
+			indexMonthlyRor.put(entry.getKey(), (float) ((entry.getValue() - 1.0) * AppConstants.PERCENTAGE_CONVERSION_FACTOR));
+		}
+
+		return indexMonthlyRor;
 	}
 
 }

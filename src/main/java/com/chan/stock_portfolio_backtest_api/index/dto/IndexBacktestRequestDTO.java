@@ -21,4 +21,7 @@ public class IndexBacktestRequestDTO {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @NotNull(message = "End date must not be null")
     private LocalDate endDate;
+
+    @Builder.Default
+    private Long initialAmount = 10000000L;
 }
