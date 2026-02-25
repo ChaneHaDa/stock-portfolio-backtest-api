@@ -10,9 +10,6 @@ servers:
   - url: https://api.example.com
     description: Production server
 
-security:
-  - bearer-jwt: []
-
 components:
   securitySchemes:
     bearer-jwt:
@@ -72,12 +69,16 @@ components:
         - password
         - email
         - name
+        - phoneNumber
       properties:
         username:
           type: string
+          minLength: 3
+          maxLength: 20
           description: 사용자 아이디
         password:
           type: string
+          minLength: 8
           description: 비밀번호
           format: password
         email:
@@ -86,6 +87,8 @@ components:
           description: 이메일
         name:
           type: string
+          minLength: 2
+          maxLength: 50
           description: 이름
         phoneNumber:
           type: string
@@ -96,10 +99,8 @@ components:
       properties:
         id:
           type: integer
-          description: 사용자 ID
         username:
           type: string
-          description: 사용자 아이디
         email:
           type: string
           format: email
@@ -120,29 +121,54 @@ components:
       type: object
       required:
         - stockId
-        - quantity
+        - weight
       properties:
         stockId:
           type: integer
           description: 주식 ID
-        quantity:
-          type: integer
-          description: 수량
-          minimum: 1
+        weight:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: 포트폴리오 비중 (0~1)
 
     PortfolioRequest:
       type: object
       required:
         - name
-        - items
+        - amount
+        - startDate
+        - endDate
+        - portfolioItemRequestDTOList
       properties:
         name:
           type: string
-          description: 포트폴리오 이름
           maxLength: 100
-        items:
+          description: 포트폴리오 이름
+        description:
+          type: string
+        amount:
+          type: integer
+          format: int64
+          description: 투자 금액
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        ror:
+          type: number
+          format: float
+        volatility:
+          type: number
+          format: float
+        price:
+          type: number
+          format: float
+        portfolioItemRequestDTOList:
           type: array
-          description: 포트폴리오 항목 목록
           items:
             $ref: '#/components/schemas/PortfolioItemRequest'
 
@@ -153,9 +179,39 @@ components:
           type: integer
         name:
           type: string
-        createdAt:
+        description:
           type: string
-          format: date-time
+        amount:
+          type: integer
+          format: int64
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        ror:
+          type: number
+          format: float
+        volatility:
+          type: number
+          format: float
+        price:
+          type: number
+          format: float
+
+    PortfolioDetailItemResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        stockId:
+          type: integer
+        name:
+          type: string
+        weight:
+          type: number
+          format: float
 
     PortfolioDetailResponse:
       type: object
@@ -164,37 +220,65 @@ components:
           type: integer
         name:
           type: string
+        description:
+          type: string
+        amount:
+          type: integer
+          format: int64
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        ror:
+          type: number
+          format: float
+        volatility:
+          type: number
+          format: float
+        price:
+          type: number
+          format: float
         items:
           type: array
           items:
-            type: object
-            properties:
-              id:
-                type: integer
-              stockId:
-                type: integer
-              stockName:
-                type: string
-              quantity:
-                type: integer
+            $ref: '#/components/schemas/PortfolioDetailItemResponse'
+
+    PortfolioBacktestRequestItem:
+      type: object
+      required:
+        - weight
+      properties:
+        stockId:
+          type: integer
+          description: 기존 종목 ID
+        stockName:
+          type: string
+          description: 기존 종목명(표시용)
+        customStockName:
+          type: string
+          description: 사용자 정의 종목명
+        annualReturnRate:
+          type: number
+          format: float
+          minimum: -100
+          maximum: 1000
+          description: 사용자 정의 연수익률(%)
+        weight:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: 포트폴리오 비중 (0~1)
 
     PortfolioBacktestRequest:
       type: object
       required:
-        - items
         - startDate
         - endDate
+        - portfolioBacktestRequestItemDTOList
       properties:
-        items:
-          type: array
-          description: 포트폴리오 항목 목록
-          items:
-            type: object
-            properties:
-              stockId:
-                type: integer
-              quantity:
-                type: integer
         startDate:
           type: string
           format: date
@@ -203,45 +287,58 @@ components:
           type: string
           format: date
           description: 백테스트 종료일
-        initialAmount:
-          type: number
+        amount:
+          type: integer
+          format: int64
           description: 초기 투자 금액
-          default: 10000000
+          default: 100000
+        portfolioBacktestRequestItemDTOList:
+          type: array
+          description: 포트폴리오 항목 목록
+          items:
+            $ref: '#/components/schemas/PortfolioBacktestRequestItem'
+
+    PortfolioBacktestResponseItem:
+      type: object
+      properties:
+        name:
+          type: string
+        totalRor:
+          type: number
+          format: float
+        monthlyRor:
+          type: object
+          additionalProperties:
+            type: number
+            format: float
 
     PortfolioBacktestResponse:
       type: object
       properties:
-        totalReturn:
+        totalRor:
           type: number
-          description: 총 수익 (원)
-        totalReturnRate:
+          format: float
+          description: 전체 복리 수익률(%)
+        totalAmount:
+          type: integer
+          format: int64
+        volatility:
           type: number
-          description: 총 수익률
-        maxDrawdown:
-          type: number
-          description: 최대 낙폭
-        cagr:
-          type: number
-          description: 연평균 수익률
-        mdd:
-          type: number
-          description: MDD 비율
-        sharpeRatio:
-          type: number
-          description: 샤프 지수
-        dailyValues:
+          format: float
+        monthlyRor:
+          type: object
+          additionalProperties:
+            type: number
+            format: float
+        monthlyAmount:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        portfolioBacktestResponseItemDTOList:
           type: array
-          description: 일별 포트폴리오 가치
           items:
-            type: object
-            properties:
-              date:
-                type: string
-                format: date
-              value:
-                type: number
-              returnRate:
-                type: number
+            $ref: '#/components/schemas/PortfolioBacktestResponseItem'
 
     # Stock Schemas
     StockResponse:
@@ -255,20 +352,19 @@ components:
           type: string
         isinCode:
           type: string
-        market:
+        marketCategory:
           type: string
-          enum: [KOSPI, KOSDAQ, KONEX]
 
     StockSearchResponse:
       type: object
       properties:
-        id:
+        stockId:
           type: integer
         name:
           type: string
         shortCode:
           type: string
-        market:
+        marketCategory:
           type: string
 
     StockPrice:
@@ -286,10 +382,13 @@ components:
           type: number
         tradeQuantity:
           type: integer
+          format: int64
         tradeAmount:
-          type: number
+          type: integer
+          format: int64
         issuedCount:
           type: integer
+          format: int64
         baseDate:
           type: string
           format: date
@@ -304,19 +403,15 @@ components:
           type: string
         category:
           type: string
-        description:
-          type: string
 
     IndexSearchResponse:
       type: object
       properties:
-        id:
+        indexId:
           type: integer
         name:
           type: string
         category:
-          type: string
-        description:
           type: string
 
     IndexBacktestRequest:
@@ -332,32 +427,25 @@ components:
           type: string
           format: date
         initialAmount:
-          type: number
+          type: integer
+          format: int64
           default: 10000000
+          description: 현재 입력은 수신되지만 계산에는 반영되지 않습니다.
 
     IndexBacktestResponse:
       type: object
       properties:
-        totalReturn:
+        totalRor:
           type: number
-        totalReturnRate:
+          format: float
+        volatility:
           type: number
-        maxDrawdown:
-          type: number
-        cagr:
-          type: number
-        mdd:
-          type: number
-        dailyValues:
-          type: array
-          items:
-            type: object
-            properties:
-              date:
-                type: string
-                format: date
-              value:
-                type: number
+          format: float
+        monthlyRor:
+          type: object
+          additionalProperties:
+            type: number
+            format: float
 
     IndexPrice:
       type: object
@@ -606,8 +694,6 @@ paths:
         - Portfolio
       summary: 포트폴리오 백테스팅
       description: 포트폴리오 구성과 기간을 입력받아 백테스팅 결과를 계산합니다.
-      security:
-        - bearer-jwt: []
       requestBody:
         required: true
         content:
@@ -624,9 +710,12 @@ paths:
               example:
                 status: success
                 data:
-                  totalReturn: 1550000
-                  totalReturnRate: 0.155
-                  maxDrawdown: -8.2
+                  totalRor: 15.5
+                  totalAmount: 11550000
+                  volatility: 8.2
+                  monthlyRor:
+                    "2024-01-01": 1.2
+                    "2024-02-01": 0.8
         '400':
           description: 잘못된 입력값
           content:
