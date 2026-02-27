@@ -119,6 +119,8 @@ public class PortfolioService {
 	public PortfolioResponseDTO updatePortfolio(Integer portfolioId, PortfolioRequestDTO portfolioRequestDTO) {
 		Portfolio portfolio = portfolioRepository.findById(portfolioId)
 			.orElseThrow(() -> new PortfolioNotFoundException(portfolioId));
+		Users user = authService.getCurrentUser();
+		securityService.validatePortfolioOwnership(portfolio, user);
 
 		portfolio.updatePortfolio(
 			portfolioRequestDTO.getName(),

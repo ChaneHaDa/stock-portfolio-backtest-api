@@ -278,6 +278,7 @@ class PortfolioServiceTest {
         // Then
         verify(portfolioRepository).findById(1);
         verify(authService).getCurrentUser();
+        verify(securityService).validatePortfolioOwnership(testPortfolio, testUser);
         verify(portfolioRepository).delete(testPortfolio);
     }
 
@@ -292,6 +293,8 @@ class PortfolioServiceTest {
 
         when(portfolioRepository.findById(1)).thenReturn(Optional.of(testPortfolio));
         when(authService.getCurrentUser()).thenReturn(otherUser);
+        doThrow(new EntityNotFoundException("Portfolio Not Found"))
+                .when(securityService).validatePortfolioOwnership(testPortfolio, otherUser);
 
         // When & Then
         EntityNotFoundException exception = assertThrows(
@@ -304,6 +307,7 @@ class PortfolioServiceTest {
         // Verify interactions
         verify(portfolioRepository).findById(1);
         verify(authService).getCurrentUser();
+        verify(securityService).validatePortfolioOwnership(testPortfolio, otherUser);
         verify(portfolioRepository, never()).delete(any());
     }
 
@@ -325,6 +329,7 @@ class PortfolioServiceTest {
         // Verify interactions
         verify(portfolioRepository).findById(1);
         verify(authService).getCurrentUser();
+        verify(securityService).validatePortfolioOwnership(testPortfolio, testUser);
         verify(stockRepository).findAllById(Arrays.asList(1, 2));
     }
 
@@ -339,6 +344,8 @@ class PortfolioServiceTest {
 
         when(portfolioRepository.findById(1)).thenReturn(Optional.of(testPortfolio));
         when(authService.getCurrentUser()).thenReturn(otherUser);
+        doThrow(new EntityNotFoundException("Portfolio Not Found"))
+                .when(securityService).validatePortfolioOwnership(testPortfolio, otherUser);
 
         // When & Then
         EntityNotFoundException exception = assertThrows(
@@ -346,11 +353,12 @@ class PortfolioServiceTest {
                 () -> portfolioService.updatePortfolio(1, portfolioRequestDTO)
         );
 
-        assertEquals("Portfolio not found", exception.getMessage());
+        assertEquals("Portfolio Not Found", exception.getMessage());
 
         // Verify interactions
         verify(portfolioRepository).findById(1);
         verify(authService).getCurrentUser();
+        verify(securityService).validatePortfolioOwnership(testPortfolio, otherUser);
         verify(stockRepository, never()).findAllById(any());
     }
 }
