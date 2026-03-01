@@ -714,16 +714,46 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PortfolioBacktestRequest'
-            example:
-              startDate: "2023-01-01"
-              endDate: "2023-12-31"
-              amount: 1000000
-              rebalanceFrequency: "MONTHLY"
-              portfolioBacktestRequestItemDTOList:
-                - stockId: 1
-                  weight: 0.6
-                - stockId: 2
-                  weight: 0.4
+            examples:
+              stockIdPortfolio:
+                summary: 기존 종목 포트폴리오 예시
+                value:
+                  startDate: "2023-01-01"
+                  endDate: "2023-12-31"
+                  amount: 1000000
+                  rebalanceFrequency: "MONTHLY"
+                  portfolioBacktestRequestItemDTOList:
+                    - stockId: 1
+                      weight: 0.6
+                    - stockId: 2
+                      weight: 0.4
+              customStockPortfolio:
+                summary: 사용자 정의 종목 포트폴리오 예시
+                value:
+                  startDate: "2023-01-01"
+                  endDate: "2023-12-31"
+                  amount: 1000000
+                  rebalanceFrequency: "QUARTERLY"
+                  portfolioBacktestRequestItemDTOList:
+                    - customStockName: "나만의성장주"
+                      annualReturnRate: 12.5
+                      weight: 0.7
+                    - customStockName: "나만의배당주"
+                      annualReturnRate: 6.2
+                      weight: 0.3
+              mixedPortfolio:
+                summary: 기존+사용자 정의 혼합 예시
+                value:
+                  startDate: "2023-01-01"
+                  endDate: "2023-12-31"
+                  amount: 1000000
+                  rebalanceFrequency: "YEARLY"
+                  portfolioBacktestRequestItemDTOList:
+                    - stockId: 1
+                      weight: 0.5
+                    - customStockName: "커스텀알파"
+                      annualReturnRate: 9.8
+                      weight: 0.5
       responses:
         '200':
           description: 백테스팅 성공
