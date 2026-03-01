@@ -272,6 +272,17 @@ components:
           maximum: 1
           description: 포트폴리오 비중 (0~1)
 
+    RebalanceFrequency:
+      type: string
+      description: 리밸런싱 주기
+      enum:
+        - NONE
+        - DAILY
+        - MONTHLY
+        - QUARTERLY
+        - YEARLY
+      example: MONTHLY
+
     PortfolioBacktestRequest:
       type: object
       required:
@@ -292,6 +303,9 @@ components:
           format: int64
           description: 초기 투자 금액
           default: 100000
+        rebalanceFrequency:
+          $ref: '#/components/schemas/RebalanceFrequency'
+          default: DAILY
         portfolioBacktestRequestItemDTOList:
           type: array
           description: 포트폴리오 항목 목록
@@ -700,6 +714,16 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PortfolioBacktestRequest'
+            example:
+              startDate: "2023-01-01"
+              endDate: "2023-12-31"
+              amount: 1000000
+              rebalanceFrequency: "MONTHLY"
+              portfolioBacktestRequestItemDTOList:
+                - stockId: 1
+                  weight: 0.6
+                - stockId: 2
+                  weight: 0.4
       responses:
         '200':
           description: 백테스팅 성공

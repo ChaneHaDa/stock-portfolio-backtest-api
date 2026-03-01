@@ -3,6 +3,7 @@ package com.chan.stock_portfolio_backtest_api.service;
 import com.chan.stock_portfolio_backtest_api.portfolio.dto.PortfolioBacktestRequestDTO;
 import com.chan.stock_portfolio_backtest_api.portfolio.dto.PortfolioBacktestRequestItemDTO;
 import com.chan.stock_portfolio_backtest_api.portfolio.dto.PortfolioBacktestResponseDTO;
+import com.chan.stock_portfolio_backtest_api.portfolio.dto.RebalanceFrequency;
 import com.chan.stock_portfolio_backtest_api.stock.repository.StockPriceRepository;
 import com.chan.stock_portfolio_backtest_api.stock.repository.StockRepository;
 import com.chan.stock_portfolio_backtest_api.portfolio.service.PortfolioBacktestService;
@@ -90,5 +91,44 @@ class PortfolioBacktestServiceCustomStockTest {
         assertThrows(Exception.class, () -> {
             portfolioBacktestService.calculatePortfolio(request);
         });
+    }
+
+    @Test
+    void testCalculatePortfolioWithDifferentRebalanceFrequencies() {
+        PortfolioBacktestRequestItemDTO growthStock = PortfolioBacktestRequestItemDTO.builder()
+                .customStockName("고수익")
+                .annualReturnRate(40.0f)
+                .weight(0.5f)
+                .build();
+
+        PortfolioBacktestRequestItemDTO defensiveStock = PortfolioBacktestRequestItemDTO.builder()
+                .customStockName("저수익")
+                .annualReturnRate(-10.0f)
+                .weight(0.5f)
+                .build();
+
+        PortfolioBacktestRequestDTO noneRequest = PortfolioBacktestRequestDTO.builder()
+                .startDate(LocalDate.of(2023, 1, 1))
+                .endDate(LocalDate.of(2023, 12, 31))
+                .amount(1000000L)
+                .rebalanceFrequency(RebalanceFrequency.NONE)
+                .portfolioBacktestRequestItemDTOList(Arrays.asList(growthStock, defensiveStock))
+                .build();
+
+        PortfolioBacktestRequestDTO monthlyRequest = PortfolioBacktestRequestDTO.builder()
+                .startDate(LocalDate.of(2023, 1, 1))
+                .endDate(LocalDate.of(2023, 12, 31))
+                .amount(1000000L)
+                .rebalanceFrequency(RebalanceFrequency.MONTHLY)
+                .portfolioBacktestRequestItemDTOList(Arrays.asList(growthStock, defensiveStock))
+                .build();
+
+        PortfolioBacktestResponseDTO noneResult = portfolioBacktestService.calculatePortfolio(noneRequest);
+        PortfolioBacktestResponseDTO monthlyResult = portfolioBacktestService.calculatePortfolio(monthlyRequest);
+
+        assertNotNull(noneResult);
+        assertNotNull(monthlyResult);
+        assertNotEquals(noneResult.getTotalRor(), monthlyResult.getTotalRor());
+        assertNotEquals(noneResult.getTotalAmount(), monthlyResult.getTotalAmount());
     }
 }

@@ -5,6 +5,7 @@ import com.chan.stock_portfolio_backtest_api.stock.domain.StockPrice;
 import com.chan.stock_portfolio_backtest_api.portfolio.dto.PortfolioBacktestRequestDTO;
 import com.chan.stock_portfolio_backtest_api.portfolio.dto.PortfolioBacktestRequestItemDTO;
 import com.chan.stock_portfolio_backtest_api.portfolio.dto.PortfolioBacktestResponseDTO;
+import com.chan.stock_portfolio_backtest_api.portfolio.dto.RebalanceFrequency;
 import com.chan.stock_portfolio_backtest_api.common.exception.EntityNotFoundException;
 import com.chan.stock_portfolio_backtest_api.common.exception.InvalidDateRangeException;
 import com.chan.stock_portfolio_backtest_api.stock.repository.StockPriceRepository;
@@ -226,5 +227,30 @@ class PortfolioBacktestServiceTest {
 
         verify(stockRepository).findAllById(Arrays.asList(1));
         verify(stockPriceRepository).findByStockInAndBaseDateBetween(anyList(), any(), any());
+    }
+
+    @Test
+    void calculatePortfolio_DefaultFrequency_ShouldBehaveLikeDailyRebalancing() {
+        // Given
+        when(stockRepository.findAllById(anyList()))
+                .thenReturn(Arrays.asList(testStock1, testStock2));
+        when(stockPriceRepository.findByStockInAndBaseDateBetween(anyList(), any(), any()))
+                .thenReturn(testStockPrices);
+
+        PortfolioBacktestRequestDTO dailyRequest = PortfolioBacktestRequestDTO.builder()
+                .amount(1000000L)
+                .startDate(LocalDate.of(2023, 1, 1))
+                .endDate(LocalDate.of(2023, 2, 1))
+                .rebalanceFrequency(RebalanceFrequency.DAILY)
+                .portfolioBacktestRequestItemDTOList(requestDTO.getPortfolioBacktestRequestItemDTOList())
+                .build();
+
+        // When
+        PortfolioBacktestResponseDTO defaultResult = portfolioBacktestService.calculatePortfolio(requestDTO);
+        PortfolioBacktestResponseDTO dailyResult = portfolioBacktestService.calculatePortfolio(dailyRequest);
+
+        // Then
+        assertEquals(defaultResult.getTotalRor(), dailyResult.getTotalRor(), 0.0001f);
+        assertEquals(defaultResult.getTotalAmount(), dailyResult.getTotalAmount());
     }
 }

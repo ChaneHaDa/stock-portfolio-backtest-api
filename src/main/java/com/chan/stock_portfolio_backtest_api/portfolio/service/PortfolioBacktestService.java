@@ -6,6 +6,7 @@ import com.chan.stock_portfolio_backtest_api.portfolio.dto.PortfolioBacktestRequ
 import com.chan.stock_portfolio_backtest_api.portfolio.dto.PortfolioBacktestRequestItemDTO;
 import com.chan.stock_portfolio_backtest_api.portfolio.dto.PortfolioBacktestResponseDTO;
 import com.chan.stock_portfolio_backtest_api.portfolio.dto.PortfolioBacktestResponseItemDTO;
+import com.chan.stock_portfolio_backtest_api.portfolio.dto.RebalanceFrequency;
 import com.chan.stock_portfolio_backtest_api.common.exception.EntityNotFoundException;
 import com.chan.stock_portfolio_backtest_api.common.exception.InvalidDateRangeException;
 import com.chan.stock_portfolio_backtest_api.common.constants.AppConstants;
@@ -48,8 +49,12 @@ public class PortfolioBacktestService {
             }
         }
 
-        Map<LocalDate, Float> portfolioDailyRor = new TreeMap<>();
+        RebalanceFrequency rebalanceFrequency = request.getRebalanceFrequency() == null
+                ? RebalanceFrequency.DAILY
+                : request.getRebalanceFrequency();
+
         List<PortfolioBacktestResponseItemDTO> responseItemDTOs = new ArrayList<>();
+        Map<PortfolioBacktestRequestItemDTO, Map<LocalDate, Float>> itemDailyRorMap = new LinkedHashMap<>();
 
         LocalDate startMonth = startDate.withDayOfMonth(1);
         LocalDate endMonth = endDate.withDayOfMonth(1);
@@ -109,10 +114,12 @@ public class PortfolioBacktestService {
                     .monthlyRor(stockMonthlyRor)
                     .build();
             responseItemDTOs.add(responseItem);
-
-            // 6. 포트폴리오 일별 수익률에 가중치 적용하여 합산
-            PortfolioCalculator.mergeStockDailyIntoPortfolioDailyRor(portfolioDailyRor, stockDailyRor, item.getWeight());
+            itemDailyRorMap.put(item, stockDailyRor);
         }
+
+        // 6. 리밸런싱 주기에 따라 포트폴리오 일별 수익률 계산
+        Map<LocalDate, Float> portfolioDailyRor = calculatePortfolioDailyRorWithRebalancing(
+                itemDailyRorMap, startDate, endDate, rebalanceFrequency);
 
         // 7. 포트폴리오 월별 집계
         Map<LocalDate, Float> portfolioMonthlyRor = PortfolioCalculator.aggregateDailyToMonthlyRor(portfolioDailyRor);
@@ -139,6 +146,111 @@ public class PortfolioBacktestService {
                 .volatility(volatility)
                 .portfolioBacktestResponseItemDTOList(responseItemDTOs)
                 .build();
+    }
+
+    private Map<LocalDate, Float> calculatePortfolioDailyRorWithRebalancing(
+            Map<PortfolioBacktestRequestItemDTO, Map<LocalDate, Float>> itemDailyRorMap,
+            LocalDate startDate,
+            LocalDate endDate,
+            RebalanceFrequency rebalanceFrequency) {
+
+        if (itemDailyRorMap.isEmpty()) {
+            return new TreeMap<>();
+        }
+
+        TreeSet<LocalDate> tradingDates = new TreeSet<>();
+        for (Map<LocalDate, Float> dailyRor : itemDailyRorMap.values()) {
+            for (LocalDate date : dailyRor.keySet()) {
+                if (!date.isBefore(startDate) && !date.isAfter(endDate)) {
+                    tradingDates.add(date);
+                }
+            }
+        }
+
+        if (tradingDates.isEmpty()) {
+            return new TreeMap<>();
+        }
+
+        Map<PortfolioBacktestRequestItemDTO, Double> positionValues = new LinkedHashMap<>();
+        for (PortfolioBacktestRequestItemDTO item : itemDailyRorMap.keySet()) {
+            positionValues.put(item, (double) item.getWeight());
+        }
+
+        LocalDate lastRebalanceDate = tradingDates.first();
+        Map<LocalDate, Float> portfolioDailyRor = new TreeMap<>();
+
+        for (LocalDate tradingDate : tradingDates) {
+            if (shouldRebalance(rebalanceFrequency, lastRebalanceDate, tradingDate)) {
+                double totalValue = calculateTotalValue(positionValues);
+                rebalanceToTargetWeights(positionValues, totalValue);
+                lastRebalanceDate = tradingDate;
+            }
+
+            double totalValue = calculateTotalValue(positionValues);
+            if (totalValue <= 0d) {
+                portfolioDailyRor.put(tradingDate, AppConstants.DEFAULT_DAILY_ROR);
+                continue;
+            }
+
+            double dailyPortfolioRor = 0d;
+            for (Map.Entry<PortfolioBacktestRequestItemDTO, Double> position : positionValues.entrySet()) {
+                PortfolioBacktestRequestItemDTO item = position.getKey();
+                double weight = position.getValue() / totalValue;
+                float dailyRor = itemDailyRorMap.get(item).getOrDefault(tradingDate, AppConstants.DEFAULT_DAILY_ROR);
+                dailyPortfolioRor += weight * dailyRor;
+            }
+
+            portfolioDailyRor.put(tradingDate, (float) dailyPortfolioRor);
+
+            for (Map.Entry<PortfolioBacktestRequestItemDTO, Double> position : positionValues.entrySet()) {
+                PortfolioBacktestRequestItemDTO item = position.getKey();
+                float dailyRor = itemDailyRorMap.get(item).getOrDefault(tradingDate, AppConstants.DEFAULT_DAILY_ROR);
+                double updatedValue = position.getValue()
+                        * (1 + dailyRor / AppConstants.PERCENTAGE_CONVERSION_FACTOR);
+                position.setValue(updatedValue);
+            }
+        }
+
+        return portfolioDailyRor;
+    }
+
+    private boolean shouldRebalance(
+            RebalanceFrequency rebalanceFrequency,
+            LocalDate lastRebalanceDate,
+            LocalDate currentDate) {
+        if (lastRebalanceDate == null || rebalanceFrequency == null) {
+            return true;
+        }
+
+        return switch (rebalanceFrequency) {
+            case NONE -> false;
+            case DAILY -> currentDate.isAfter(lastRebalanceDate);
+            case MONTHLY -> currentDate.getYear() != lastRebalanceDate.getYear()
+                    || currentDate.getMonthValue() != lastRebalanceDate.getMonthValue();
+            case QUARTERLY -> currentDate.getYear() != lastRebalanceDate.getYear()
+                    || quarterOf(currentDate) != quarterOf(lastRebalanceDate);
+            case YEARLY -> currentDate.getYear() != lastRebalanceDate.getYear();
+        };
+    }
+
+    private int quarterOf(LocalDate date) {
+        return ((date.getMonthValue() - 1) / 3) + 1;
+    }
+
+    private double calculateTotalValue(Map<PortfolioBacktestRequestItemDTO, Double> positionValues) {
+        return positionValues.values().stream().mapToDouble(Double::doubleValue).sum();
+    }
+
+    private void rebalanceToTargetWeights(
+            Map<PortfolioBacktestRequestItemDTO, Double> positionValues,
+            double totalValue) {
+        if (totalValue <= 0d) {
+            return;
+        }
+
+        for (Map.Entry<PortfolioBacktestRequestItemDTO, Double> position : positionValues.entrySet()) {
+            position.setValue(totalValue * position.getKey().getWeight());
+        }
     }
 
     private Map<Stock, Map<LocalDate, Float>> calculateAllStockDailyRor(

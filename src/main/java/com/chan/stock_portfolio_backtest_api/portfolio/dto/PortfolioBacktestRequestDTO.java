@@ -29,6 +29,9 @@ public class PortfolioBacktestRequestDTO {
     @Builder.Default
     private Long amount = 100000L;
 
+    @Builder.Default
+    private RebalanceFrequency rebalanceFrequency = RebalanceFrequency.DAILY;
+
     @Valid
     private List<PortfolioBacktestRequestItemDTO> portfolioBacktestRequestItemDTOList;
 }
