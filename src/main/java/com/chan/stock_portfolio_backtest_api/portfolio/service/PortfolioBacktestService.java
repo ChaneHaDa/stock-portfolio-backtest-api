@@ -158,14 +158,24 @@ public class PortfolioBacktestService {
             return new TreeMap<>();
         }
 
-        TreeSet<LocalDate> tradingDates = new TreeSet<>();
-        for (Map<LocalDate, Float> dailyRor : itemDailyRorMap.values()) {
+        boolean hasMarketStock = itemDailyRorMap.keySet().stream().anyMatch(item -> !item.isCustomStock());
+        TreeSet<LocalDate> allTradingDates = new TreeSet<>();
+        TreeSet<LocalDate> marketTradingDates = new TreeSet<>();
+
+        for (Map.Entry<PortfolioBacktestRequestItemDTO, Map<LocalDate, Float>> entry : itemDailyRorMap.entrySet()) {
+            PortfolioBacktestRequestItemDTO item = entry.getKey();
+            Map<LocalDate, Float> dailyRor = entry.getValue();
             for (LocalDate date : dailyRor.keySet()) {
                 if (!date.isBefore(startDate) && !date.isAfter(endDate)) {
-                    tradingDates.add(date);
+                    allTradingDates.add(date);
+                    if (!item.isCustomStock()) {
+                        marketTradingDates.add(date);
+                    }
                 }
             }
         }
+
+        TreeSet<LocalDate> tradingDates = hasMarketStock ? marketTradingDates : allTradingDates;
 
         if (tradingDates.isEmpty()) {
             return new TreeMap<>();
@@ -260,18 +270,29 @@ public class PortfolioBacktestService {
             return new HashMap<>();
         }
 
-        // 첫 거래일의 전일 종가가 필요하므로 7일 전부터 조회
-        LocalDate queryStartDate = startDate.minusDays(7);
-        List<StockPrice> allPrices = stockPriceRepository
-                .findByStockInAndBaseDateBetween(stocks, queryStartDate, endDate);
+        List<StockPrice> latestPricesBeforeStartDate = Optional
+                .ofNullable(stockPriceRepository.findLatestPricesBeforeStartDate(stocks, startDate))
+                .orElseGet(Collections::emptyList);
 
-        // 주식별로 그룹화
-        Map<Stock, List<StockPrice>> stockPriceGroups = allPrices.stream()
-                .collect(Collectors.groupingBy(StockPrice::getStock));
+        List<StockPrice> pricesInRange = Optional
+                .ofNullable(stockPriceRepository.findByStockInAndBaseDateBetween(stocks, startDate, endDate))
+                .orElseGet(Collections::emptyList);
+
+        List<StockPrice> allPrices = new ArrayList<>(latestPricesBeforeStartDate.size() + pricesInRange.size());
+        allPrices.addAll(latestPricesBeforeStartDate);
+        allPrices.addAll(pricesInRange);
+
+        // 주식별로 그룹화 (stockId 기준)
+        Map<Integer, List<StockPrice>> stockPriceGroups = allPrices.stream()
+                .filter(stockPrice -> stockPrice.getStock() != null && stockPrice.getStock().getId() != null)
+                .collect(Collectors.groupingBy(stockPrice -> stockPrice.getStock().getId()));
 
         Map<Stock, Map<LocalDate, Float>> result = new HashMap<>();
         for (Stock stock : stocks) {
-            List<StockPrice> stockPrices = stockPriceGroups.getOrDefault(stock, Collections.emptyList());
+            List<StockPrice> stockPrices = stockPriceGroups.getOrDefault(stock.getId(), Collections.emptyList())
+                    .stream()
+                    .sorted(Comparator.comparing(StockPrice::getBaseDate))
+                    .toList();
 
             // 종가 기반 일별 수익률 계산
             Map<LocalDate, Float> allDailyRor = PortfolioCalculator.calculateDailyRorFromPrices(stockPrices);

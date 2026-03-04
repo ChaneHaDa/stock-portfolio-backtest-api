@@ -4,9 +4,12 @@ import com.chan.stock_portfolio_backtest_api.portfolio.dto.PortfolioBacktestRequ
 import com.chan.stock_portfolio_backtest_api.portfolio.dto.PortfolioBacktestRequestItemDTO;
 import com.chan.stock_portfolio_backtest_api.portfolio.dto.PortfolioBacktestResponseDTO;
 import com.chan.stock_portfolio_backtest_api.portfolio.dto.RebalanceFrequency;
+import com.chan.stock_portfolio_backtest_api.stock.domain.Stock;
+import com.chan.stock_portfolio_backtest_api.stock.domain.StockPrice;
 import com.chan.stock_portfolio_backtest_api.stock.repository.StockPriceRepository;
 import com.chan.stock_portfolio_backtest_api.stock.repository.StockRepository;
 import com.chan.stock_portfolio_backtest_api.portfolio.service.PortfolioBacktestService;
+import com.chan.stock_portfolio_backtest_api.stock.util.PortfolioCalculator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,8 +18,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class PortfolioBacktestServiceCustomStockTest {
@@ -130,5 +138,76 @@ class PortfolioBacktestServiceCustomStockTest {
         assertNotNull(monthlyResult);
         assertNotEquals(noneResult.getTotalRor(), monthlyResult.getTotalRor());
         assertNotEquals(noneResult.getTotalAmount(), monthlyResult.getTotalAmount());
+    }
+
+    @Test
+    void testMixedPortfolio_UsesMarketTradingDatesForCustomStock() {
+        Stock marketStock = Stock.builder()
+                .id(1)
+                .name("시장종목")
+                .shortCode("MKT")
+                .build();
+
+        PortfolioBacktestRequestItemDTO marketItem = PortfolioBacktestRequestItemDTO.builder()
+                .stockId(1)
+                .weight(0.5f)
+                .build();
+
+        PortfolioBacktestRequestItemDTO customItem = PortfolioBacktestRequestItemDTO.builder()
+                .customStockName("커스텀")
+                .annualReturnRate(100.0f)
+                .weight(0.5f)
+                .build();
+
+        LocalDate startDate = LocalDate.of(2023, 1, 2);
+        LocalDate endDate = LocalDate.of(2023, 1, 6);
+
+        PortfolioBacktestRequestDTO request = PortfolioBacktestRequestDTO.builder()
+                .startDate(startDate)
+                .endDate(endDate)
+                .amount(1_000_000L)
+                .portfolioBacktestRequestItemDTOList(Arrays.asList(marketItem, customItem))
+                .build();
+
+        StockPrice day0 = StockPrice.builder()
+                .stock(marketStock)
+                .baseDate(LocalDate.of(2023, 1, 2))
+                .closePrice(100.0f)
+                .openPrice(100.0f)
+                .lowPrice(99.0f)
+                .highPrice(101.0f)
+                .build();
+        StockPrice day1 = StockPrice.builder()
+                .stock(marketStock)
+                .baseDate(LocalDate.of(2023, 1, 3))
+                .closePrice(100.0f)
+                .openPrice(100.0f)
+                .lowPrice(99.0f)
+                .highPrice(101.0f)
+                .build();
+        StockPrice day2 = StockPrice.builder()
+                .stock(marketStock)
+                .baseDate(LocalDate.of(2023, 1, 5))
+                .closePrice(100.0f)
+                .openPrice(100.0f)
+                .lowPrice(99.0f)
+                .highPrice(101.0f)
+                .build();
+
+        when(stockRepository.findAllById(List.of(1))).thenReturn(List.of(marketStock));
+        when(stockPriceRepository.findLatestPricesBeforeStartDate(anyList(), any())).thenReturn(List.of());
+        when(stockPriceRepository.findByStockInAndBaseDateBetween(anyList(), any(), any()))
+                .thenReturn(List.of(day0, day1, day2));
+
+        PortfolioBacktestResponseDTO result = portfolioBacktestService.calculatePortfolio(request);
+
+        Map<LocalDate, Float> customDailyRor = PortfolioCalculator.generateDailyRorFromAnnual(100.0f, startDate, endDate);
+        float customDailyPercent = customDailyRor.values().iterator().next();
+        double oneDayDecimal = (customDailyPercent * 0.5d) / 100d;
+        float expectedWithMarketDates = (float) ((Math.pow(1 + oneDayDecimal, 2) - 1) * 100);
+        float legacyUnionResult = (float) ((Math.pow(1 + oneDayDecimal, 5) - 1) * 100);
+
+        assertEquals(expectedWithMarketDates, result.getTotalRor(), 0.0001f);
+        assertNotEquals(legacyUnionResult, result.getTotalRor(), 0.0001f);
     }
 }

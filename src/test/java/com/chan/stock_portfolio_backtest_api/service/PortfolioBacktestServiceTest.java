@@ -253,4 +253,56 @@ class PortfolioBacktestServiceTest {
         assertEquals(defaultResult.getTotalRor(), dailyResult.getTotalRor(), 0.0001f);
         assertEquals(defaultResult.getTotalAmount(), dailyResult.getTotalAmount());
     }
+
+    @Test
+    void calculatePortfolio_ShouldUseLatestPriceBeforeStartDateForFirstReturn() {
+        PortfolioBacktestRequestItemDTO singleItem = PortfolioBacktestRequestItemDTO.builder()
+                .stockId(1)
+                .weight(1.0f)
+                .build();
+
+        PortfolioBacktestRequestDTO singleStockRequest = PortfolioBacktestRequestDTO.builder()
+                .startDate(LocalDate.of(2023, 1, 1))
+                .endDate(LocalDate.of(2023, 1, 3))
+                .amount(1_000_000L)
+                .portfolioBacktestRequestItemDTOList(List.of(singleItem))
+                .build();
+
+        StockPrice beforeStart = StockPrice.builder()
+                .stock(testStock1)
+                .baseDate(LocalDate.of(2022, 12, 1))
+                .closePrice(100.0f)
+                .openPrice(100.0f)
+                .lowPrice(99.0f)
+                .highPrice(101.0f)
+                .build();
+
+        StockPrice day1 = StockPrice.builder()
+                .stock(testStock1)
+                .baseDate(LocalDate.of(2023, 1, 2))
+                .closePrice(110.0f)
+                .openPrice(108.0f)
+                .lowPrice(107.0f)
+                .highPrice(111.0f)
+                .build();
+
+        StockPrice day2 = StockPrice.builder()
+                .stock(testStock1)
+                .baseDate(LocalDate.of(2023, 1, 3))
+                .closePrice(121.0f)
+                .openPrice(120.0f)
+                .lowPrice(119.0f)
+                .highPrice(122.0f)
+                .build();
+
+        when(stockRepository.findAllById(List.of(1))).thenReturn(List.of(testStock1));
+        when(stockPriceRepository.findLatestPricesBeforeStartDate(anyList(), any())).thenReturn(List.of(beforeStart));
+        when(stockPriceRepository.findByStockInAndBaseDateBetween(anyList(), any(), any()))
+                .thenReturn(List.of(day1, day2));
+
+        PortfolioBacktestResponseDTO result = portfolioBacktestService.calculatePortfolio(singleStockRequest);
+
+        assertNotNull(result);
+        assertEquals(21.0f, result.getTotalRor(), 0.0001f);
+    }
 }

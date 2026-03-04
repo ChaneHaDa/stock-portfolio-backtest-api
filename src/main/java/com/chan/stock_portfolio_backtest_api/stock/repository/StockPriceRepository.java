@@ -13,6 +13,16 @@ import com.chan.stock_portfolio_backtest_api.stock.domain.Stock;
 import com.chan.stock_portfolio_backtest_api.stock.domain.StockPrice;
 
 public interface StockPriceRepository extends JpaRepository<StockPrice, Integer> {
+	@Query("SELECT sp FROM StockPrice sp " +
+		"WHERE sp.stock IN :stocks " +
+		"AND sp.baseDate = (" +
+		"SELECT MAX(sp2.baseDate) FROM StockPrice sp2 " +
+		"WHERE sp2.stock = sp.stock AND sp2.baseDate < :startDate" +
+		")")
+	List<StockPrice> findLatestPricesBeforeStartDate(
+		@Param("stocks") List<Stock> stocks,
+		@Param("startDate") LocalDate startDate);
+
 	@Query("SELECT sp FROM StockPrice sp WHERE sp.stock IN :stocks AND sp.baseDate BETWEEN :startDate AND :endDate ORDER BY sp.stock.id, sp.baseDate")
 	List<StockPrice> findByStockInAndBaseDateBetween(
 		@Param("stocks") List<Stock> stocks,
