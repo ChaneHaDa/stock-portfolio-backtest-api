@@ -68,6 +68,10 @@ Spring Boot 기반의 RESTful API로, 사용자가 주식 포트폴리오를 구
    ```
 4. **애플리케이션 실행**
    ```bash
+   set -a; source .env; set +a; ./gradlew bootRun
+   ```
+   또는 빌드된 JAR로 실행:
+   ```bash
    java -jar build/libs/stock-portfolio-backtest-api-*.jar
    ```
    또는 IDE에서 `StockPortfolioBacktestApiApplication.java` 실행
