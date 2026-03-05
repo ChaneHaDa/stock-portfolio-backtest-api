@@ -6,6 +6,7 @@ import com.chan.stock_portfolio_backtest_api.portfolio.dto.PortfolioBacktestRequ
 import com.chan.stock_portfolio_backtest_api.portfolio.dto.PortfolioBacktestRequestItemDTO;
 import com.chan.stock_portfolio_backtest_api.portfolio.dto.PortfolioBacktestResponseDTO;
 import com.chan.stock_portfolio_backtest_api.portfolio.dto.RebalanceFrequency;
+import com.chan.stock_portfolio_backtest_api.common.exception.BadRequestException;
 import com.chan.stock_portfolio_backtest_api.common.exception.EntityNotFoundException;
 import com.chan.stock_portfolio_backtest_api.common.exception.InvalidDateRangeException;
 import com.chan.stock_portfolio_backtest_api.stock.repository.StockPriceRepository;
@@ -304,5 +305,33 @@ class PortfolioBacktestServiceTest {
 
         assertNotNull(result);
         assertEquals(21.0f, result.getTotalRor(), 0.0001f);
+    }
+
+    @Test
+    void calculatePortfolio_DuplicateStockIds_ShouldThrowBadRequestException() {
+        PortfolioBacktestRequestItemDTO item1 = PortfolioBacktestRequestItemDTO.builder()
+                .stockId(1)
+                .weight(0.5f)
+                .build();
+        PortfolioBacktestRequestItemDTO item2 = PortfolioBacktestRequestItemDTO.builder()
+                .stockId(1)
+                .weight(0.5f)
+                .build();
+
+        PortfolioBacktestRequestDTO duplicateRequest = PortfolioBacktestRequestDTO.builder()
+                .startDate(LocalDate.of(2023, 1, 1))
+                .endDate(LocalDate.of(2023, 1, 31))
+                .amount(1_000_000L)
+                .portfolioBacktestRequestItemDTOList(List.of(item1, item2))
+                .build();
+
+        BadRequestException exception = assertThrows(
+                BadRequestException.class,
+                () -> portfolioBacktestService.calculatePortfolio(duplicateRequest)
+        );
+
+        assertEquals("Duplicate stockId is not allowed: 1", exception.getMessage());
+        verify(stockRepository, never()).findAllById(anyList());
+        verify(stockPriceRepository, never()).findByStockInAndBaseDateBetween(anyList(), any(), any());
     }
 }

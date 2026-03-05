@@ -1,7 +1,9 @@
 package com.chan.stock_portfolio_backtest_api.portfolio.valid;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.chan.stock_portfolio_backtest_api.portfolio.dto.PortfolioBacktestRequestDTO;
 import com.chan.stock_portfolio_backtest_api.portfolio.dto.PortfolioBacktestRequestItemDTO;
@@ -39,6 +41,20 @@ public class PortfolioInputValidator implements ConstraintValidator<ValidPortfol
 		if (portfolioBacktestRequestItemDTOList != null) {
 			for (PortfolioBacktestRequestItemDTO i : portfolioBacktestRequestItemDTOList) {
 				weightSum += i.getWeight();
+			}
+		}
+
+		// duplicate stockId is not allowed
+		if (portfolioBacktestRequestItemDTOList != null) {
+			Set<Integer> stockIds = new HashSet<>();
+			for (PortfolioBacktestRequestItemDTO item : portfolioBacktestRequestItemDTOList) {
+				if (item != null && item.getStockId() != null && !stockIds.add(item.getStockId())) {
+					constraintValidatorContext
+						.buildConstraintViolationWithTemplate("duplicate stockId is not allowed")
+						.addPropertyNode("portfolioBacktestRequestItemDTOList")
+						.addConstraintViolation();
+					return false;
+				}
 			}
 		}
 

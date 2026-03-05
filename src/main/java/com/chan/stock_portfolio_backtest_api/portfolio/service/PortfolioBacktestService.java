@@ -7,6 +7,7 @@ import com.chan.stock_portfolio_backtest_api.portfolio.dto.PortfolioBacktestRequ
 import com.chan.stock_portfolio_backtest_api.portfolio.dto.PortfolioBacktestResponseDTO;
 import com.chan.stock_portfolio_backtest_api.portfolio.dto.PortfolioBacktestResponseItemDTO;
 import com.chan.stock_portfolio_backtest_api.portfolio.dto.RebalanceFrequency;
+import com.chan.stock_portfolio_backtest_api.common.exception.BadRequestException;
 import com.chan.stock_portfolio_backtest_api.common.exception.EntityNotFoundException;
 import com.chan.stock_portfolio_backtest_api.common.exception.InvalidDateRangeException;
 import com.chan.stock_portfolio_backtest_api.common.constants.AppConstants;
@@ -46,6 +47,14 @@ public class PortfolioBacktestService {
             if (!item.isValid()) {
                 throw new EntityNotFoundException(
                     "Invalid portfolio item: must have either stockId or (customStockName + annualReturnRate)");
+            }
+        }
+
+        Set<Integer> uniqueStockIds = new HashSet<>();
+        for (PortfolioBacktestRequestItemDTO item : requestItems) {
+            Integer stockId = item.getStockId();
+            if (stockId != null && !uniqueStockIds.add(stockId)) {
+                throw new BadRequestException("Duplicate stockId is not allowed: " + stockId);
             }
         }
 
